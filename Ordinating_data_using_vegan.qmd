@@ -1,0 +1,32 @@
+---
+title: "Ordinating data using Vegan"
+author: "Jari Oksanen, adapted by T. J. Smith"
+format: html
+editor: visual
+---
+
+## Abstract
+
+This vignette describes some of the most commonly used ordination pathways supported by this package. Unconstrained ordination examples cover principal component analysis, principal coordinate analysis, detrended correspondence analysis, and non-metric multidimensional scaling. This vignette shows how to interpret their results by fitting environmental vectors and factors or smooth environmental surfaces to the graph. The basic plotting command, and more advanced plotting commands for congested plots are also discussed, as well as adding items such as ellipses, convex hulls, and other items for classes. The constrained ordination example employs constrained (canonical) correspondence analysis. It shows how a model is defined, and discusses model building and significance tests of the whole ordination, single constraints, and axes.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{data}
+library(vegan)
+data(varespec)
+```
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
