@@ -9,24 +9,51 @@ editor: visual
 
 This vignette describes some of the most commonly used ordination pathways supported by this package. Unconstrained ordination examples cover principal component analysis, principal coordinate analysis, detrended correspondence analysis, and non-metric multidimensional scaling. This vignette shows how to interpret their results by fitting environmental vectors and factors or smooth environmental surfaces to the graph. The basic plotting command, and more advanced plotting commands for congested plots are also discussed, as well as adding items such as ellipses, convex hulls, and other items for classes. The constrained ordination example employs constrained (canonical) correspondence analysis. It shows how a model is defined, and discusses model building and significance tests of the whole ordination, single constraints, and axes.
 
-## Running Code
+## 1.0 Unconstrained ordinations
+The vegan package contains all common ordination methods: Principal component analysis (function rda, or prcomp in the base R), correspondence analysis (cca), detrended correspondence analysis (decorana) and a wrapper for nonmetric multidimensional scaling (metaMDS). Additionally, it contains a function for derived dissimilarity (distance) matrixes from community abundance data in a format compatible with the ape function for principal coordinate analysis (pcoa).
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## 1.1 Principal components analysis
+Let's start simple with principal components analysis. First, check you have vegan and ape installed.
 
-```{data}
+```{r}
+if(length(c("vegan", "ape")[!c("vegan", "ape") %in% installed.packages()[,"Package"]]) > 0){
+  install.packages(c("vegan", "ape")[!c("vegan", "ape") %in% installed.packages()[,"Package"]])
+}
+```
+
+Now let's load the example dataset. This is composed of estimated cover values of 44 different species of lichen and other flora.
+
+```{r}
 library(vegan)
 data(varespec)
 ```
 
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
+Try viewing dataset, see if you can spot any trends.
 
 ```{r}
-#| echo: false
-2 * 2
+View(varespec)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Pretty difficult, right? Let's try ordinating the data using principal component analysis. 
+
+```{r}
+PCA <- rda(varespec, scale = FALSE)
+```
+
+First things first, let's see how effectively we've summarised the variance in the dataset. Plot a bar chart of the proportion of the total eigenvalues accounted for by each principal component. For meaningful visualisation, you want to see the vast majority in the first 2-3 axes (so our visualisations of the data will be meaningful).
+
+```{r}
+barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig))
+round(as.vector(PCA$CA$eig)/sum(PCA$CA$eig), digits = 2)
+```
+
+
+
+
+
+
+
+
+
+
+
