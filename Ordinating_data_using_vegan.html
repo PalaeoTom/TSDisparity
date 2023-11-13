@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Jari Oksanen, adapted by T. J. Smith">
+<meta name="author" content="Jari Oksanen, adapted by Thomas Smith">
 
 <title>Ordinating data using Vegan</title>
 <style>
@@ -90,7 +90,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Jari Oksanen, adapted by T. J. Smith </p>
+             <p>Jari Oksanen, adapted by Thomas Smith </p>
           </div>
   </div>
     
@@ -108,6 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="unconstrained-ordinations" class="level2">
 <h2 class="anchored" data-anchor-id="unconstrained-ordinations">1.0 Unconstrained ordinations</h2>
 <p>The vegan package contains all common ordination methods: Principal component analysis (function rda, or prcomp in the base R), correspondence analysis (cca), detrended correspondence analysis (decorana) and a wrapper for nonmetric multidimensional scaling (metaMDS). Additionally, it contains a function for derived dissimilarity (distance) matrixes from community abundance data in a format compatible with the ape function for principal coordinate analysis (pcoa).</p>
+<p>In terms of its applicability to disparity analyses, Vegan is a package that supports basic analyses of categorical and traditional morphometric data. Other packages offer a much greater variety of disparity-analysis-specific support. However, as a package rooted in community ecology, the field that disparity borrows most of its methodological techniques from, it is worthwhile familiarising yourself with the capabilities of vegan.</p>
 </section>
 <section id="principal-components-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="principal-components-analysis">1.1 Principal components analysis</h2>
@@ -117,9 +118,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"ape"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"ape"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Clear your environment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Now let’s load the example dataset. This is composed of estimated cover values of 44 different species of lichen and other flora.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: permute</code></pre>
 </div>
@@ -129,28 +134,202 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stderr">
 <pre><code>This is vegan 2.6-4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Try viewing dataset, see if you can spot any trends.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Pretty difficult, right? Let’s try ordinating the data using principal component analysis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">rda</span>(varespec, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">rda</span>(varespec, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First things first, let’s see how effectively we’ve summarised the variance in the dataset. Plot a bar chart of the proportion of the total eigenvalues accounted for by each principal component. For meaningful visualisation, you want to see the vast majority in the first 2-3 axes (so our visualisations of the data will be meaningful).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">as.vector</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig)<span class="sc">/</span><span class="fu">sum</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">as.vector</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig)<span class="sc">/</span><span class="fu">sum</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">as.vector</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig)<span class="sc">/</span><span class="fu">sum</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig), <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">as.vector</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig)<span class="sc">/</span><span class="fu">sum</span>(PCA<span class="sc">$</span>CA<span class="sc">$</span>eig), <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 0.54 0.25 0.07 0.04 0.03 0.02 0.01 0.01 0.01 0.01 0.01 0.00 0.00 0.00 0.00
 [16] 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00</code></pre>
 </div>
 </div>
+<p>The first two axes account for 0.79 of the total eigenvalues, or 79% of the total variance. Its subjective, of course, but such a high proportion of the variance across the first two axes means a visualisation may be useful. Let’s plot it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The default labels are the row and column names. We can refine this. By including ‘display = “sites”’, we can just plot the rows (the sites in this dataset). Argument type let’s us specify the format of these data points.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">display =</span> <span class="st">"sites"</span>, <span class="at">type =</span> <span class="st">"points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Conversely, changing the ‘display’ argument to “species” will just plot the columns (the species in this dataset).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>, <span class="at">type =</span> <span class="st">"points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>If you don’t change the ‘display’ arguments, you can change formatting of both the sites and species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>You can isolate the PCA scores with the following for further analyses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sitePCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>u <span class="co"># Site scores</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>speciesPCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>v <span class="co"># Species scores</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can also plot the results of PCA as a biplot, where the species are plotted as arrows which signify the direction in which the cover increases for those species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(<span class="fu">biplot</span>(PCA, <span class="at">choices =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"text"</span>, <span class="st">"points"</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>,<span class="dv">10</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Don’t worry about the suppressed warnings - they’re just stating that not all arrows could be plotted because some of the species cluster at the origin (i.e.&nbsp;the arrows are of length zero).</p>
+<p>You can check out your other options for customising a biplot by running the following.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>?biplot.rda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Thinking about ordinating your data using this function? Make sure it’s in the right format. You’ll want to match in the following ways:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "data.frame"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "list"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "18" "15" "24" "27" "23" "19" "22" "16" "28" "13" "14" "20" "25" "7"  "5" 
+[16] "6"  "3"  "4"  "2"  "9"  "12" "10" "11" "21"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Callvulg" "Empenigr" "Rhodtome" "Vaccmyrt" "Vaccviti" "Pinusylv"
+ [7] "Descflex" "Betupube" "Vacculig" "Diphcomp" "Dicrsp"   "Dicrfusc"
+[13] "Dicrpoly" "Hylosple" "Pleuschr" "Polypili" "Polyjuni" "Polycomm"
+[19] "Pohlnuta" "Ptilcili" "Barbhatc" "Cladarbu" "Cladrang" "Cladstel"
+[25] "Cladunci" "Cladcocc" "Cladcorn" "Cladgrac" "Cladfimb" "Cladcris"
+[31] "Cladchlo" "Cladbotr" "Cladamau" "Cladsp"   "Cetreric" "Cetrisla"
+[37] "Flavniva" "Nepharct" "Stersp"   "Peltapht" "Icmaeric" "Cladcerv"
+[43] "Claddefo" "Cladphyl"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>?rda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Argument ‘x’ needs to be a data frame where the rows are samples and the columns are the variables. Bear in mind that your samples can be sites, if you’re sampling environmental variables or species coverage, or species, if you’re sampling species traits. In the case of disparity analysis, the latter will be the case. As such, make sure each row represents a taxonomic unit, and each column represents a trait.</p>
+<section id="principal-coordinate-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="principal-coordinate-analysis">1.2 principal coordinate analysis</h4>
+<p>Vegan doesn’t support principal coordinate analysis, the ordination of dissimilarity/distance matrices, but ape does. Let’s load it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>First, we need to convert our data matrix into a distance matrix. There is a base R which offers a limited selection of distance metrics to choose from. Let’s take a look at our options.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>?dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our options are “euclidean”, “maximum”, “manhattan”, “canberra”, “binary” or “minkowski”. If your dataset is 100% complete (i.e) has no missing data, you could use the default Euclidean distance. If your dataset includes any missing data, however, this function will simply drop the rows in which the missing entries occur from the analysis. vegdist offers a much greater variety of distance metrics to choose from. Let’s take a look.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>?vegdist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Lots to choose from! It it worth familiarising yourself not just with how these distances are calculated, but also why they were derived in the first place. This will usually tell you whether they are applicable to your study.</p>
+<p>Let’s derive a distance matrix from our data, one using the Euclidean distance, one using the Gower coefficient.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>dist.E <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(varespec, <span class="at">method =</span> <span class="st">"euclidean"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>dist.G <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(varespec, <span class="at">method =</span> <span class="st">"gower"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s explore the properties of one of these distance matrices.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dist.E)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "dist"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(dist.E)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "double"</code></pre>
+</div>
+</div>
+<p>Just like the output of the base R dist function. Likewise, these distance matrices can be transformed into matrix objects using as.matrix. You might find these objects more intuitive to view and manipulate (I certainly do).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>distM.E <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dist.E)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>distM.G <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dist.G)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(distM.E)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(distM.G)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These distance matrices can be manipulated using basic R matrix indexing. Try identifying the pairs of sites separated by the greatest and smallest distances.</p>
+<p>Simple pre-ordination indices of disparity can be calculated from these distance matrices using base R functions. For example, from the standard ‘dist’ objects (which do not include the all-zero diagonal), the mean pairwise distance:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dist.E)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 56.13408</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dist.G)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1985776</code></pre>
+</div>
+</div>
+<p>However, for most standard indices of disparity we need to ordinate. We can ordinate distance matrices of either format.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>PCOA.E <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(dist.E)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>PCOA.G <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(dist.G)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Before we do anything, we must check the relative eigenvalues.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(PCOA.E<span class="sc">$</span>values<span class="sc">$</span>Relative_eig, <span class="at">main =</span> <span class="st">"Euclidean distances"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(PCOA.G<span class="sc">$</span>values<span class="sc">$</span>Relative_eig, <span class="at">main =</span> <span class="st">"Gower distances"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-23-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Uh-oh, notice anything about the Gower distances plot? Negative eigenvalues have been introduced. This isn’t good - it means that additional variance has been added into the data to make the space defined by the axes of the ordination with positive eigenvalues.</p>
+<p>Luckily, function pcoa has a pair of built-in correction options: the so-called Lingoes and Cailliez corrections. These corrections add constants to each non-diagonal distance in the matrix at different stages in the ordination process. The outcomes should be the same - no negative eigenvalues. Let’s try each and check.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>PCOA.G.cailliez <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(dist.G, <span class="at">correction =</span> <span class="st">"cailliez"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>PCOA.G.lingoes <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(dist.G, <span class="at">correction =</span> <span class="st">"lingoes"</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(PCOA.G.cailliez<span class="sc">$</span>values<span class="sc">$</span>Rel_corr_eig, <span class="at">main =</span> <span class="st">"Gower distance relative eigenvalues - Cailliez correction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(PCOA.G.lingoes<span class="sc">$</span>values<span class="sc">$</span>Rel_corr_eig, <span class="at">main =</span> <span class="st">"Gower distance relative eigenvalues - Lingoes correction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-24-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Hey presto, no more negative eigenvalues. It doesn’t really matter which of these two corrections you use. However, it does matter when you apply them.</p>
+<p>If the purpose of your study is to visualize the distribution of variation in your dataset, then corrections like this are not necessary and actually spread the variance in your dataset across more axes (compare the corrected relative eigenvalues with the uncorrected - you’ll see the first couple of axes have higher values in the latter), thereby decreasing the information content of your visualizations.</p>
+<p>If you intend to quantify the spread of your samples across all or most axes (i.e.&nbsp;conduct a quantitative analysis of disparity), then it is important to ensure that the space defined by your ordination is Euclidean.</p>
+<p>Let’s check out our PCAs. We’ll plot the first two axes of each uncorrected ordination. It is good practice when doing this to report the relative eigenvalues accounted for by each axis. I’ve done this below, rounding to three decimal places.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCOA.G.cailliez<span class="sc">$</span>vectors[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)], <span class="at">main =</span> <span class="st">"Gower distances"</span>, </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">paste0</span>(<span class="st">"PCOA axis 1 ("</span>, <span class="fu">round</span>(PCOA.G<span class="sc">$</span>values<span class="sc">$</span>Relative_eig[<span class="dv">1</span>], <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">")"</span>), </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="fu">paste0</span>(<span class="st">"PCOA axis 2 ("</span>, <span class="fu">round</span>(PCOA.G<span class="sc">$</span>values<span class="sc">$</span>Relative_eig[<span class="dv">2</span>], <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">")"</span>))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCOA.E<span class="sc">$</span>vectors[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)], <span class="at">main =</span> <span class="st">"Euclidean distances"</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="fu">paste0</span>(<span class="st">"PCOA axis 1 ("</span>, <span class="fu">round</span>(PCOA.E<span class="sc">$</span>values<span class="sc">$</span>Relative_eig[<span class="dv">1</span>], <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">")"</span>), </span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="fu">paste0</span>(<span class="st">"PCOA axis 2 ("</span>, <span class="fu">round</span>(PCOA.E<span class="sc">$</span>values<span class="sc">$</span>Relative_eig[<span class="dv">2</span>], <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">")"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordinating_data_using_vegan_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These plots look very different but the relative eigenvalues explain why: The ordination of the raw Euclidean distance matrix summarises over 75% of the variance in the dataset across the first two axes, whereas the ordination of the Gower distance matrix captures less than 50%.</p>
+<p>This demonstrates the power of a complete data matrix. If you have one - fantastic. You can draw powerful insights into the structure of your data from simple two-dimensional visualisations. This is highly unlikely in analyses of disparity - unless your dataset is small. In these cases, you’ll need to use another distance metric, such as the Gower coefficient.</p>
+</section>
 </section>
 
 </main>
