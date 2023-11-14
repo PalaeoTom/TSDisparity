@@ -5,16 +5,18 @@ format: html
 editor: visual
 ---
 
-## Abstract
+## Introduction
 
 This vignette describes some of the most commonly used ordination pathways supported by this package. Unconstrained ordination examples cover principal component analysis, principal coordinate analysis, correspondence analysis, and non-metric multidimensional scaling. This vignette shows how to interpret their results by fitting environmental vectors and factors or smooth environmental surfaces to the graph. The basic plotting command, and more advanced plotting commands for congested plots are also discussed, as well as adding items such as ellipses, convex hulls, and other items for classes. The constrained ordination example employs constrained (canonical) correspondence analysis. It shows how a model is defined, and discusses model building and significance tests of the whole ordination, single constraints, and axes.
 
 ## 1.0 Unconstrained ordinations
+
 The vegan package contains all common ordination methods: Principal component analysis (function rda, or prcomp in the base R), correspondence analysis (cca), and a wrapper for nonmetric multidimensional scaling (metaMDS). Additionally, it contains a function for derived dissimilarity (distance) matrixes from community abundance data in a format compatible with the ape function for principal coordinate analysis (pcoa).
 
-In terms of its applicability to disparity analyses, Vegan is a package that supports basic analyses of categorical and traditional morphometric data. Other packages offer a much greater variety of disparity-analysis-specific support. However, as a package rooted in community ecology, the field that disparity borrows most of its methodological techniques from, it is worthwhile familiarising yourself with the capabilities of vegan. 
+In terms of its applicability to disparity analyses, Vegan is a package that supports basic analyses of categorical and traditional morphometric data. Other packages offer a much greater variety of disparity-analysis-specific support. However, as a package rooted in community ecology, the field that disparity borrows most of its methodological techniques from, it is worthwhile familiarising yourself with the capabilities of vegan.
 
 ## 1.1 Principal components analysis (PCA)
+
 Let's start simple with principal components analysis. First, check you have vegan and ape installed.
 
 ```{r}
@@ -42,7 +44,7 @@ Try viewing dataset, see if you can spot any trends.
 View(varespec)
 ```
 
-Pretty difficult, right? Let's try ordinating the data using principal component analysis. 
+Pretty difficult, right? Let's try ordinating the data using principal component analysis.
 
 ```{r}
 PCA <- rda(varespec, scale = FALSE)
@@ -73,7 +75,7 @@ Conversely, changing the 'display' argument to "species" will just plot the colu
 plot(PCA, display = "species", type = "points")
 ```
 
-If you don't change the 'display' arguments, you can change formatting of both the sites and species. 
+If you don't change the 'display' arguments, you can change formatting of both the sites and species.
 
 ```{r}
 plot(PCA, type = "points")
@@ -86,7 +88,7 @@ sitePCA <- PCA$CA$u # Site scores
 speciesPCA <- PCA$CA$v # Species scores
 ```
 
-You can also plot the results of PCA as a biplot, where the species are plotted as arrows which signify the direction in which the cover increases for those species. 
+You can also plot the results of PCA as a biplot, where the species are plotted as arrows which signify the direction in which the cover increases for those species.
 
 ```{r}
 suppressWarnings(biplot(PCA, choices = c(1,2), type = c("text", "points"), xlim = c(-5,10)))
@@ -95,11 +97,12 @@ suppressWarnings(biplot(PCA, choices = c(1,2), type = c("text", "points"), xlim 
 Don't worry about the suppressed warnings - they're just stating that not all arrows could be plotted because some of the species cluster at the origin (i.e. the arrows are of length zero).
 
 You can check out your other options for customising a biplot by running the following.
+
 ```{r}
 ?biplot.rda
 ```
 
-Thinking about ordinating your data using this function? Make sure it's in the right format. You'll want to match in the following ways:
+Thinking about ordinating your data using this function (or any of the others that follow for that matter)? Make sure it's in the right format. You'll want to match in the following ways:
 
 ```{r}
 class(varespec)
@@ -109,9 +112,9 @@ colnames(varespec)
 ?rda
 ```
 
-Argument 'x' needs to be a data frame where the rows are samples and the columns are the variables. Bear in mind that your samples can be sites, if you're sampling environmental variables or species coverage, or species, if you're sampling species traits. In the case of disparity analysis, the latter will be the case. As such, make sure each row represents a taxonomic unit, and each column represents a trait.   
+Argument 'x' needs to be a data frame where the rows are samples and the columns are the variables. Bear in mind that your samples can be sites, if you're sampling environmental variables or species coverage, or species, if you're sampling species traits. In the case of disparity analysis, the latter will be the case. As such, make sure each row represents a taxonomic unit, and each column represents a trait.
 
-## 1.2 principal coordinate analysis (PCOA) ##
+## 1.2 principal coordinate analysis (PCOA)
 
 Vegan doesn't support principal coordinate analysis, the ordination of dissimilarity/distance matrices, but ape does. Let's load it.
 
@@ -133,7 +136,7 @@ Our options are "euclidean", "maximum", "manhattan", "canberra", "binary" or "mi
 
 Lots to choose from! It it worth familiarising yourself not just with how these distances are calculated, but also why they were derived in the first place. This will usually tell you whether they are applicable to your study.
 
-Let's derive a distance matrix from our data, one using the Euclidean distance, one using the Gower coefficient. 
+Let's derive a distance matrix from our data, one using the Euclidean distance, one using the Gower coefficient.
 
 ```{r}
 dist.E <- vegdist(varespec, method = "euclidean")
@@ -147,7 +150,7 @@ class(dist.E)
 typeof(dist.E)
 ```
 
-Just like the output of the base R dist function. Likewise, these distance matrices can be transformed into matrix objects using as.matrix. You might find these objects more intuitive to view and manipulate (I certainly do). 
+Just like the output of the base R dist function. Likewise, these distance matrices can be transformed into matrix objects using as.matrix. You might find these objects more intuitive to view and manipulate (I certainly do).
 
 ```{r}
 distM.E <- as.matrix(dist.E)
@@ -165,14 +168,14 @@ mean(dist.E)
 mean(dist.G)
 ```
 
-However, for most standard indices of disparity we need to ordinate. We can ordinate distance matrices of either format. 
+However, for most standard indices of disparity we need to ordinate. We can ordinate distance matrices of either format.
 
 ```{r}
 PCOA.E <- pcoa(dist.E)
 PCOA.G <- pcoa(dist.G)
 ```
 
-Before we do anything, we must check the relative eigenvalues. 
+Before we do anything, we must check the relative eigenvalues.
 
 ```{r}
 barplot(PCOA.E$values$Relative_eig, main = "Euclidean distances")
@@ -190,15 +193,15 @@ barplot(PCOA.G.cailliez$values$Rel_corr_eig, main = "Gower distance relative eig
 barplot(PCOA.G.lingoes$values$Rel_corr_eig, main = "Gower distance relative eigenvalues - Lingoes correction")
 ```
 
-Hey presto, no more negative eigenvalues. It doesn't really matter which of these two corrections you use. However, it does matter when you apply them. 
+Hey presto, no more negative eigenvalues. It doesn't really matter which of these two corrections you use. However, it does matter when you apply them.
 
-If the purpose of your study is to visualize the distribution of variation in your dataset, then corrections like this are not necessary and actually spread the variance in your dataset across more axes (compare the corrected relative eigenvalues with the uncorrected - you'll see the first couple of axes have higher values in the latter), thereby decreasing the information content of your visualizations. 
+If the purpose of your study is to visualize the distribution of variation in your dataset, then corrections like this are not necessary and actually spread the variance in your dataset across more axes (compare the corrected relative eigenvalues with the uncorrected - you'll see the first couple of axes have higher values in the latter), thereby decreasing the information content of your visualizations.
 
-If you intend to quantify the spread of your samples across all or most axes (i.e. conduct a quantitative analysis of disparity), then it is important to ensure that the space defined by your ordination is Euclidean. 
+If you intend to quantify the spread of your samples across all or most axes (i.e. conduct a quantitative analysis of disparity), then it is important to ensure that the space defined by your ordination is Euclidean.
 
 Let's check out our PCAs. We'll plot the first two axes of each uncorrected ordination. It is good practice when doing this to report the relative eigenvalues accounted for by each axis. I've done this below, rounding to three decimal places.
 
-```{r} 
+```{r}
 par(mfrow = c(1,2))
 plot(PCOA.G.cailliez$vectors[,c(1,2)], main = "Gower distances", 
      xlab = paste0("PCOA axis 1 (", round(PCOA.G$values$Relative_eig[1], digits = 3), ")"), 
@@ -209,14 +212,15 @@ plot(PCOA.E$vectors[,c(1,2)], main = "Euclidean distances",
 par(mfrow = c(1,1))
 ```
 
-These plots look very different but the relative eigenvalues explain why: The ordination of the raw Euclidean distance matrix summarises over 75% of the variance in the dataset across the first two axes, whereas the ordination of the Gower distance matrix captures less than 50%. 
+These plots look very different but the relative eigenvalues explain why: The ordination of the raw Euclidean distance matrix summarises over 75% of the variance in the dataset across the first two axes, whereas the ordination of the Gower distance matrix captures less than 50%.
 
-This demonstrates the power of a complete data matrix. If you have one - fantastic. You can draw powerful insights into the structure of your data from simple two-dimensional visualisations. This is highly unlikely in analyses of disparity - unless your dataset is small. In these cases, you'll need to use another distance metric, such as the Gower coefficient. 
+This demonstrates the power of a complete data matrix. If you have one - fantastic. You can draw powerful insights into the structure of your data from simple two-dimensional visualisations. This is highly unlikely in analyses of disparity - unless your dataset is small. In these cases, you'll need to use another distance metric, such as the Gower coefficient.
 
 ## 1.3 Non-metric multidimensional scaling (NMDS)
+
 PCOA provides a Euclidean representation of a set of samples whose relative similarities to one another are quantified by some distance metric. As you have seen, sometimes 2-3 axes won't cut it in terms of representing the bulk of the variation in the dataset. One solution to this is to plot as many axes as possible. However, this can make the results of your analyses hard to understand.
 
-Another solution is to take a different approach to dimensionality reduction and use non-metric multidimensional scaling. 
+Another solution is to take a different approach to dimensionality reduction and use non-metric multidimensional scaling.
 
 Let's take a look at the function that does this in vegan.
 
@@ -224,31 +228,31 @@ Let's take a look at the function that does this in vegan.
 ?metaMDS
 ```
 
-Lots of arguments here. They key ones to look at 'k', 'try', 'trymax', 'autotransform', and 'distance'. 'K' specifies the number of dimensions your distance matrix will be reduced to (default = 2). 'try' and 'trymax' specify the minimum and maximum number of random placements of objects in ordination space that will be attempted during an iteration respectively. An iteration will stop before 'trymax' is reached if an optimal solution is reached. 'distance' lets you specify a distance metric from vegdist if you submit a community data object, rather than a dist object or symmetric square matrix. Finally, 'autotransform' dictates whether the function applies basic transformations regularly employed to community data if said data type is provided (default = TRUE). 
+Lots of arguments here. They key ones to look at 'k', 'try', 'trymax', 'autotransform', and 'distance'. 'K' specifies the number of dimensions your distance matrix will be reduced to (default = 2). 'try' and 'trymax' specify the minimum and maximum number of random placements of objects in ordination space that will be attempted during an iteration respectively. An iteration will stop before 'trymax' is reached if an optimal solution is reached. 'distance' lets you specify a distance metric from vegdist if you submit a community data object, rather than a dist object or symmetric square matrix. Finally, 'autotransform' dictates whether the function applies basic transformations regularly employed to community data if said data type is provided (default = TRUE).
 
-Let's run a series of quick analyses. We'll use the uncorrected Gower and Euclidean distance matrices we generated earlier. First we need to figure out the best compromise between minimising the dimensionality of the resulting ordination and accurately representing the distances separating the sites. 
+Let's run a series of quick analyses. We'll use the uncorrected Gower and Euclidean distance matrices we generated earlier. First we need to figure out the best compromise between minimising the dimensionality of the resulting ordination and accurately representing the distances separating the sites.
 
 ```{r}
 NMDS.stress.test <- function(x, title = "NMDS stress plot") { 
-  plot(rep(1, 10), replicate(10, metaMDS(x, k = 1)$stress), xlim = c(1, 10),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = title)
+  plot(rep(1, 10), replicate(10, metaMDS(x, k = 1, trace = F)$stress), xlim = c(1, 10),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = title)
   for (i in 1:10) {
-    points(rep(i + 1,10),replicate(10, metaMDS(x, autotransform = F, k = i + 1)$stress))
+    points(rep(i + 1,10),replicate(10, metaMDS(x, autotransform = F, k = i + 1, trace = F)$stress))
   }
 }
-suppressWarnings(NMDS.stress.test(dist.E, title = "NMDS stress plot - Euclidean distance"))
-suppressWarnings(NMDS.stress.test(dist.G, title = "NMDS stress plot - Gower distance"))
+NMDS.stress.test(dist.E, title = "NMDS stress plot - Euclidean distance")
+NMDS.stress.test(dist.G, title = "NMDS stress plot - Gower distance")
 ```
 
-Interpretations of these stress values is notoriously subjective. However, a widely-applied rule of thumb is that values >0.2 are a no-go. Some people will go as far as to break down how stress values below 0.2 should be intepreted (e.g. 0.1-0.2 are fine but should be treated with caution, 0.05-0.1 are good, <0.05 are excellent). However, this is very subjective and data dependent. For the purpose of this exercise, we just want to get below 0.2.  
+Interpretations of these stress values is notoriously subjective. However, a widely-applied rule of thumb is that values \>0.2 are a no-go. Some people will go as far as to break down how stress values below 0.2 should be intepreted (e.g. 0.1-0.2 are fine but should be treated with caution, 0.05-0.1 are good, \<0.05 are excellent). However, this is very subjective and data dependent. For the purpose of this exercise, we just want to get below 0.2.
 
 In both cases, two dimensions are sufficient, so let's run a final set of analyses with two dimensions.
 
 ```{r}
-NMDS.E <- metaMDS(dist.E, k = 2, trymax = 200)
-NMDS.G <- metaMDS(dist.G, k = 2, trymax = 200)
+NMDS.E <- metaMDS(dist.E, k = 2, trymax = 200, trace = F)
+NMDS.G <- metaMDS(dist.G, k = 2, trymax = 200, trace = F)
 ```
 
-We can draw a Shepard diagram to compare how the ordination distances fit against the original dissimilarities. 
+We can draw a Shepard diagram to compare how the ordination distances fit against the original dissimilarities.
 
 ```{r}
 par(mfrow = c(1,2))
@@ -259,9 +263,9 @@ par(mfrow = c(1,1))
 
 These plots neatly demonstrate how two ordination axes produce a better fit when summarising the Euclidean distances instead of the Gower distances (we're looking for a linear relationship). Some noise at the tails of the distribution is to be expected. Hence we can proceed with both. However, before you do, try ordinating both distance matrices with three axes and comparing the stressplots.
 
-Once you've done that, plot and compare the two ordinations using the chunk below. 
+Once you've done that, plot and compare the two ordinations using the chunk below.
 
-```{r} 
+```{r}
 par(mfrow = c(1,2))
 plot(NMDS.G$points, main = "Gower distances", 
      xlab = paste0("NMDS axis 1"), 
@@ -272,12 +276,14 @@ plot(NMDS.E$points, main = "Euclidean distances",
 par(mfrow = c(1,1))
 ```
 
-They don't look too dissimilar to the PCOA plots. However, remember these are non-metric spaces. The distances between the points no longer carry consistent meaning and so the information content of these plots is limited. 
+They don't look too dissimilar to the PCOA plots. However, remember these are non-metric spaces. The distances between the points no longer carry consistent meaning and so the information content of these plots is limited.
 
 ## 1.4 Other ordination methods in Vegan
-Vegan includes functions for a couple of other ordination techniques that are popular in community ecology. Most of these don't see regular use in contemporary disparity analyses but they are worth exploring, just in case a use strikes you! 
 
-# Correspondence analysis (CA)
+Vegan includes functions for a couple of other ordination techniques that are popular in community ecology. Most of these don't see regular use in contemporary disparity analyses but they are worth exploring, just in case a use strikes you!
+
+### Correspondence analysis (CA)
+
 PCA preserves Euclidean distances among samples (and so if affected by double zeros). Correspondence analysis preserves chi-square distances (and so is unaffected by double zeros). PCA assumes a linear relation between variables and ordination axes, CA a uni-modal relationship. These are the core differences between PCA and CA which will dictate which method you should use. In almost all cases, because the variation you will sample using traditional morphometrics, geometric morphometrics, and outline methods will be relatively constrained, PCA will be the most appropriate. Nevertheless let's run through a short example using a different dataset.
 
 ```{r}
@@ -285,9 +291,9 @@ data(dune)
 CA <- cca(dune)
 ```
 
-Let's plot the first two axes with the proportion of eigenvalues accounted for.  
+Let's plot the first two axes with the proportion of eigenvalues accounted for.
 
-```{r} 
+```{r}
 plot(CA, main = "Correspondence analysis", 
      xlab = paste0("CA axis 1 (", round(CA$CA$eig[1]/sum(CA$CA$eig), digits = 3), ")"), 
      ylab = paste0("CA axis 2 (", round(CA$CA$eig[2]/sum(CA$CA$eig), digits = 3), ")"))
@@ -295,7 +301,7 @@ plot(CA, main = "Correspondence analysis",
 
 The first two axes account for less than half the variance in the dataset, so more than two would probably be needed for a reasonable representation.
 
-You can extract the site and species scores with the following for further analysis. 
+You can extract the site and species scores with the following for further analysis.
 
 ```{r}
 sitesCA <- CA$CA$u
@@ -304,7 +310,8 @@ speciesCA <- CA$CA$v
 
 Why not try analysing the varespec data using CA and comparing it to the results of the PCA?
 
-# Detrended correspondence analysis
+### Detrended correspondence analysis
+
 A modified version of CA for analysing sparse ecological gradient data (e.g. time-series of species colonisation). It was developed with the intention of rectifying two alleged faults of standard correspondence analysis: the apparent curvature of straight gradients and packing of sites at the ends of the gradient. It doesn't see much use today and will be of little relevance to most of you.
 
 ```{r}
@@ -319,12 +326,13 @@ See the decorana function information for further details about the method if yo
 ?decorana
 ```
 
-# Canonical correspondence analysis (CCA)
-One of three methods of constrained ordination supported by Vegan. Constrained ordination methods analyse at least two matrices at once and seek to identify how much of the variance in one is explained by the other. While unconstrained ordination methods summarise and present all the variation in a dataset, constrained methods will only display variation in the response data that can be attributed to the predictor data. 
+### Canonical correspondence analysis (CCA)
 
-There are constrained equivalents of each major unconstrained ordination method. For principal components analysis, there is redundancy analysis (RDA). For principal coordinates analysis and non-metric multidimensional scaling, there is distance-based redundancy analysis (db-RDA). Finally, for correspondence analysis, there is canonical correspondence analysis (CCA). 
+One of three methods of constrained ordination supported by Vegan. Constrained ordination methods analyse at least two matrices at once and seek to identify how much of the variance in one is explained by the other. While unconstrained ordination methods summarise and present all the variation in a dataset, constrained methods will only display variation in the response data that can be attributed to the predictor data.
 
-These methods are surprisingly rare in analyses of disparity. However, there potential utility is obvious. In Vegan, each constrained ordination method has its own function: CCA has cca (it switches from CA to CCA when a constraining matrix is submitted as argument 'y'), RDA has rda (same as cca, switches from PCA to RDA if 'y' is a constraining matrix), non-RDA has capscale. All functions work in broadly the same way, so we'll just run an RDA using the dune dataset. 
+There are constrained equivalents of each major unconstrained ordination method. For principal components analysis, there is redundancy analysis (RDA). For principal coordinates analysis and non-metric multidimensional scaling, there is distance-based redundancy analysis (db-RDA). Finally, for correspondence analysis, there is canonical correspondence analysis (CCA).
+
+These methods are surprisingly rare in analyses of disparity. However, there potential utility is obvious. In Vegan, each constrained ordination method has its own function: CCA has cca (it switches from CA to CCA when a constraining matrix is submitted as argument 'y'), RDA has rda (same as cca, switches from PCA to RDA if 'y' is a constraining matrix), non-RDA has capscale. All functions work in broadly the same way, so we'll just run an RDA using the dune dataset.
 
 ```{r}
 ?rda
@@ -332,7 +340,7 @@ These methods are surprisingly rare in analyses of disparity. However, there pot
 
 It is easiest to specify a constrained ordination is through a forumla. Here we are exploring to what degree variables A1 and management (from the dune.env dataset) constrain our base dataset.
 
-When analysing abundance data, it is preferable to apply the Hellinger transformation to minimise the impact of vastly different sample total abundances. However, this is not necessary in analyses of disparity so we won't bother here.  
+When analysing abundance data, it is preferable to apply the Hellinger transformation to minimise the impact of vastly different sample total abundances. However, this is not necessary in analyses of disparity so we won't bother here.
 
 ```{r}
 data("dune.env")
@@ -342,9 +350,9 @@ RDA
 RsquareAdj(RDA)
 ```
 
-We can see from the printout that these two variables, A1 + Management, explained 0.3994 of the total variance in the dune dataset. Adjusted R-squared measures the strength of the relationship between Y and X after applying a correction to the regular R-squared value to take into account the number of explanatory variables (we want the simplest model possible). This is the statistic that should be reported when model building in this way. 
+We can see from the printout that these two variables, A1 + Management, explained 0.3994 of the total variance in the dune dataset. Adjusted R-squared measures the strength of the relationship between Y and X after applying a correction to the regular R-squared value to take into account the number of explanatory variables (we want the simplest model possible). This is the statistic that should be reported when model building in this way.
 
-# Testing the significance of different terms
+### Testing the significance of different terms
 
 Previously, we picked two variables at random for our RDA. What about if we want to include all variables that are statistically important? We can do this via forward selection.
 
@@ -357,7 +365,7 @@ RDA.upper <- rda(dune ~ ., data = dune.env)
 RDA.lower <- rda(dune ~ 1, data = dune.env)
 ```
 
-Now we will use the ordiR2step function to perform forward selection on our 5 environmental variables. This will produce an optimised model. Key arguments include: 'object', which specifies our start point, and argument 'scope', which specifies our end (so we move from no variables included to all). Argument 'direction' specifies how the algorithm should proceed (should it move 'forward', adding variables, or take them away, moving 'backward', or try 'both'). Argument R2scope ensures the function will not exceed the R2 of the complete model (i.e. including all variables, defaults to TRUE). 
+Now we will use the ordiR2step function to perform forward selection on our 5 environmental variables. This will produce an optimised model. Key arguments include: 'object', which specifies our start point, and argument 'scope', which specifies our end (so we move from no variables included to all). Argument 'direction' specifies how the algorithm should proceed (should it move 'forward', adding variables, or take them away, moving 'backward', or try 'both'). Argument R2scope ensures the function will not exceed the R2 of the complete model (i.e. including all variables, defaults to TRUE).
 
 ```{r}
 fwd.sel <- ordiR2step(RDA.lower, RDA.upper, direction = "both")
@@ -377,13 +385,13 @@ RDA.opt
 RsquareAdj(RDA.opt)
 ```
 
-Almost the same amount of variance explained by the management variable alone, with very similar adjusted R-squared values. 
+Almost the same amount of variance explained by the management variable alone, with very similar adjusted R-squared values.
 
 Why not try repeating the analyses above after switching argument R2scope to FALSE in the ordiR2step function. What changes?
 
-There are other ways of testing for the significance of constraints. Vegan supports a series of wrapper anova functions. 
+There are other ways of testing for the significance of constraints. Vegan supports a series of wrapper anova functions.
 
-The below will test the significance of the overall model we originally specified (i.e. dune ~ A1 + management).
+The below will test the significance of the overall model we originally specified (i.e. dune \~ A1 + management).
 
 ```{r}
 anova(RDA)
@@ -407,7 +415,8 @@ You can test the significance of each constrained axis:
 anova(RDA, by="axis")
 ```
 
-# Conditioned or partial ordination
+### Conditioned or partial ordination
+
 All constrained ordination methods can have terms that are partialled out from the analysis before constraints are applied. This lets us reduce noise in the dataset.
 
 ```{r}
@@ -418,6 +427,7 @@ RDA.part
 This partials out the effect of 'moisture', which affects the significance of the other terms. Why don't you use the vegan ANOVA functions to explore by how much this has changed the results of the RDA?
 
 ## 1.5 Fitting environmental variables
+
 Vegan provides two functions for fitting environmental variables onto ordination: envfit fits vectors of continuous variables and centroids of levels of class variables (defined as factor in R). The arrow shows the direction of the (increasing) gradient, and the length of the arrow is proportional to the correlation between the variable and the ordination; and ordisurf (which requires package mgcv) fits smooth surfaces for continuous variables onto ordination using thin plate splines with cross-validatory selection of smoothness.
 
 Let's try both using the base RDA of the dune dataset.
@@ -443,16 +453,18 @@ ordisurf(RDA ~ A1, data = dune.env)
 This is a little more informative!
 
 ## 1.6 Plotting using Vegan
-# Basic plotting
+
+### Basic plotting
+
 Finally, vegan has a variety of functions that let you customise your ordinations.
 
-Let's start with a basic plot of our varespec PCA data from way, way back in this tutorial. Let's plot the sites as points and species (variables) as crosses. 
+Let's start with a basic plot of our varespec PCA data from way, way back in this tutorial. Let's plot the sites as points and species (variables) as crosses.
 
 ```{r}
 plot(PCA, type = "p")
 ```
 
-If you want finer control over your plot, it's best to start with a blank plot first. This can be achieved by changing argument 'type' to "n" (i.e. you'll just plot the axes). Let's make the sites and species more distinct this way. 
+If you want finer control over your plot, it's best to start with a blank plot first. This can be achieved by changing argument 'type' to "n" (i.e. you'll just plot the axes). Let's make the sites and species more distinct this way.
 
 ```{r}
 plot(PCA, type = "n")
@@ -462,9 +474,9 @@ text(PCA, display = "species", cex=0.7, col="blue")
 
 All vegan ordination methods have a specific plot function. In addition, vegan has an alternative plotting function ordiplot that also knows many non-vegan ordination methods, such as prcomp, cmdscale and isoMDS. All vegan plot functions return invisibly an ordiplot object, so that you can use ordiplot support functions with the results (points, text, identify). Function ordirgl (requires rgl package) provides dynamic three-dimensional graphics that can be spun around or zoomed into with your mouse. Function ordiplot3d (requires package scatterplot3d) displays simple three-dimensional scatterplots.
 
-Ordiplot uses the same arguments as plot.cca (the vegan extension of plot). Why not try experimenting before moving on? 
+Ordiplot uses the same arguments as plot.cca (the vegan extension of plot). Why not try experimenting before moving on?
 
-It is worth familiarising yourself with the arguments you can use to customise your plot. Use xlim and ylim to set the limits of your axes and the select argument (which accepts a logical vector which is TRUE for displayed items or a vector of indices of displayed items) to specify which points are plotting. You can also use the following functions to customise your plots. 
+It is worth familiarising yourself with the arguments you can use to customise your plot. Use xlim and ylim to set the limits of your axes and the select argument (which accepts a logical vector which is TRUE for displayed items or a vector of indices of displayed items) to specify which points are plotting. You can also use the following functions to customise your plots.
 
 You can use the ordilabel function to add partially opaque text labels to a plot: some text labels will be covered, but the uppermost will be readable.
 
@@ -473,7 +485,7 @@ plot(PCA, type = "points")
 ordilabel(PCA, display = "species")
 ```
 
-You can use the automatic orditorp function that uses text only if this can be done without overwriting previous labels, but points in other cases. This produces a much tidier version of the labelled plot produced by ordilabel. You have to specify whether you want to label the species (columns) or sites (rows). 
+You can use the automatic orditorp function that uses text only if this can be done without overwriting previous labels, but points in other cases. This produces a much tidier version of the labelled plot produced by ordilabel. You have to specify whether you want to label the species (columns) or sites (rows).
 
 ```{r}
 plot(PCA, type = "points")
@@ -487,37 +499,38 @@ plot(PCA, type = "points")
 ordipointlabel(PCA)
 ```
 
-# Adding items to plots
+### Adding items to plots
+
 Probably the most useful thing you can do to your ordination is to add some sort of convex hull to separate groups of points that are distinct from one another in some way. Vegan supports three functions for doing just that.
 
 When adding a convex hull to a constrained ordination, you can simple specify the environmental variable you wish to group by and ordihull will add convex hulls:
 
 ```{r}
 plot(RDA, type = "points")
-ordihull(RDA, Management, col = 1:4, lwd = 3, draw = "polygon", alpha = 100)
+ordihull(RDA, groups = dune.env$Management, col = 1:4, lwd = 3, draw = "polygon", alpha = 100)
 ```
 
 Ordiellipse will add ellipses enclosing all points in the group (these can be altered to encompass the standard deviation or standard error of the groups using the "kind" argument):
 
 ```{r}
 plot(RDA, type = "points")
-ordiellipse(RDA, Management, col = 1:4, lwd = 3, draw = "polygon", alpha = 100)
+ordiellipse(RDA, groups = dune.env$Management, col = 1:4, lwd = 3, draw = "polygon", alpha = 100, kind = "ehull")
 ```
 
 And ordispider links items to their centroids:
 
 ```{r}
 plot(RDA, type = "points")
-ordispider(RDA, Management, col = 1:4, lwd = 3)
+ordispider(RDA, groups = dune.env$Management, col = 1:4, lwd = 3)
 ```
 
-Unfortunately, these functions only work seamlessly with constrained ordinations. For unconstrained ordinations, we have to specify the groups. 
+Unfortunately, these functions only work seamlessly with constrained ordinations. For unconstrained ordinations, we have to specify the groups.
 
 ```{r}
 groups <- as.data.frame(c(rep(1,8),rep(2,6),rep(3,10)))
 colnames(groups) <- "grouping"
 plot(PCA, type = "points")
-ordihull(PCA, groups$grouping, col = 1:3, lwd = 3, draw = "polygon", alpha = 100)
+ordihull(PCA, groups = groups$grouping, col = 1:3, lwd = 3, draw = "polygon", alpha = 100)
 ```
 
 Have a play around with the other functions and see what you can generate!

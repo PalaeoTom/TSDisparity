@@ -1,0 +1,24 @@
+---
+title: "Analysing landmark and outline data using Momocs"
+author: "Marita Quitzau, Romain Frelat, and Vincent Bonhomme. Adapted by Thomas Smith"
+format: html
+editor: visual
+---
+
+## Introduction
+This vignette aims to provide a quick introduction to morphometric analyses and the comparison of methods on coral reef fish.  It was created based on R version 4.0.2 and Momocs version 1.3.2.
+
+It is the companion tutorial for the published paper:
+
+Quitzau, M., Frelat, R., Bonhomme, V., Möllmann, C., Nagelkerke, L., & Bejarano, S. (2022). Traits, landmarks and outlines: Three congruent sides of a tale on coral reef fish morphology. Ecology and Evolution, 12, e8787. https://doi.org/10.1002/ece3.8787.
+
+See the “Material and Methods” section of the paper and the “Electronic supplementary materials” for more details about the method.
+
+# 1.0 Load data
+
+```{r}
+library(Momocs)
+load("CoralFishes.Rdata")
+```
+
+
