@@ -102,16 +102,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 <section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<h2 class="anchored" data-anchor-id="introduction">1.0 Introduction</h2>
 <p>This vignette describes some of the most commonly used ordination pathways supported by this package. Unconstrained ordination examples cover principal component analysis, principal coordinate analysis, correspondence analysis, and non-metric multidimensional scaling. This vignette shows how to interpret their results by fitting environmental vectors and factors or smooth environmental surfaces to the graph. The basic plotting command, and more advanced plotting commands for congested plots are also discussed, as well as adding items such as ellipses, convex hulls, and other items for classes. The constrained ordination example employs constrained (canonical) correspondence analysis. It shows how a model is defined, and discusses model building and significance tests of the whole ordination, single constraints, and axes.</p>
 </section>
 <section id="unconstrained-ordinations" class="level2">
-<h2 class="anchored" data-anchor-id="unconstrained-ordinations">1.0 Unconstrained ordinations</h2>
+<h2 class="anchored" data-anchor-id="unconstrained-ordinations">2.0 Unconstrained ordinations</h2>
 <p>The vegan package contains all common ordination methods: Principal component analysis (function rda, or prcomp in the base R), correspondence analysis (cca), and a wrapper for nonmetric multidimensional scaling (metaMDS). Additionally, it contains a function for derived dissimilarity (distance) matrixes from community abundance data in a format compatible with the ape function for principal coordinate analysis (pcoa).</p>
 <p>In terms of its applicability to disparity analyses, Vegan is a package that supports basic analyses of categorical and traditional morphometric data. Other packages offer a much greater variety of disparity-analysis-specific support. However, as a package rooted in community ecology, the field that disparity borrows most of its methodological techniques from, it is worthwhile familiarising yourself with the capabilities of vegan.</p>
-</section>
-<section id="principal-components-analysis-pca" class="level2">
-<h2 class="anchored" data-anchor-id="principal-components-analysis-pca">1.1 Principal components analysis (PCA)</h2>
+<section id="principal-components-analysis-pca" class="level3">
+<h3 class="anchored" data-anchor-id="principal-components-analysis-pca">2.1 Principal components analysis (PCA)</h3>
 <p>Let’s start simple with principal components analysis. First, check you have vegan and ape installed.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"ape"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"ape"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
@@ -231,8 +230,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Argument ‘x’ needs to be a data frame where the rows are samples and the columns are the variables. Bear in mind that your samples can be sites, if you’re sampling environmental variables or species coverage, or species, if you’re sampling species traits. In the case of disparity analysis, the latter will be the case. As such, make sure each row represents a taxonomic unit, and each column represents a trait.</p>
 </section>
-<section id="principal-coordinate-analysis-pcoa" class="level2">
-<h2 class="anchored" data-anchor-id="principal-coordinate-analysis-pcoa">1.2 principal coordinate analysis (PCOA)</h2>
+<section id="principal-coordinate-analysis-pcoa" class="level3">
+<h3 class="anchored" data-anchor-id="principal-coordinate-analysis-pcoa">2.2 principal coordinate analysis (PCOA)</h3>
 <p>Vegan doesn’t support principal coordinate analysis, the ordination of dissimilarity/distance matrices, but ape does. Let’s load it.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -331,8 +330,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>These plots look very different but the relative eigenvalues explain why: The ordination of the raw Euclidean distance matrix summarises over 75% of the variance in the dataset across the first two axes, whereas the ordination of the Gower distance matrix captures less than 50%.</p>
 <p>This demonstrates the power of a complete data matrix. If you have one - fantastic. You can draw powerful insights into the structure of your data from simple two-dimensional visualisations. This is highly unlikely in analyses of disparity - unless your dataset is small. In these cases, you’ll need to use another distance metric, such as the Gower coefficient.</p>
 </section>
-<section id="non-metric-multidimensional-scaling-nmds" class="level2">
-<h2 class="anchored" data-anchor-id="non-metric-multidimensional-scaling-nmds">1.3 Non-metric multidimensional scaling (NMDS)</h2>
+<section id="non-metric-multidimensional-scaling-nmds" class="level3">
+<h3 class="anchored" data-anchor-id="non-metric-multidimensional-scaling-nmds">2.3 Non-metric multidimensional scaling (NMDS)</h3>
 <p>PCOA provides a Euclidean representation of a set of samples whose relative similarities to one another are quantified by some distance metric. As you have seen, sometimes 2-3 axes won’t cut it in terms of representing the bulk of the variation in the dataset. One solution to this is to plot as many axes as possible. However, this can make the results of your analyses hard to understand.</p>
 <p>Another solution is to take a different approach to dimensionality reduction and use non-metric multidimensional scaling.</p>
 <p>Let’s take a look at the function that does this in vegan.</p>
@@ -481,11 +480,12 @@ Warning in metaMDS(x, autotransform = F, k = i + 1, trace = F): stress is
 </div>
 <p>They don’t look too dissimilar to the PCOA plots. However, remember these are non-metric spaces. The distances between the points no longer carry consistent meaning and so the information content of these plots is limited.</p>
 </section>
-<section id="other-ordination-methods-in-vegan" class="level2">
-<h2 class="anchored" data-anchor-id="other-ordination-methods-in-vegan">1.4 Other ordination methods in Vegan</h2>
+</section>
+<section id="constrained-ordination-methods" class="level2">
+<h2 class="anchored" data-anchor-id="constrained-ordination-methods">3.0 Constrained ordination methods</h2>
 <p>Vegan includes functions for a couple of other ordination techniques that are popular in community ecology. Most of these don’t see regular use in contemporary disparity analyses but they are worth exploring, just in case a use strikes you!</p>
 <section id="correspondence-analysis-ca" class="level3">
-<h3 class="anchored" data-anchor-id="correspondence-analysis-ca">Correspondence analysis (CA)</h3>
+<h3 class="anchored" data-anchor-id="correspondence-analysis-ca">3.1 Correspondence analysis (CA)</h3>
 <p>PCA preserves Euclidean distances among samples (and so if affected by double zeros). Correspondence analysis preserves chi-square distances (and so is unaffected by double zeros). PCA assumes a linear relation between variables and ordination axes, CA a uni-modal relationship. These are the core differences between PCA and CA which will dictate which method you should use. In almost all cases, because the variation you will sample using traditional morphometrics, geometric morphometrics, and outline methods will be relatively constrained, PCA will be the most appropriate. Nevertheless let’s run through a short example using a different dataset.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(dune)</span>
@@ -509,7 +509,7 @@ Warning in metaMDS(x, autotransform = F, k = i + 1, trace = F): stress is
 <p>Why not try analysing the varespec data using CA and comparing it to the results of the PCA?</p>
 </section>
 <section id="detrended-correspondence-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="detrended-correspondence-analysis">Detrended correspondence analysis</h3>
+<h3 class="anchored" data-anchor-id="detrended-correspondence-analysis">3.2 Detrended correspondence analysis</h3>
 <p>A modified version of CA for analysing sparse ecological gradient data (e.g.&nbsp;time-series of species colonisation). It was developed with the intention of rectifying two alleged faults of standard correspondence analysis: the apparent curvature of straight gradients and packing of sites at the ends of the gradient. It doesn’t see much use today and will be of little relevance to most of you.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>DCA <span class="ot">&lt;-</span> <span class="fu">decorana</span>(dune)</span>
@@ -540,7 +540,7 @@ Axis lengths         3.7004 3.1166 1.30055 1.47888</code></pre>
 </div>
 </section>
 <section id="canonical-correspondence-analysis-cca" class="level3">
-<h3 class="anchored" data-anchor-id="canonical-correspondence-analysis-cca">Canonical correspondence analysis (CCA)</h3>
+<h3 class="anchored" data-anchor-id="canonical-correspondence-analysis-cca">3.3 Canonical correspondence analysis (CCA)</h3>
 <p>One of three methods of constrained ordination supported by Vegan. Constrained ordination methods analyse at least two matrices at once and seek to identify how much of the variance in one is explained by the other. While unconstrained ordination methods summarise and present all the variation in a dataset, constrained methods will only display variation in the response data that can be attributed to the predictor data.</p>
 <p>There are constrained equivalents of each major unconstrained ordination method. For principal components analysis, there is redundancy analysis (RDA). For principal coordinates analysis and non-metric multidimensional scaling, there is distance-based redundancy analysis (db-RDA). Finally, for correspondence analysis, there is canonical correspondence analysis (CCA).</p>
 <p>These methods are surprisingly rare in analyses of disparity. However, there potential utility is obvious. In Vegan, each constrained ordination method has its own function: CCA has cca (it switches from CA to CCA when a constraining matrix is submitted as argument ‘y’), RDA has rda (same as cca, switches from PCA to RDA if ‘y’ is a constraining matrix), non-RDA has capscale. All functions work in broadly the same way, so we’ll just run an RDA using the dune dataset.</p>
@@ -588,7 +588,7 @@ $adj.r.squared
 <p>We can see from the printout that these two variables, A1 + Management, explained 0.3994 of the total variance in the dune dataset. Adjusted R-squared measures the strength of the relationship between Y and X after applying a correction to the regular R-squared value to take into account the number of explanatory variables (we want the simplest model possible). This is the statistic that should be reported when model building in this way.</p>
 </section>
 <section id="testing-the-significance-of-different-terms" class="level3">
-<h3 class="anchored" data-anchor-id="testing-the-significance-of-different-terms">Testing the significance of different terms</h3>
+<h3 class="anchored" data-anchor-id="testing-the-significance-of-different-terms">3.4 Testing the significance of different terms</h3>
 <p>Previously, we picked two variables at random for our RDA. What about if we want to include all variables that are statistically important? We can do this via forward selection.</p>
 <p>First, let’s generate RDA objects that try to explain the variance in the dune dataset with all and none of the environmental variables. These will serve as our endmember models.</p>
 <div class="cell">
@@ -699,8 +699,8 @@ Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
            Df Variance      F Pr(&gt;F)   
-A1          1    8.115 2.4091  0.010 **
-Management  3   25.483 2.5218  0.002 **
+A1          1    8.115 2.4091  0.014 * 
+Management  3   25.483 2.5218  0.004 **
 Residual   15   50.526                 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
@@ -716,10 +716,10 @@ Permutation: free
 Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
-           Df Variance      F Pr(&gt;F)    
-A1          1    4.367 1.2965  0.238    
-Management  3   25.483 2.5218  0.001 ***
-Residual   15   50.526                  
+           Df Variance      F Pr(&gt;F)   
+A1          1    4.367 1.2965  0.252   
+Management  3   25.483 2.5218  0.003 **
+Residual   15   50.526                 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
@@ -734,19 +734,19 @@ Permutation: free
 Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
-         Df Variance      F Pr(&gt;F)  
-RDA1      1   15.144 4.4960  0.011 *
-RDA2      1   11.862 3.5215  0.015 *
-RDA3      1    4.053 1.2033  0.546  
-RDA4      1    2.538 0.7535  0.717  
-Residual 15   50.526                
+         Df Variance      F Pr(&gt;F)   
+RDA1      1   15.144 4.4960  0.004 **
+RDA2      1   11.862 3.5215  0.012 * 
+RDA3      1    4.053 1.2033  0.581   
+RDA4      1    2.538 0.7535  0.717   
+Residual 15   50.526                 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 </section>
 <section id="conditioned-or-partial-ordination" class="level3">
-<h3 class="anchored" data-anchor-id="conditioned-or-partial-ordination">Conditioned or partial ordination</h3>
+<h3 class="anchored" data-anchor-id="conditioned-or-partial-ordination">3.5 Conditioned or partial ordination</h3>
 <p>All constrained ordination methods can have terms that are partialled out from the analysis before constraints are applied. This lets us reduce noise in the dataset.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>RDA.part <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> A1 <span class="sc">+</span> Management <span class="sc">+</span> <span class="fu">Condition</span>(Moisture), <span class="at">data=</span>dune.env)</span>
@@ -773,9 +773,8 @@ Eigenvalues for unconstrained axes:
 </div>
 <p>This partials out the effect of ‘moisture’, which affects the significance of the other terms. Why don’t you use the vegan ANOVA functions to explore by how much this has changed the results of the RDA?</p>
 </section>
-</section>
-<section id="fitting-environmental-variables" class="level2">
-<h2 class="anchored" data-anchor-id="fitting-environmental-variables">1.5 Fitting environmental variables</h2>
+<section id="fitting-environmental-variables" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-environmental-variables">3.6 Fitting environmental variables</h3>
 <p>Vegan provides two functions for fitting environmental variables onto ordination: envfit fits vectors of continuous variables and centroids of levels of class variables (defined as factor in R). The arrow shows the direction of the (increasing) gradient, and the length of the arrow is proportional to the correlation between the variable and the ordination; and ordisurf (which requires package mgcv) fits smooth surfaces for continuous variables onto ordination using thin plate splines with cross-validatory selection of smoothness.</p>
 <p>Let’s try both using the base RDA of the dune dataset.</p>
 <div class="cell">
@@ -786,7 +785,7 @@ Eigenvalues for unconstrained axes:
 ***VECTORS
 
        RDA1     RDA2    r2 Pr(&gt;r)  
-A1 -0.91473 -0.40407 0.276  0.053 .
+A1 -0.91473 -0.40407 0.276   0.05 *
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Permutation: free
@@ -840,10 +839,11 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>This is a little more informative!</p>
 </section>
+</section>
 <section id="plotting-using-vegan" class="level2">
-<h2 class="anchored" data-anchor-id="plotting-using-vegan">1.6 Plotting using Vegan</h2>
+<h2 class="anchored" data-anchor-id="plotting-using-vegan">4.0 Plotting using Vegan</h2>
 <section id="basic-plotting" class="level3">
-<h3 class="anchored" data-anchor-id="basic-plotting">Basic plotting</h3>
+<h3 class="anchored" data-anchor-id="basic-plotting">4.1 Basic plotting</h3>
 <p>Finally, vegan has a variety of functions that let you customise your ordinations.</p>
 <p>Let’s start with a basic plot of our varespec PCA data from way, way back in this tutorial. Let’s plot the sites as points and species (variables) as crosses.</p>
 <div class="cell">
@@ -893,7 +893,7 @@ REML score: 42.24929     </code></pre>
 </div>
 </section>
 <section id="adding-items-to-plots" class="level3">
-<h3 class="anchored" data-anchor-id="adding-items-to-plots">Adding items to plots</h3>
+<h3 class="anchored" data-anchor-id="adding-items-to-plots">4.2 Adding items to plots</h3>
 <p>Probably the most useful thing you can do to your ordination is to add some sort of convex hull to separate groups of points that are distinct from one another in some way. Vegan supports three functions for doing just that.</p>
 <p>When adding a convex hull to a constrained ordination, you can simple specify the environmental variable you wish to group by and ordihull will add convex hulls:</p>
 <div class="cell">

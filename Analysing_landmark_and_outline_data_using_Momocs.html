@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marita Quitzau, Romain Frelat, and Vincent Bonhomme. Adapted by Thomas Smith">
+
+<title>Analysing landmark and outline data using Momocs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/quarto.js"></script>
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/popper.min.js"></script>
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Analysing_landmark_and_outline_data_using_Momocs_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Analysing_landmark_and_outline_data_using_Momocs_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Analysing_landmark_and_outline_data_using_Momocs_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Analysing_landmark_and_outline_data_using_Momocs_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysing landmark and outline data using Momocs</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marita Quitzau, Romain Frelat, and Vincent Bonhomme. Adapted by Thomas Smith </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1.0 Introduction</h2>
+<p>This vignette aims to provide a quick introduction to morphometric analyses through a comparison of landmark and outline methods on coral reef fish. It was created based on R version 4.0.2 and Momocs version 1.3.2.</p>
+<p>It is the companion tutorial for the published paper:</p>
+<p>Quitzau, M., Frelat, R., Bonhomme, V., Möllmann, C., Nagelkerke, L., &amp; Bejarano, S. (2022). Traits, landmarks and outlines: Three congruent sides of a tale on coral reef fish morphology. Ecology and Evolution, 12, e8787. https://doi.org/10.1002/ece3.8787.</p>
+<section id="load-data-and-library" class="level3">
+<h3 class="anchored" data-anchor-id="load-data-and-library">1.1 Load data and library</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Momocs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Momocs'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># move to wherever you have saved the datasets folder</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"~/R_packages/R_projects/TSDisparity/"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"datasets/fish_traits.Rds"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>landmarks <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"datasets/fish_landmarks.Rds"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>outlines <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"datasets/fish_outlines.Rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="explore-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="explore-datasets">1.2 Explore datasets</h3>
+<p>These three data objects contain the morphological information of 112 images of fish. They comprise the morphological traits and general information about the taxonomy (stored in the object traits), the coordinates of landmarks (stored in the object landmarks), and the outlines (stored in the object outlines).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(traits<span class="sc">$</span>family)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Acanthuridae     Scaridae    Siganidae 
+          26           76           10 </code></pre>
+</div>
+</div>
+<p>The dataset covers 41 species from 3 families. 26 individuals belong to the surgeonfishes (Acanthuridae), 76 to the parrotfishes (Scaridae), and 10 to the rabitfishes (Siganidae). Hereinafter, the outlines of the images are shown with families Acanthuridae, Scaridae, and Siganidae colored in red, blue, and green respectively.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the color for each family</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>palF <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#dc322f"</span>, <span class="st">"#497dcb"</span>, <span class="st">"#85995e"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Attribute a color per image</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>colF <span class="ot">&lt;-</span> palF[traits<span class="sc">$</span>family]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Represent the outline of all the images</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">panel</span>(outlines, <span class="at">col=</span>colF)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Remember, if you want to analyse your own data, make sure it is of the correct class and type. You can check these properties using the following functions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># object traits</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(traits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "data.frame"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(traits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "list"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(traits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "A lineatus 12.5cmSL-Comoros"               
+  [2] "A lineatus 16.4cmSL-23.1TL-Solomons"       
+  [3] "A lineatus 17cmFL-Marshalls"               
+  [4] "A lineatus 18.1cmSL-27.7cmTL-Palau"        
+  [5] "A lineatus 6.84cmSL"                       
+  [6] "A maculiceps 21.6cmSL-30.7cmTL-Solomons"   
+  [7] "A nigricans 16.7cmSL-20.8cmTL-Japan"       
+  [8] "A nigricauda 18cmFL-Marshall"              
+  [9] "A nigricauda 22cmSL-Marshalls"             
+ [10] "A nigrofuscus 9.3cmSL-Philippines"         
+ [11] "A nigrofuscus 9cmSL-13cmTL-Marshalls"      
+ [12] "A pyroferus 13cmSL-17.5cmTL-Tahiti"        
+ [13] "A pyroferus 17.2cmSL-24.9cmTL-Marquesas"   
+ [14] "BIO_Siganus punctatissimus"                
+ [15] "Bolbometopon muricatum 51cmSL-62cmTL"      
+ [16] "C carolinus -29cmFL"                       
+ [17] "C carolinus 17.5cmSL-21.6cmTL-Hawaii"      
+ [18] "C carolinus 21.2cmSL-25.9cmTL-Hawaii"      
+ [19] "C carolinus 31.8cmSL 39.1cmTL"             
+ [20] "C striatus 14cmSL-Philippines"             
+ [21] "C striatus 9.4cmSL-12.7cmTL-Marshalls"     
+ [22] "Cetoscarus bicolor 34.6cmSL-43.2cmTL"      
+ [23] "Cetoscarus bicolor 36cmSL"                 
+ [24] "Cetoscarus bicolor 37cmSL-45.4cmTL"        
+ [25] "Cetoscarus bicolor 37cmSL-45.7cmTL"        
+ [26] "Cetoscarus bicolor 41cmFL"                 
+ [27] "Cetoscarus bicolor 42cmSL"                 
+ [28] "Chlorurus bleekeri 18.5cmSL-22.1cmTL"      
+ [29] "Chlorurus bleekeri 20cmSL-24.6cmTL"        
+ [30] "Chlorurus bleekeri 30cmTL"                 
+ [31] "Chlorurus microrhinos 41.7cmSL-58.4cmTL"   
+ [32] "Chlorurus sordidus 15.4cmSL-18.8cmTL"      
+ [33] "Chlorurus sordidus 16.4cmSL-22.4cmTL"      
+ [34] "Chlorurus sordidus 22.3cmSL-26.7cmTL"      
+ [35] "Chlorurus sordidus 22.7cmSL-27.6cmTL"      
+ [36] "Chlorurus sordidus 29cmTL"                 
+ [37] "Hipposcarus longiceps 28.2cmSL-35.3cmTL"   
+ [38] "Hipposcarus longiceps 30.3cmSL-37.6cmTL"   
+ [39] "Hipposcarus longiceps 38.2cmSL-45.7cmTL"   
+ [40] "Hipposcarus longiceps 45.8cmSL-55cmTL"     
+ [41] "N lituratus 16.1cmSL-21.2cmTL-Guam"        
+ [42] "N unicornis 28.7cmSL-Australia"            
+ [43] "N unicornis 29cmSL-Fiji"                   
+ [44] "N vlamingii 42.5cmSL-58cmTL-Marshalls"     
+ [45] "PBS_Siganus_argenteus_1006260"             
+ [46] "S chameleon 15.1cmSL-18.3cmTL-Palau"       
+ [47] "S chameleon 15.2cmSL-18.5cmTL-Philippines" 
+ [48] "S chameleon 17.6cmSL-Fiji"                 
+ [49] "S chameleon 17cmSL-30.2cmTL-Australia"     
+ [50] "S chameleon 18.9cmSL-23.4cmTL-Australia"   
+ [51] "S chameleon 20.9cmSL-26.4cmTL-Philippines" 
+ [52] "S chameleon 21.2cmSL-27.7cmTL-Indonesia"   
+ [53] "S corallinus 17.4cmSL-22.1cmTL-Palau"      
+ [54] "S dimidiatus 11.01cmSL-Palau"              
+ [55] "S dimidiatus 15.6cmSL-19.3cmTL"            
+ [56] "S dimidiatus 17.2cmSL-21.6cmTL-Solomons"   
+ [57] "S dimidiatus 17.4cmSL-20.8cmTL-Palau"      
+ [58] "S dimidiatus 18.7cmSL-23cmTL-Solomons"     
+ [59] "S doliatus 16.2cmSL-Fiji"                  
+ [60] "S forsteni 24.9cmSL-31.5cmTL-Australia"    
+ [61] "S forsteni 25.2cmSL-31cmTL"                
+ [62] "S forsteni 25.3SL-32cmTL-Guam"             
+ [63] "S frenatus 18.9cmSL-22.9cmTL-Marshalls"    
+ [64] "S frenatus 20.6cmSL-25.2cmTL"              
+ [65] "S frenatus 21.7cmSL-26.2cmTL"              
+ [66] "S frenatus 22.5cmSL-29cmTL-Marshalls"      
+ [67] "S frenatus 29cmTL-Marshalls"               
+ [68] "S frenatus 32.5cmSL-41.9cmTL-Marshalls"    
+ [69] "S ghobban 22.8cmSL-27.7cmTL-Micronesia"    
+ [70] "S ghobban 25.5cmSL-31.8cmTL-Kiribati"      
+ [71] "S ghobban 38.2cmSL-49.8TL-Marshalls"       
+ [72] "S ghobban 40.2cmSL-FrenchPoly"             
+ [73] "S globiceps 13.28cmSL-Fiji"                
+ [74] "S globiceps 22.2cmSL-28cmTL-Palmyra"       
+ [75] "S japanensis 22cmSL-26.7cmTL-Solomons"     
+ [76] "S japanensis 30cmTL-Marshalls"             
+ [77] "S niger 22.34cmSL-Palau"                   
+ [78] "S niger 24.5cmSL-31.9cmTL-Seychelles"      
+ [79] "S oviceps 16cmSL-FrenchPoly.Tetiaroa"      
+ [80] "S prasiognathos 22.5cmSL-27.9cmTL-Maldives"
+ [81] "S prasiognathos 22.5cmSL-28.7cmTL-Maldives"
+ [82] "S prasiognathos 30.3cmSL-40.1cmTL"         
+ [83] "S psittacus 20.8cmSL-FrenchPolynesia"      
+ [84] "S psittacus 22.8cmSL-29.2cmTL-Australia"   
+ [85] "S puellus 22.2cmSL-27.9cmTL-Micronesia"    
+ [86] "S punctatus 17.9cmSL-22.2cmTL-Indonesia"   
+ [87] "S punctatus 29cmSL-Fiji"                   
+ [88] "S punctatus 32.9cmSL-41.1cmTL-Marshalls"   
+ [89] "S punctatus 7.25cmSL-Fiji"                 
+ [90] "S quoyi 12.3cmSL-15.2cmTL-Indonesia"       
+ [91] "S quoyi 16.6cmSL-20.8cmTL-Solomons"        
+ [92] "S quoyi 16.8cmSL-20.8cmTL-Palau"           
+ [93] "S quoyi 19.6cmSL-21.1cmTL-Philippines"     
+ [94] "S rubroviolaceus-35.5cmSL-46.2cmTL"        
+ [95] "S schlegeli-17.5cmSL-21.3cmTL-Tonga"       
+ [96] "S schlegeli - 20.3cmSL-25.2cmTL-Japan"     
+ [97] "S schlegeli 14cmSL-17cmTL-Australia"       
+ [98] "S schlegeli 15.7cmSL-18.8cmTL"             
+ [99] "S schlegeli 17.5cmSL-21.3cmTL"             
+[100] "S schlegeli 19.9cmSL-24.4cmTL-Australia"   
+[101] "S schlegeli 24cmSL-29.8cmTL-Australia"     
+[102] "S spinus 11cmSL-13.6cmTL-Australia"        
+[103] "S spinus 14.4cmSL-18.3cmTL-Micronesia"     
+[104] "S spinus 21.7cmTL-28.4cmTL"                
+[105] "S vulpinus 16.8cmSL-19,8cmTL-Micronesia"   
+[106] "Z scopas 10.1cmSL-12.2cmTL-Australia"      
+[107] "Z scopas 10.1cmSL-Tahiti"                  
+[108] "Z scopas 11.9cmSL-Philippines"             
+[109] "Z scopas 14cmSL"                           
+[110] "Z scopas 8.43cmSL-Comores"                 
+[111] "Z veliferum 11.7cm SL-14.5cmTL"            
+[112] "Z veliferum 11.7cmSL - 14.5cmTL-Hawaii"    </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(traits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "species"  "family"   "BodyAR"   "CaudalAR" "CaudalFL" "CaudalPT"
+ [7] "DorsalS"  "EyeP"     "EyeS"     "HeadD"    "HeadL"    "LJawL"   
+[13] "OralGP"   "PectoAR"  "PectoP"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># object landmarks</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(landmarks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Ldk" "Coo"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(landmarks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "list"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(landmarks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "A lineatus 12.5cmSL-Comoros"               
+  [2] "A lineatus 16.4cmSL-23.1TL-Solomons"       
+  [3] "A lineatus 17cmFL-Marshalls"               
+  [4] "A lineatus 18.1cmSL-27.7cmTL-Palau"        
+  [5] "A lineatus 6.84cmSL"                       
+  [6] "A maculiceps 21.6cmSL-30.7cmTL-Solomons"   
+  [7] "A nigricans 16.7cmSL-20.8cmTL-Japan"       
+  [8] "A nigricauda 18cmFL-Marshall"              
+  [9] "A nigricauda 22cmSL-Marshalls"             
+ [10] "A nigrofuscus 9.3cmSL-Philippines"         
+ [11] "A nigrofuscus 9cmSL-13cmTL-Marshalls"      
+ [12] "A pyroferus 13cmSL-17.5cmTL-Tahiti"        
+ [13] "A pyroferus 17.2cmSL-24.9cmTL-Marquesas"   
+ [14] "BIO_Siganus punctatissimus"                
+ [15] "Bolbometopon muricatum 51cmSL-62cmTL"      
+ [16] "C carolinus -29cmFL"                       
+ [17] "C carolinus 17.5cmSL-21.6cmTL-Hawaii"      
+ [18] "C carolinus 21.2cmSL-25.9cmTL-Hawaii"      
+ [19] "C carolinus 31.8cmSL 39.1cmTL"             
+ [20] "C striatus 14cmSL-Philippines"             
+ [21] "C striatus 9.4cmSL-12.7cmTL-Marshalls"     
+ [22] "Cetoscarus bicolor 34.6cmSL-43.2cmTL"      
+ [23] "Cetoscarus bicolor 36cmSL"                 
+ [24] "Cetoscarus bicolor 37cmSL-45.4cmTL"        
+ [25] "Cetoscarus bicolor 37cmSL-45.7cmTL"        
+ [26] "Cetoscarus bicolor 41cmFL"                 
+ [27] "Cetoscarus bicolor 42cmSL"                 
+ [28] "Chlorurus bleekeri 18.5cmSL-22.1cmTL"      
+ [29] "Chlorurus bleekeri 20cmSL-24.6cmTL"        
+ [30] "Chlorurus bleekeri 30cmTL"                 
+ [31] "Chlorurus microrhinos 41.7cmSL-58.4cmTL"   
+ [32] "Chlorurus sordidus 15.4cmSL-18.8cmTL"      
+ [33] "Chlorurus sordidus 16.4cmSL-22.4cmTL"      
+ [34] "Chlorurus sordidus 22.3cmSL-26.7cmTL"      
+ [35] "Chlorurus sordidus 22.7cmSL-27.6cmTL"      
+ [36] "Chlorurus sordidus 29cmTL"                 
+ [37] "Hipposcarus longiceps 28.2cmSL-35.3cmTL"   
+ [38] "Hipposcarus longiceps 30.3cmSL-37.6cmTL"   
+ [39] "Hipposcarus longiceps 38.2cmSL-45.7cmTL"   
+ [40] "Hipposcarus longiceps 45.8cmSL-55cmTL"     
+ [41] "N lituratus 16.1cmSL-21.2cmTL-Guam"        
+ [42] "N unicornis 28.7cmSL-Australia"            
+ [43] "N unicornis 29cmSL-Fiji"                   
+ [44] "N vlamingii 42.5cmSL-58cmTL-Marshalls"     
+ [45] "PBS_Siganus_argenteus_1006260"             
+ [46] "S chameleon 15.1cmSL-18.3cmTL-Palau"       
+ [47] "S chameleon 15.2cmSL-18.5cmTL-Philippines" 
+ [48] "S chameleon 17.6cmSL-Fiji"                 
+ [49] "S chameleon 17cmSL-30.2cmTL-Australia"     
+ [50] "S chameleon 18.9cmSL-23.4cmTL-Australia"   
+ [51] "S chameleon 20.9cmSL-26.4cmTL-Philippines" 
+ [52] "S chameleon 21.2cmSL-27.7cmTL-Indonesia"   
+ [53] "S corallinus 17.4cmSL-22.1cmTL-Palau"      
+ [54] "S dimidiatus 11.01cmSL-Palau"              
+ [55] "S dimidiatus 15.6cmSL-19.3cmTL"            
+ [56] "S dimidiatus 17.2cmSL-21.6cmTL-Solomons"   
+ [57] "S dimidiatus 17.4cmSL-20.8cmTL-Palau"      
+ [58] "S dimidiatus 18.7cmSL-23cmTL-Solomons"     
+ [59] "S doliatus 16.2cmSL-Fiji"                  
+ [60] "S forsteni 24.9cmSL-31.5cmTL-Australia"    
+ [61] "S forsteni 25.2cmSL-31cmTL"                
+ [62] "S forsteni 25.3SL-32cmTL-Guam"             
+ [63] "S frenatus 18.9cmSL-22.9cmTL-Marshalls"    
+ [64] "S frenatus 20.6cmSL-25.2cmTL"              
+ [65] "S frenatus 21.7cmSL-26.2cmTL"              
+ [66] "S frenatus 22.5cmSL-29cmTL-Marshalls"      
+ [67] "S frenatus 29cmTL-Marshalls"               
+ [68] "S frenatus 32.5cmSL-41.9cmTL-Marshalls"    
+ [69] "S ghobban 22.8cmSL-27.7cmTL-Micronesia"    
+ [70] "S ghobban 25.5cmSL-31.8cmTL-Kiribati"      
+ [71] "S ghobban 38.2cmSL-49.8TL-Marshalls"       
+ [72] "S ghobban 40.2cmSL-FrenchPoly"             
+ [73] "S globiceps 13.28cmSL-Fiji"                
+ [74] "S globiceps 22.2cmSL-28cmTL-Palmyra"       
+ [75] "S japanensis 22cmSL-26.7cmTL-Solomons"     
+ [76] "S japanensis 30cmTL-Marshalls"             
+ [77] "S niger 22.34cmSL-Palau"                   
+ [78] "S niger 24.5cmSL-31.9cmTL-Seychelles"      
+ [79] "S oviceps 16cmSL-FrenchPoly.Tetiaroa"      
+ [80] "S prasiognathos 22.5cmSL-27.9cmTL-Maldives"
+ [81] "S prasiognathos 22.5cmSL-28.7cmTL-Maldives"
+ [82] "S prasiognathos 30.3cmSL-40.1cmTL"         
+ [83] "S psittacus 20.8cmSL-FrenchPolynesia"      
+ [84] "S psittacus 22.8cmSL-29.2cmTL-Australia"   
+ [85] "S puellus 22.2cmSL-27.9cmTL-Micronesia"    
+ [86] "S punctatus 17.9cmSL-22.2cmTL-Indonesia"   
+ [87] "S punctatus 29cmSL-Fiji"                   
+ [88] "S punctatus 32.9cmSL-41.1cmTL-Marshalls"   
+ [89] "S punctatus 7.25cmSL-Fiji"                 
+ [90] "S quoyi 12.3cmSL-15.2cmTL-Indonesia"       
+ [91] "S quoyi 16.6cmSL-20.8cmTL-Solomons"        
+ [92] "S quoyi 16.8cmSL-20.8cmTL-Palau"           
+ [93] "S quoyi 19.6cmSL-21.1cmTL-Philippines"     
+ [94] "S rubroviolaceus-35.5cmSL-46.2cmTL"        
+ [95] "S schlegeli-17.5cmSL-21.3cmTL-Tonga"       
+ [96] "S schlegeli - 20.3cmSL-25.2cmTL-Japan"     
+ [97] "S schlegeli 14cmSL-17cmTL-Australia"       
+ [98] "S schlegeli 15.7cmSL-18.8cmTL"             
+ [99] "S schlegeli 17.5cmSL-21.3cmTL"             
+[100] "S schlegeli 19.9cmSL-24.4cmTL-Australia"   
+[101] "S schlegeli 24cmSL-29.8cmTL-Australia"     
+[102] "S spinus 11cmSL-13.6cmTL-Australia"        
+[103] "S spinus 14.4cmSL-18.3cmTL-Micronesia"     
+[104] "S spinus 21.7cmTL-28.4cmTL"                
+[105] "S vulpinus 16.8cmSL-19,8cmTL-Micronesia"   
+[106] "Z scopas 10.1cmSL-12.2cmTL-Australia"      
+[107] "Z scopas 10.1cmSL-Tahiti"                  
+[108] "Z scopas 11.9cmSL-Philippines"             
+[109] "Z scopas 14cmSL"                           
+[110] "Z scopas 8.43cmSL-Comores"                 
+[111] "Z veliferum 11.7cm SL-14.5cmTL"            
+[112] "Z veliferum 11.7cmSL - 14.5cmTL-Hawaii"    </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># object outlines</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(outlines)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Out" "Coo"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(outlines)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "list"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(outlines)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "A lineatus 12.5cmSL-Comoros"               
+  [2] "A lineatus 16.4cmSL-23.1TL-Solomons"       
+  [3] "A lineatus 17cmFL-Marshalls"               
+  [4] "A lineatus 18.1cmSL-27.7cmTL-Palau"        
+  [5] "A lineatus 6.84cmSL"                       
+  [6] "A maculiceps 21.6cmSL-30.7cmTL-Solomons"   
+  [7] "A nigricans 16.7cmSL-20.8cmTL-Japan"       
+  [8] "A nigricauda 18cmFL-Marshall"              
+  [9] "A nigricauda 22cmSL-Marshalls"             
+ [10] "A nigrofuscus 9.3cmSL-Philippines"         
+ [11] "A nigrofuscus 9cmSL-13cmTL-Marshalls"      
+ [12] "A pyroferus 13cmSL-17.5cmTL-Tahiti"        
+ [13] "A pyroferus 17.2cmSL-24.9cmTL-Marquesas"   
+ [14] "BIO_Siganus punctatissimus"                
+ [15] "Bolbometopon muricatum 51cmSL-62cmTL"      
+ [16] "C carolinus -29cmFL"                       
+ [17] "C carolinus 17.5cmSL-21.6cmTL-Hawaii"      
+ [18] "C carolinus 21.2cmSL-25.9cmTL-Hawaii"      
+ [19] "C carolinus 31.8cmSL 39.1cmTL"             
+ [20] "C striatus 14cmSL-Philippines"             
+ [21] "C striatus 9.4cmSL-12.7cmTL-Marshalls"     
+ [22] "Cetoscarus bicolor 34.6cmSL-43.2cmTL"      
+ [23] "Cetoscarus bicolor 36cmSL"                 
+ [24] "Cetoscarus bicolor 37cmSL-45.4cmTL"        
+ [25] "Cetoscarus bicolor 37cmSL-45.7cmTL"        
+ [26] "Cetoscarus bicolor 41cmFL"                 
+ [27] "Cetoscarus bicolor 42cmSL"                 
+ [28] "Chlorurus bleekeri 18.5cmSL-22.1cmTL"      
+ [29] "Chlorurus bleekeri 20cmSL-24.6cmTL"        
+ [30] "Chlorurus bleekeri 30cmTL"                 
+ [31] "Chlorurus microrhinos 41.7cmSL-58.4cmTL"   
+ [32] "Chlorurus sordidus 15.4cmSL-18.8cmTL"      
+ [33] "Chlorurus sordidus 16.4cmSL-22.4cmTL"      
+ [34] "Chlorurus sordidus 22.3cmSL-26.7cmTL"      
+ [35] "Chlorurus sordidus 22.7cmSL-27.6cmTL"      
+ [36] "Chlorurus sordidus 29cmTL"                 
+ [37] "Hipposcarus longiceps 28.2cmSL-35.3cmTL"   
+ [38] "Hipposcarus longiceps 30.3cmSL-37.6cmTL"   
+ [39] "Hipposcarus longiceps 38.2cmSL-45.7cmTL"   
+ [40] "Hipposcarus longiceps 45.8cmSL-55cmTL"     
+ [41] "N lituratus 16.1cmSL-21.2cmTL-Guam"        
+ [42] "N unicornis 28.7cmSL-Australia"            
+ [43] "N unicornis 29cmSL-Fiji"                   
+ [44] "N vlamingii 42.5cmSL-58cmTL-Marshalls"     
+ [45] "PBS_Siganus_argenteus_1006260"             
+ [46] "S chameleon 15.1cmSL-18.3cmTL-Palau"       
+ [47] "S chameleon 15.2cmSL-18.5cmTL-Philippines" 
+ [48] "S chameleon 17.6cmSL-Fiji"                 
+ [49] "S chameleon 17cmSL-30.2cmTL-Australia"     
+ [50] "S chameleon 18.9cmSL-23.4cmTL-Australia"   
+ [51] "S chameleon 20.9cmSL-26.4cmTL-Philippines" 
+ [52] "S chameleon 21.2cmSL-27.7cmTL-Indonesia"   
+ [53] "S corallinus 17.4cmSL-22.1cmTL-Palau"      
+ [54] "S dimidiatus 11.01cmSL-Palau"              
+ [55] "S dimidiatus 15.6cmSL-19.3cmTL"            
+ [56] "S dimidiatus 17.2cmSL-21.6cmTL-Solomons"   
+ [57] "S dimidiatus 17.4cmSL-20.8cmTL-Palau"      
+ [58] "S dimidiatus 18.7cmSL-23cmTL-Solomons"     
+ [59] "S doliatus 16.2cmSL-Fiji"                  
+ [60] "S forsteni 24.9cmSL-31.5cmTL-Australia"    
+ [61] "S forsteni 25.2cmSL-31cmTL"                
+ [62] "S forsteni 25.3SL-32cmTL-Guam"             
+ [63] "S frenatus 18.9cmSL-22.9cmTL-Marshalls"    
+ [64] "S frenatus 20.6cmSL-25.2cmTL"              
+ [65] "S frenatus 21.7cmSL-26.2cmTL"              
+ [66] "S frenatus 22.5cmSL-29cmTL-Marshalls"      
+ [67] "S frenatus 29cmTL-Marshalls"               
+ [68] "S frenatus 32.5cmSL-41.9cmTL-Marshalls"    
+ [69] "S ghobban 22.8cmSL-27.7cmTL-Micronesia"    
+ [70] "S ghobban 25.5cmSL-31.8cmTL-Kiribati"      
+ [71] "S ghobban 38.2cmSL-49.8TL-Marshalls"       
+ [72] "S ghobban 40.2cmSL-FrenchPoly"             
+ [73] "S globiceps 13.28cmSL-Fiji"                
+ [74] "S globiceps 22.2cmSL-28cmTL-Palmyra"       
+ [75] "S japanensis 22cmSL-26.7cmTL-Solomons"     
+ [76] "S japanensis 30cmTL-Marshalls"             
+ [77] "S niger 22.34cmSL-Palau"                   
+ [78] "S niger 24.5cmSL-31.9cmTL-Seychelles"      
+ [79] "S oviceps 16cmSL-FrenchPoly.Tetiaroa"      
+ [80] "S prasiognathos 22.5cmSL-27.9cmTL-Maldives"
+ [81] "S prasiognathos 22.5cmSL-28.7cmTL-Maldives"
+ [82] "S prasiognathos 30.3cmSL-40.1cmTL"         
+ [83] "S psittacus 20.8cmSL-FrenchPolynesia"      
+ [84] "S psittacus 22.8cmSL-29.2cmTL-Australia"   
+ [85] "S puellus 22.2cmSL-27.9cmTL-Micronesia"    
+ [86] "S punctatus 17.9cmSL-22.2cmTL-Indonesia"   
+ [87] "S punctatus 29cmSL-Fiji"                   
+ [88] "S punctatus 32.9cmSL-41.1cmTL-Marshalls"   
+ [89] "S punctatus 7.25cmSL-Fiji"                 
+ [90] "S quoyi 12.3cmSL-15.2cmTL-Indonesia"       
+ [91] "S quoyi 16.6cmSL-20.8cmTL-Solomons"        
+ [92] "S quoyi 16.8cmSL-20.8cmTL-Palau"           
+ [93] "S quoyi 19.6cmSL-21.1cmTL-Philippines"     
+ [94] "S rubroviolaceus-35.5cmSL-46.2cmTL"        
+ [95] "S schlegeli-17.5cmSL-21.3cmTL-Tonga"       
+ [96] "S schlegeli - 20.3cmSL-25.2cmTL-Japan"     
+ [97] "S schlegeli 14cmSL-17cmTL-Australia"       
+ [98] "S schlegeli 15.7cmSL-18.8cmTL"             
+ [99] "S schlegeli 17.5cmSL-21.3cmTL"             
+[100] "S schlegeli 19.9cmSL-24.4cmTL-Australia"   
+[101] "S schlegeli 24cmSL-29.8cmTL-Australia"     
+[102] "S spinus 11cmSL-13.6cmTL-Australia"        
+[103] "S spinus 14.4cmSL-18.3cmTL-Micronesia"     
+[104] "S spinus 21.7cmTL-28.4cmTL"                
+[105] "S vulpinus 16.8cmSL-19,8cmTL-Micronesia"   
+[106] "Z scopas 10.1cmSL-12.2cmTL-Australia"      
+[107] "Z scopas 10.1cmSL-Tahiti"                  
+[108] "Z scopas 11.9cmSL-Philippines"             
+[109] "Z scopas 14cmSL"                           
+[110] "Z scopas 8.43cmSL-Comores"                 
+[111] "Z veliferum 11.7cm SL-14.5cmTL"            
+[112] "Z veliferum 11.7cmSL - 14.5cmTL-Hawaii"    </code></pre>
+</div>
+</div>
+</section>
+<section id="momocs-continuous-data-structures" class="level3">
+<h3 class="anchored" data-anchor-id="momocs-continuous-data-structures">1.3 Momocs continuous data structures</h3>
+<p>You’ll notice that the outline and landmarks objects have two classes, one of which is ‘coo’. A Coo is a bespoke superclass of object in Momocs which contains three classes: ’Out’s (closed outlines), ’Opn’s (open outlines), and ’Ldk’s (configurations of landmarks).</p>
+<p>Each element of each coo object corresponds to a shape. In the case of the landmark data, this shape takes the form of a matrix of coordinates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(landmarks[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix" "array" </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(landmarks[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "double"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>landmarks[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2]
+ [1,]  105  169
+ [2,]   82  195
+ [3,]  170  297
+ [4,]  408  236
+ [5,]  453  243
+ [6,]  449  176
+ [7,]  398  188
+ [8,]  255  123
+ [9,]  194  220
+[10,]  208  194
+[11,]  123  252
+[12,]  147  253</code></pre>
+</div>
+</div>
+<p>These can be plotted using cooplot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coo_plot</span>(landmarks[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>What about the corresponding outline?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(outlines[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix" "array" </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(outlines[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "double"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coo_plot</span>(outlines[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now that’s a fish!</p>
+</section>
+</section>
+<section id="traditional-morphometrics" class="level2">
+<h2 class="anchored" data-anchor-id="traditional-morphometrics">2.0 Traditional morphometrics</h2>
+<p>Traditional morphometrics (TM) capture shape using ratios between lengths, angles, or areas measured on body parts. These ratios, also called morphological traits, often relate directly to specific functions, e.g.&nbsp;locomotion or diet.</p>
+<p>The object ‘traits’ contains 13 morphological traits related to food acquisition or locomotion.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#remove the species and family information</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>traitsonly <span class="ot">&lt;-</span> traits[, <span class="dv">3</span><span class="sc">:</span><span class="dv">15</span>]</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(traitsonly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "BodyAR"   "CaudalAR" "CaudalFL" "CaudalPT" "DorsalS"  "EyeP"    
+ [7] "EyeS"     "HeadD"    "HeadL"    "LJawL"    "OralGP"   "PectoAR" 
+[13] "PectoP"  </code></pre>
+</div>
+</div>
+<p>We can use principal components analysis to summarise the variation across these 13 morphological traits and visualise them with the following script. Momocs relies on the base R function for principal components analysis, prcomp, to get the job done.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a PCA on the traits</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>pcaTM   <span class="ot">&lt;-</span> <span class="fu">as_PCA</span>(<span class="fu">prcomp</span>(<span class="fu">scale</span>(traitsonly)), <span class="at">fac =</span> <span class="cn">NULL</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the morphospace using the Momocs extension of plot, plot_PCA</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaTM, <span class="at">col=</span>colF, <span class="at">cex=</span><span class="fl">1.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Each point represents one shape, its location in morphospace based on on its loading on the the first two axes, the first two principal components (PC). The distance between points in morphospace reflects their morphological dissimilarity. Identical shapes will overlap perfectly, whereas massively different shapes will plot in different regions of the space. The colors indicate their family. As indicated by the axes labels, the first PC explains 29% of the variance, while the second and third PCs capture 16% and 11% respectively.</p>
+<p>The PC are interpreted based on the loading of the traits. We can visualize them with a barplot().</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">mar=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">las=</span><span class="dv">1</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">sort</span>(pcaTM<span class="sc">$</span>rotation[,<span class="dv">1</span>]), </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">horiz=</span><span class="cn">TRUE</span>, <span class="at">main=</span><span class="st">"PC1"</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">sort</span>(pcaTM<span class="sc">$</span>rotation[,<span class="dv">2</span>]), </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">horiz=</span><span class="cn">TRUE</span>, <span class="at">main=</span><span class="st">"PC2"</span>)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">sort</span>(pcaTM<span class="sc">$</span>rotation[,<span class="dv">3</span>]), </span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">horiz=</span><span class="cn">TRUE</span>, <span class="at">main=</span><span class="st">"PC3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The first component describes the elongation of the body and the head size. With a high score on PC1, species have high values of head length (HeadL), head depth (HeadD), oral gape position (OralGP), and relatively low values for body aspect ratio (BodyAR), and caudal peduncle throttling (CaudalPT). In other words, individuals with a positive score on PC1 have an elongated body, a relatively larger head (in relation to standard length and body depth), and a caudal peduncle relatively broad compared to the caudal fin depth. On the contrary, species with a negative score on PC1 have a more rounded body (nearly as deep as long), with a relatively small head and a narrower caudal peduncle.</p>
+<p>The second component describes eye size (EyeS) and position (EyeP), as well as pectoral fin position (PectoP). PC2 is negatively correlated with eye size and positively correlated with eye and pectoral fin position. Fish with negative loadings therefore have high values of eye size and low values of eye and pectoral fin position. The opposite applies for fish with positive loadings. This results in the separation of fish with large, centered eyes and more ventral pectoral fins from those with smaller, higher positioned eyes and centered pectoral fins.</p>
+<p>Lastly, the third component describes fin development and the resulting swimming style, which is either based on the dorsal and pectoral fin, or the caudal fin. Fish with positive scores have higher values for eye size (EyeS) and a higher pectoral fin aspect ratio (PectoAR). Fish with negative scores have higher values for the dorsal spine (DorsalS) and the caudal fin length (CaudalFL) (i.e.&nbsp;the ratio between the medial caudal fin ray and the longest caudal fin ray, indicating an either straight or curved caudal fin). This shows the trade-off between fish with large dorsal spines, straight caudal fins, small eyes, and long and narrow pectoral fins (dorsal-pectoral based swimming), and fish with small dorsal spines, curved caudal fins, larger eyes, and short and broad pectoral fins (caudal fin swimming).</p>
+</section>
+<section id="geometric-morphometrics-landmark-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="geometric-morphometrics-landmark-analysis">3.0 Geometric morphometrics (landmark analysis)</h2>
+<p>Landmarks analysis (LA) is based on the Cartesian coordinates of landmarks, identified as homologous points that can be defined on all individuals within a population. The object landmarks contains the coordinates of landmarks:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here we plot the landmarks of Scarus chameleon</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 47th image of our dataset</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ldk_plot</span>(landmarks[<span class="dv">47</span>], <span class="at">pch=</span><span class="dv">16</span>, <span class="at">cex=</span><span class="fl">1.2</span>, <span class="at">centroid=</span><span class="cn">FALSE</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ldk_labels</span>(landmarks[<span class="dv">47</span>], <span class="at">cex =</span> <span class="fl">1.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It is crucial to isolate and minimise all sources of non-shape variation. Here, we chose to normalize landmarks using full generalized Procrustes superimposition.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>ldkPro <span class="ot">&lt;-</span> <span class="fu">fgProcrustes</span>(landmarks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>iteration:  1   gain: 30191 
+iteration:  2   gain: 0.35722 
+iteration:  3   gain: 0.20759 
+iteration:  4   gain: 0.0038577 
+iteration:  5   gain: 0.13585 
+iteration:  6   gain: 0.073892 
+iteration:  7   gain: 0.012701 
+iteration:  8   gain: 0.00013458 
+iteration:  9   gain: 0.0037602 
+iteration:  10  gain: 0.0079995 
+iteration:  11  gain: 0.0057821 
+iteration:  12  gain: 0.00022625 
+iteration:  13  gain: 0.0028557 
+iteration:  14  gain: 0.002723 
+iteration:  15  gain: 0.0013234 
+iteration:  16  gain: 6.1681e-05 
+iteration:  17  gain: 0.00059169 
+iteration:  18  gain: 0.00064329 
+iteration:  19  gain: 0.00034857 
+iteration:  20  gain: 2.0708e-05 
+iteration:  21  gain: 0.00015537 
+iteration:  22  gain: 0.00016569 
+iteration:  23  gain: 8.8604e-05 
+iteration:  24  gain: 6.2027e-06 
+iteration:  25  gain: 3.8281e-05 
+iteration:  26  gain: 4.1709e-05 
+iteration:  27  gain: 2.2708e-05 
+iteration:  28  gain: 1.8385e-06 
+iteration:  29  gain: 9.5789e-06 
+iteration:  30  gain: 1.0559e-05 
+iteration:  31  gain: 5.8062e-06 
+iteration:  32  gain: 5.3133e-07 
+iteration:  33  gain: 2.3863e-06 
+iteration:  34  gain: 2.6689e-06 
+iteration:  35  gain: 1.4849e-06 
+iteration:  36  gain: 1.513e-07 
+iteration:  37  gain: 5.9488e-07 
+iteration:  38  gain: 6.7471e-07 
+iteration:  39  gain: 3.7962e-07 
+iteration:  40  gain: 4.2534e-08 
+iteration:  41  gain: 1.482e-07 
+iteration:  42  gain: 1.7053e-07 
+iteration:  43  gain: 9.7028e-08 
+iteration:  44  gain: 1.184e-08 
+iteration:  45  gain: 3.691e-08 
+iteration:  46  gain: 4.3091e-08 
+iteration:  47  gain: 2.4794e-08 
+iteration:  48  gain: 3.2661e-09 
+iteration:  49  gain: 9.1882e-09 
+iteration:  50  gain: 1.0886e-08 
+iteration:  51  gain: 6.3335e-09 
+iteration:  52  gain: 8.9483e-10 
+iteration:  53  gain: 2.2865e-09 
+iteration:  54  gain: 2.7429e-09 
+iteration:  55  gain: 1.6263e-09 
+iteration:  56  gain: 2.4261e-10 
+iteration:  57  gain: 5.6991e-10 
+iteration:  58  gain: 6.9235e-10 
+iteration:  59  gain: 4.1575e-10 
+iteration:  60  gain: 6.8553e-11 </code></pre>
+</div>
+</div>
+<p>We can illustrate the Procrustes adjustment by looking at the superimposition of the landmarks of all images before and after the generalized Procrustes superimposition.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stack</span>(landmarks, <span class="at">title=</span><span class="st">"before"</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stack</span>(ldkPro, <span class="at">title=</span><span class="st">"after"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now we have (hopefully) isolated the shape variation in our data, we can summarise it using principal components analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute PCA for the landmarks coordinates  </span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>pcaLA <span class="ot">&lt;-</span> <span class="fu">PCA</span>(ldkPro)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To improve comparability between approaches, we will multiply the second PC loadings by -1. This operation doesn’t affect the distribution of points.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#adjust sign of PC2</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>pcaLA<span class="sc">$</span>x[,<span class="dv">2</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaLA<span class="sc">$</span>x[,<span class="dv">2</span>]</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>pcaLA<span class="sc">$</span>rotation[,<span class="dv">2</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaLA<span class="sc">$</span>rotation[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now visualise the morphospace.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the morphological space defined by PC1 and PC2</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaLA, <span class="at">col=</span>colF, <span class="at">cex=</span><span class="fl">1.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The grey dots are the reconstructed configurations of landmarks from the loadings on the PCs. These give us some idea of which fish shapes correspond to which regions. Each colored dot represents one shape located in the morphospace, and is colored by family. As indicated by the axes labels, the first PC explains 66% of the variance, the second and third PCs capture 11% and 6% respectively.</p>
+<p>A closer look at the deformation grids (remember those?) along the PCs can help their interpretation. We can visualize the contribution of the three first PCs using a custom function, PCldkContrib.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load function</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>PCldkContrib <span class="ot">&lt;-</span> <span class="cf">function</span>(pca, ldk, <span class="at">nax =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">seqsd =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">linex=</span><span class="fl">0.5</span>, <span class="at">liney=</span><span class="dv">1</span>){</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  list2arr <span class="ot">&lt;-</span> <span class="cf">function</span>(li){</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>    ar <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim=</span><span class="fu">c</span>(<span class="fu">dim</span>(li[[<span class="dv">1</span>]]), <span class="fu">length</span>(li)))</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(li)){</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>      ar[,,i] <span class="ot">&lt;-</span> li[[i]]</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(ar)</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  cons <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">list2arr</span>(ldk<span class="sc">$</span>coo), <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), mean)</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="fu">length</span>(nax), <span class="fu">length</span>(seqsd)), <span class="at">oma=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> nax){</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> seqsd){</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>      sd.i <span class="ot">&lt;-</span> cons<span class="sc">+</span> <span class="fu">matrix</span>(pca<span class="sc">$</span>rotation[, i]<span class="sc">*</span>j<span class="sc">*</span><span class="fu">sd</span>(pca<span class="sc">$</span>x[, i]), <span class="at">ncol=</span><span class="dv">2</span>)</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tps_grid</span>(cons, sd.i, <span class="at">shp =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">points</span>(sd.i, <span class="at">pch=</span><span class="dv">20</span>, <span class="at">col=</span><span class="st">"black"</span>)</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (j<span class="sc">==</span>seqsd[<span class="dv">1</span>]){</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mtext</span>(<span class="fu">paste</span>(<span class="st">"PC"</span>, i), <span class="at">side =</span> <span class="dv">2</span>, <span class="at">line =</span> liney, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i<span class="sc">==</span>nax[<span class="fu">length</span>(nax)]){</span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>        sgtxt <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(j<span class="sc">&lt;</span><span class="dv">0</span>, <span class="st">"-"</span>, <span class="st">"+"</span>)</span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>        addtxt <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(j<span class="sc">==</span><span class="dv">0</span>, <span class="st">""</span>, <span class="fu">paste</span>(sgtxt, <span class="fu">abs</span>(j), <span class="st">"sd"</span>))</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mtext</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, addtxt), <span class="at">side =</span> <span class="dv">1</span>, <span class="at">line =</span> linex, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a><span class="co"># run function</span></span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">cex=</span><span class="fl">1.5</span>)</span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a><span class="fu">PCldkContrib</span>(pcaLA, ldkPro, <span class="at">nax =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">liney=</span><span class="dv">1</span>, <span class="at">linex=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This lets us evaluate the information content of the first three principal components, just as we did with the traditional morphometrics.</p>
+<p>The first component describes the elongation of the body and head depth, and caudal peduncle. This observation is based on the overall polygon bounded by the extreme landmarks (landmarks 2, 3, 5, 6, and 8). Additionally, the landmarks of the head (landmarks 1-3 and 11-12) are further apart in fish with a negative loading on PC1 and narrow on the other side. From left to right, the landmarks of the eye (11+12) come closer to the landmarks of the mouth (1+2), the dorsal fin insertion (3) and the anal fin insertion (8) drift to a more posterior position, and the landmarks around the caudal peduncle (4-7) become broader.</p>
+<p>The second component highlights the eye and mouth, as well as the pectoral-anal fin distance, and variance in the caudal peduncle. In fish with positive scores on PC2, the landmarks of the mouth (1+2) are closer to the landmarks of the eye (11+12) than in fish with negative scores. Additionally, the pectoral fin (landmarks 9+10) is closer to the anal fin (8) in fish with negative scores and the angle between these two fins is steeper. Fish with negative scores tend to have a more trapezoid caudal peduncle (landmarks 4-7), while the caudal peduncle from fish with positive scores are more straight.</p>
+<p>The third component is about the eye size, the mouth-pectoral fin relation, and the caudal peduncle. Fish with negative scores on PC3 have larger eyes, i.e.&nbsp;a higher distance between landmarks 11 and 12, compared to fish with positive scores on PC3. The mouth (landmarks 1+2) and the pectoral fin (landmarks 9-10) are at the same vertical level in fish with positive scores, while the mouth is higher than the pectoral fin insertion in fish with negative scores on PC3. Again, a difference is found in the caudal peduncle (landmarks 4-7), which broadens along PC3.</p>
+</section>
+<section id="outline-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="outline-analysis">4.0 Outline analysis</h2>
+<p>Outline analysis (OA) describes the coordinates of points along the outline of organism through mathematical functions. The object outlines contains the outlines of 112 images of fish.</p>
+<p>To remove the size and rotation variation from the outlines, we have identified five reference landmarks: (1) ventral insertion of the caudal fin; (2) insertion of the pelvic fin; (3) snout tip; (4) anterior insertion of the dorsal fin; (5) dorsal insertion of the caudal fin. The third landmark (snout tip) is used as the starting point of the outline.</p>
+<p>We can visualize the outline and their landmarks, using the same image of Scarus chameleon</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here we plot the outline of Scarus chameleon</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 47th image of our dataset</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coo_plot</span>(outlines[<span class="dv">47</span>], <span class="at">xy.axis=</span><span class="cn">FALSE</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the landmarks position</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(outlines[<span class="dv">47</span>][outlines<span class="sc">$</span>ldk[[<span class="dv">47</span>]],], <span class="at">pch=</span><span class="st">"+"</span>, </span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">col=</span><span class="st">"red"</span>, <span class="at">cex=</span><span class="dv">2</span>)</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="co"># and their label</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(outlines[<span class="dv">47</span>][outlines<span class="sc">$</span>ldk[[<span class="dv">47</span>]],], <span class="at">labels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, </span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">col=</span><span class="st">"red"</span>, <span class="at">pos=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">cex=</span><span class="fl">1.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Similar to LA, we used a full generalized Procrustes superimposition to align the images and remove differences in size and rotation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>outPro <span class="ot">&lt;-</span> <span class="fu">fgProcrustes</span>(outlines)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>iteration:  1   gain: 5000.8 
+iteration:  2   gain: 0.10477 
+iteration:  3   gain: 0.050977 
+iteration:  4   gain: 0.00044457 
+iteration:  5   gain: 0.034117 
+iteration:  6   gain: 0.01715 
+iteration:  7   gain: 0.0020842 
+iteration:  8   gain: 2.9219e-06 
+iteration:  9   gain: 0.00044533 
+iteration:  10  gain: 0.0015409 
+iteration:  11  gain: 0.0012028 
+iteration:  12  gain: 2.2324e-05 
+iteration:  13  gain: 0.00062021 
+iteration:  14  gain: 0.00056426 
+iteration:  15  gain: 0.00026198 
+iteration:  16  gain: 5.7518e-06 
+iteration:  17  gain: 0.000123 
+iteration:  18  gain: 0.0001306 
+iteration:  19  gain: 6.8882e-05 
+iteration:  20  gain: 1.9524e-06 
+iteration:  21  gain: 3.2755e-05 
+iteration:  22  gain: 3.3556e-05 
+iteration:  23  gain: 1.7253e-05 
+iteration:  24  gain: 5.7965e-07 
+iteration:  25  gain: 8.0591e-06 
+iteration:  26  gain: 8.3907e-06 
+iteration:  27  gain: 4.3724e-06 
+iteration:  28  gain: 1.71e-07 
+iteration:  29  gain: 2.0219e-06 
+iteration:  30  gain: 2.1124e-06 
+iteration:  31  gain: 1.1048e-06 
+iteration:  32  gain: 4.9119e-08 
+iteration:  33  gain: 5.0471e-07 
+iteration:  34  gain: 5.3088e-07 
+iteration:  35  gain: 2.7934e-07 
+iteration:  36  gain: 1.3901e-08 
+iteration:  37  gain: 1.2613e-07 
+iteration:  38  gain: 1.3347e-07 
+iteration:  39  gain: 7.0611e-08 
+iteration:  40  gain: 3.8844e-09 
+iteration:  41  gain: 3.1511e-08 
+iteration:  42  gain: 3.3554e-08 
+iteration:  43  gain: 1.7844e-08 
+iteration:  44  gain: 1.0779e-09 
+iteration:  45  gain: 7.8753e-09 
+iteration:  46  gain: 8.4329e-09 
+iteration:  47  gain: 4.5097e-09 
+iteration:  48  gain: 2.949e-10 
+iteration:  49  gain: 1.9663e-09 
+iteration:  50  gain: 2.1179e-09 
+iteration:  51  gain: 1.1413e-09 
+iteration:  52  gain: 8.2707e-11 </code></pre>
+</div>
+</div>
+<p>We can visualize how the Procrustes adjustment improved the comparability of the outlines by looking at the superimposition of the outlines before and after Procrustes adjustment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stack</span>(outlines, <span class="at">title=</span><span class="st">"before"</span>)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stack</span>(outPro, <span class="at">title=</span><span class="st">"after"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now we perform an elliptical Fourier analysis (EFA). The main idea of EFA is to translate the outline into two periodic functions in x and y, that can be decomposed by Fourier transforms.</p>
+<p>The first step is to figure out how many harmonics are needed to describe the outlines.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">calibrate_harmonicpower_efourier</span>(outPro, <span class="at">nb.h=</span><span class="dv">100</span>)<span class="sc">$</span>gg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>With 15 harmonics, 99% of the shape is correctly described. So we will conduct Elliptical Fourier analysis with 15 harmonics (nb.h =15).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>fish_efa <span class="ot">&lt;-</span> <span class="fu">efourier</span>(outPro, <span class="at">norm =</span> <span class="cn">FALSE</span>, <span class="at">nb.h =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The harmonic coefficients of the 15 harmonics can be treated as shape variables. As such, we can summarise the variation across them through PCA.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Run a PCA</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>pcaOA <span class="ot">&lt;-</span> <span class="fu">PCA</span>(fish_efa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Again, we will adjust the signs of the resulting PC loadings by multiplying them by -1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#adjust sign of PC1</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>pcaOA<span class="sc">$</span>x[,<span class="dv">1</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaOA<span class="sc">$</span>x[,<span class="dv">1</span>]</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>pcaOA<span class="sc">$</span>rotation[,<span class="dv">1</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaOA<span class="sc">$</span>rotation[,<span class="dv">1</span>]</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a><span class="co">#adjust sign of PC3</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>pcaOA<span class="sc">$</span>x[,<span class="dv">3</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaOA<span class="sc">$</span>x[,<span class="dv">3</span>]</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>pcaOA<span class="sc">$</span>rotation[,<span class="dv">3</span>]<span class="ot">&lt;-</span> <span class="sc">-</span>pcaOA<span class="sc">$</span>rotation[,<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And now we can visualise the morphospace.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Visualize the morphospace</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaOA, <span class="at">col=</span>colF, <span class="at">cex =</span> <span class="fl">1.5</span>, </span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">range</span>(pcaOA<span class="sc">$</span>x[,<span class="dv">1</span>]),</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim=</span><span class="fu">range</span>(pcaOA<span class="sc">$</span>x[,<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The grey fish shapes are theoretical shapes estimated at regular intervals on the factorial plane. The location of each point is based on the loading of the harmonics on each component. Each represents a single outline and are once again colored by family. As indicated by the axis labels, the first PC explains 39% of the variance, the second and third PCs capture 20% and 16% respectively.</p>
+<p>Looking at the variation of shapes along the PCs can help their interpretation. We can visualize the contribution of the three first PCs:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">PCcontrib</span>(pcaOA, <span class="at">nax =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="at">gap =</span> <span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: `mutate_()` was deprecated in dplyr 0.7.0.
+ℹ Please use `mutate()` instead.
+ℹ See vignette('programming') for more help
+ℹ The deprecated feature was likely used in the Momocs package.
+  Please report the issue at &lt;https://github.com/MomX/Momocs/issues&gt;.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The first component describes the elongation of the body and the anal fin position. The overall shape shifts from an elongated ellipse to a near-circle. Linked to that, the gap between the pelvic and the anal fin is greater in the elongated fish than in the rounded.</p>
+<p>The second component highlights the development of the caudal fin as well as the head shape, including the position of the mouth. The caudal fin is concave for individuals with negative scores and rather straight or convex for positively-scored individuals. The head varies from a deeper but shorter head with a mouth located further to the bottom of the head to a pointed head with a centered mouth.</p>
+<p>The third component describes the size of the fins. The fins of fish with negative scores on this axis were relatively more developed than fish with positive scores. The strongest difference occurred in the pelvic fin, with negative scores capturing a highly distinct pelvic fin and the positive scores a smaller pelvic fin situated closer to the body.</p>
+</section>
+<section id="morphospace-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="morphospace-comparison">5.0 Morphospace comparison</h2>
+<p>Momocs supports a variety of methods for comparing different types of shape analysis. First, we concentrate on the PCs themselves. We will compute a correlation matrix (using Pearson’s correlation coefficient) to investigate whether the principal components of each method capture the same morphological variability among individuals. Then we will also investigate the degree of separation in morphospace between known taxonomic and functional groups.</p>
+<section id="correlation-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-matrix">5.1 Correlation matrix</h3>
+<p>Computing a correlation matrix gives us the opportunity to compare whether PCs describe the same variance, i.e.&nbsp;we can answer the question: are they highly correlated?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">cbind</span>(pcaTM<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], </span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>             pcaLA<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], </span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>             pcaOA<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>])</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(res)<span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"TM"</span>, <span class="st">"LA"</span>, <span class="st">"OA"</span>), <span class="at">each=</span><span class="dv">3</span>), </span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC3"</span>), <span class="dv">3</span>), <span class="at">sep=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>corrplot<span class="sc">::</span><span class="fu">corrplot.mixed</span>(<span class="fu">cor</span>(res), <span class="at">upper=</span><span class="st">"number"</span>, <span class="at">lower=</span><span class="st">"ellipse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The correlation matrix is divided into the correlation values (upper right) and ellipses derived from scatterplots (bottom left). Blue values and ellipses indicate positive correlations, red ones indicate negative correlations. The intensity of the color reflects the strength of the correlation.</p>
+<p>The strongest correlation is found between the first PCs of TM and LA, both of which are highly correlated with the first PC generated through OA. This correlation reflects the main morphological variation of nominally herbivorous coral reef fish, which is linked to body elongation. Interestingly, OA separates the information of elongation across 2 components, whereas the first PCs of TM and LA correlated additionally with PC2 of OA. The correlation of the third PCs of TM and OA, and the PC2 of LA highlights variances in fin shapes, covering the dorsal, pectoral and anal fin.</p>
+</section>
+<section id="differentiation-of-taxonomic-groups" class="level3">
+<h3 class="anchored" data-anchor-id="differentiation-of-taxonomic-groups">5.2 Differentiation of taxonomic groups</h3>
+<p>A second way to compare morphometric methods is to compare their ability to capture the taxonomic grouping of the fish based on their morphology. Here we use the taxonomic unit “family”:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">2</span>))</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="co">#TM</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaTM, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">eigen =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaTM, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">eigen =</span> <span class="cn">FALSE</span>, <span class="at">yax =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co">#LA</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaLA, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">morphospace =</span> <span class="cn">FALSE</span>, <span class="at">eigen =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaLA, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">eigen =</span> <span class="cn">FALSE</span>, <span class="at">morphospace =</span> <span class="cn">FALSE</span>, <span class="at">yax =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co">#OA</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaOA, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">morphospace =</span> <span class="cn">FALSE</span>, <span class="at">eigen =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pcaOA, <span class="at">fac=</span>traits<span class="sc">$</span>family, <span class="at">eigen =</span> <span class="cn">FALSE</span>, <span class="at">morphospace =</span> <span class="cn">FALSE</span>, <span class="at">yax =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>will be deprecated soon, see ?plot_PCA</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="Analysing_landmark_and_outline_data_using_Momocs_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The methods discriminate between families. The family Acanthuridae is displayed in red, Scaridae in blue, and Siganidae in green. A continuum from parrotfish (Scaridae) to rabbitfish (Siganidae), to surgeonfish (Acanthuridae) is detected by all three methods. The family Acanthuridae is relatively widespread using OA, which can be explained by the fact that OA describes variance in elongation across both PC1 and PC2, while TM and LA describe it across PC1 alone. Additionally, the detection of the highly curved caudal fin (e.g.&nbsp;genus Acanthurus) spreads the family across the morphospace. The family Siganidae is separated from the Acanthuridae by the second and third PC. OA shows most overlap of groups. Also TM shows overlap between Acanthuridae and Siganidae. LA results in the most distinct groups with no overlap.</p>
+<p>These is a really great demonstration of how improved resolution can change our perception of disparity.</p>
+</section>
+<section id="quantification-of-differentiation" class="level3">
+<h3 class="anchored" data-anchor-id="quantification-of-differentiation">5.3 Quantification of differentiation</h3>
+<p>In addition to visual interpretations with the convex hull in morphospace, we can quantify the degree of differentiation among taxonomic groups by calculating their silhouette value. The silhouette value is based on the difference between the average distance within groups (their cohesion or density) and the average distances between groups (their separation). The silhouette value ranges from -1 to +1, with higher values indicating a high degree of separation.</p>
+<p>Let’s start by calculating the silhouette value for the traditional morphometrics data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Transform family into categorical numbers</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>fam <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(traits<span class="sc">$</span>family)</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Compute the silhouette for each morphospace</span></span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>sTM <span class="ot">&lt;-</span> cluster<span class="sc">::</span><span class="fu">silhouette</span>(fam, <span class="fu">dist</span>(pcaTM<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]))</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>sLA <span class="ot">&lt;-</span> cluster<span class="sc">::</span><span class="fu">silhouette</span>(fam, <span class="fu">dist</span>(pcaLA<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]))</span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>sOA <span class="ot">&lt;-</span> cluster<span class="sc">::</span><span class="fu">silhouette</span>(fam, <span class="fu">dist</span>(pcaOA<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]))</span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Average silhouette value for TM    </span></span>
+<span id="cb79-10"><a href="#cb79-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sTM)<span class="sc">$</span>avg.width</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4407447</code></pre>
+</div>
+</div>
+<p>And now the landmark data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Average silhouette value for LA    </span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sLA)<span class="sc">$</span>avg.width</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6520176</code></pre>
+</div>
+</div>
+<p>Finally, the outline data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Average silhouette value for OA    </span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sOA)<span class="sc">$</span>avg.width</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4278421</code></pre>
+</div>
+</div>
+<p>The silhouette values support what the plots are showing - that all methods are able to differentiate families in morphospace. Any value above 0.4 is considered high. In this case, LA shows the highest separation among families with a silhouette of 0.65.</p>
+<p>Why not try these analyses again with a different grouping scheme? Perhaps one based on genus? All you need to do is add another column to the traits object denoting genera.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
