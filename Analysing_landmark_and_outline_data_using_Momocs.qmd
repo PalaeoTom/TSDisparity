@@ -15,6 +15,16 @@ Quitzau, M., Frelat, R., Bonhomme, V., Möllmann, C., Nagelkerke, L., & Bejarano
 
 ### 1.1 Load data and library
 
+First, check you have momocs installed.
+
+```{r}
+if(length(c("Momocs")[!c("Momocs") %in% installed.packages()[,"Package"]]) > 0){
+  install.packages(c("Momocs")[!c("Momocs") %in% installed.packages()[,"Package"]])
+}
+```
+
+Now load momocs and read in the data.
+
 ```{r}
 library(Momocs)
 # move to wherever you have saved the datasets folder
