@@ -174,7 +174,7 @@ char.diff returns a matrix of subclass char.diff. As such, the output can handil
 dispR.mord.dist <- as.dist(dispR.mord)
 ```
 
-char.diff allows you to treat all character scores as character tokens by changing the argument 'translate' to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e. all that will matter during distance metric calculation is whether scores match or not). 
+char.diff allows you to treat all character scores as character tokens by changing the argument 'translate' to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e. all that will matter during distance metric calculation is whether scores match or not). You can also apply transformations to the result distance matrix by submitting functions to the "correction" argument.
 
 it also allows you add special tokens to a matrix and specify special behaviors for them. For example, let's add some inapplicables coded as dashes.
 
