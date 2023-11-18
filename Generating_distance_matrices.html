@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Smith">
+
+<title>Generating distance matrices</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Generating_distance_matrices_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Generating_distance_matrices_files/libs/quarto-html/quarto.js"></script>
+<script src="Generating_distance_matrices_files/libs/quarto-html/popper.min.js"></script>
+<script src="Generating_distance_matrices_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Generating_distance_matrices_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Generating_distance_matrices_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Generating_distance_matrices_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Generating_distance_matrices_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Generating_distance_matrices_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Generating_distance_matrices_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Generating distance matrices</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Thomas Smith </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1.0 Introduction</h2>
+<p>This tutorial will introduce you to the various functions you can use to generate distance matrices. We will apply these to a categorical disparity dataset, as this is their primary use in analyses of disparity. However, you can derive distance matrices from traditional morphometric data (any distance metric that will handle continuous values will work), and both landmark and outline data using generalized Procrustes superimposition (most GPS functions will output a Procrustes distance matrix, which you can analyse). However, the application of this step will reduce the amount of information subsequent ordinations will possess (i.e.&nbsp;you won’t be able to directly infer phenotypes from the position of points in morphospace) so it is not the preferred approach in analyses of continuous data.</p>
+<section id="load-packages" class="level3">
+<h3 class="anchored" data-anchor-id="load-packages">1.1 Load packages</h3>
+<p>We will generate distance matrices using base R, Vegan, dispRity, and Claddis. Let’s make sure the latter packages are installed and load them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="base-r" class="level2">
+<h2 class="anchored" data-anchor-id="base-r">2.0 Base R</h2>
+<p>Let’s start simple with base R. First, generate a toy dataset with 10 samples coded for 10 binary characters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dv">100</span>, <span class="at">replace =</span> T), <span class="at">nrow =</span> <span class="dv">10</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Species_"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"C"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Looks like something you might collect, right?</p>
+<p>Base R can convert this data matrix into a distance matrix using the function dist.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dist.Euc <span class="ot">&lt;-</span> <span class="fu">dist</span>(data, <span class="at">method =</span> <span class="st">"euclidean"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>By default, this produces a ‘dist’ object, which is compatible with a variety of functions, most importantly the Vegan ordination methods. It is also a more efficient form of data storage than the alternative (a standard matrix object). However, it is not as intuitive. We can convert dist objects to matrix objects using as.matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dist.Euc <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dist.Euc)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dist.Euc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix" "array" </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dist.Euc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These matrices can be converted back to dist objects using as.dist.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dist.Euc <span class="ot">&lt;-</span> <span class="fu">as.dist</span>(dist.Euc)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dist.Euc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "dist"</code></pre>
+</div>
+</div>
+<p>Unfortunately, the dist function is limited in the distance metrics it can calculate. See the list below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>?dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Of those it can, only the raw Euclidean distance is used in disparity analyses, and even then somewhat irregularly. This is because the function cannot accommodate missing data (commonplace in disparity analyses). If there are any missing data entries in your data matrix, it will simply ignore that character during distance calculation, which is not ideal! As such, we need access to other distance metrics. For that, we need other packages (unless you want to calculate them yourself).</p>
+</section>
+<section id="vegan" class="level2">
+<h2 class="anchored" data-anchor-id="vegan">3.0 Vegan</h2>
+<p>Vegan gives us access to the Gower and Chi-Squared distances. Gower we use regularly in disparity analysis. Chi-squared not really, as it is only applicable to frequency data. However, we will touch on some methods of ordination that employ this later on so it’s worth taking a peek.</p>
+<p>Let’s use our data object from before.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: permute</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>This is vegan 2.6-4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vegdist.Gower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"gower"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vegdist.altGower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"altGower"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>vegdist.chisq <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>All are dist objects, as with the base R function dist. This is because vegdist is designed to be a one-for-one replacement. Try converting these distance matrices back to regular matrices and seeing how they compare to the Euclidean distance matrix we generated using the base R dist function.</p>
+<p>Notice how there are two versions of the Gower distance, “gower” and “altGower” and that they are subtly different? This is because the standard Gower distance takes into account double-zeros when the summed differences are divided by the number of comparable characters, whereas the alternative form of the Gower distance does not. This means that for pairs of taxa with double-zeros, there alternate Gower distance will be higher than their regular Gower distance. For more information, see the documentation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>?vegdist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="claddis" class="level2">
+<h2 class="anchored" data-anchor-id="claddis">4.0 Claddis</h2>
+<p>Claddis is a little slow and idiosyncratic. However, up until recently, it was the only R package that included the generalised Euclidean distance and maximum observable rescaled distance as options. Fortunately, dispRity now allows us to do this. It was also the first package built specifically for categorical disparity analysis. While I tend to shy away from it these days, its good to get a feel for it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Claddis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ape</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: phytools</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: maps</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'phytools'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:vegan':
+
+    scores</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: strap</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: geoscale</code></pre>
+</div>
+</div>
+<p>Let’s load an example dataset (Claddis requires a specific data structure).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(day_2016)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(day_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "cladisticMatrix"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(day_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cladistic matrix containing 17 taxa and 37 continuous and standard type characters (in 2 matrix blocks of 3 and 34 characters, respectively), of which:
+  29 are unordered,
+   5 are ordered,
+   3 are continuous, and
+   0 are step-matrix characters
+All non-continuous characters are weighted 1.</code></pre>
+</div>
+</div>
+<p>Objects of class cladisticMatrix have two components by default: a ‘topper’ and a ‘matrix’ object which specifies a great deal of meta-data about the matrices (weightings, orderings, data types, maximum and minimum values and so forth). You can can convert a regular data matrix into a cladisticMatrix with build_cladistic_matrix. However, bear in mind that the matrix must only contain character data for this to work.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># convert numeric matrix to character matrix</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>char.data <span class="ot">&lt;-</span> <span class="fu">apply</span>(data, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), as.character)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># now convert to cladisticMatrix - setting all characters to unordered.</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>clad.data <span class="ot">&lt;-</span> <span class="fu">build_cladistic_matrix</span>(char.data, <span class="at">ordering =</span> <span class="fu">rep</span>(<span class="st">"unord"</span>,<span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can specify most of the meta-data that will be added to your Claddis object. Take a look through the documentation to learn more.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>?build_cladistic_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Back to the example provided by Claddis! In this case, this dataset contains two matrices - one categorical, and one continuous. Our adherence to the golden rules of measurement theory means we cannot analyse these data together, so let’s drop the three continuous characters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>day_2016[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s derive some distance matrices. Claddis gives us access to four distance metrics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>clad.RED <span class="ot">&lt;-</span> <span class="fu">calculate_morphological_distances</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"red"</span>, <span class="at">distance_transformation =</span> <span class="st">"none"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>clad.GED <span class="ot">&lt;-</span> <span class="fu">calculate_morphological_distances</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"ged"</span>, <span class="at">distance_transformation =</span> <span class="st">"none"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>clad.Gower <span class="ot">&lt;-</span> <span class="fu">calculate_morphological_distances</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"gc"</span>, <span class="at">distance_transformation =</span> <span class="st">"none"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>clad.MORD <span class="ot">&lt;-</span> <span class="fu">calculate_morphological_distances</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"mord"</span>, <span class="at">distance_transformation =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The result is a list with three elements: the first a string specifying the distance metric used, the second the distance matrix itself, and the third a matrix specifying how many characters could be compared (i.e.&nbsp;both contained data) for each pair of taxa.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(clad.Gower<span class="sc">$</span>distance_matrix)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(clad.Gower<span class="sc">$</span>comparable_character_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that you can transform your distances using calculate_morphological_distances. This isn’t necessary when a distance matrix is based on a complete dataset (i.e.&nbsp;no missing data) or you simply intend to quantify disparity using pairwise distances. However, if your intention is to ordinate your data using principal coordinate analysis, the resulting ordination will be made approximately Euclidean if a square root transformation is applied. This can be done by changing the distance_transformation argument from “none” to “sqrt”. We will do this later when we start ordinating our data.</p>
+<p>calculate_morphological_distances also offers ways in which to handle polymorphisms, inapplicables, uncertainities, and character dependencies.</p>
+<p>The presence of polymorphisms, coded (01), and uncertainties, coded {01}, probably means you need to revise your character list. You shouldn’t really be using ambiguous characters that can necessitate such unusual coding strategies in disparity analysis.</p>
+<p>Inapplicables (i.e.&nbsp;when a character is absent because it is contingent on another character which is also missing - usually coded as dashes or NAs) are usually dealt with in one of three ways. Either all character scores are increased by 1 and the dashes converted into 0, all the inapplicables are simply treated as absences (dashes are converted to 1), or they are treated as missing (coded as gaps or ’?’s). The most logical solution is to treat them as any other absence (this can be done before the distance matrix is derived by recoding).</p>
+<p>Claddis does offer a fourth option based on the work of Melanie Hopkins and Katherine St.&nbsp;John, which actually takes into account the character dependencies that lead to inapplicable character scores through character weighting. However, this has not seen much usage. If you’re interested you can read the article: http://doi.org/10.1098/rspb.2018.1784</p>
+<p>And the Claddis calculate_morphological_distance documentation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>?calculate_morphological_distances</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="disprity" class="level2">
+<h2 class="anchored" data-anchor-id="disprity">5.0 dispRity</h2>
+<p>As I mentioned before, Claddis was the only R package built for the sole purpose of categorical disparity analysis until dispRity came along. Let’s try it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dispRity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>       --- dispRity package ---
+This is the CRAN release version (1.7.0) of the package.
+For news, vignettes and future releases,
+visit https://github.com/TGuillerme/dispRity</code></pre>
+</div>
+</div>
+<p>Let’s use our toy dataset. One thing to bear in mind - dispRity calculates the distances between columns, not rows, by default. However, this is not a problem for us - we’ll just set argument ‘by.col’ to FALSE.</p>
+<p>char.diff supports a variety of different distance metrics but the key ones are the Hamming distance (“hamming”), which is equivalent to the Gower distance when dealing with categorical data, the raw Euclidean distance (“euclidean”), and the maximum observable rescaled distance (“mord”).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>dispR.mord <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>dispR.euc <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"euclidean"</span>, <span class="at">by.col =</span> F)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>dispR.hamming <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"hamming"</span>, <span class="at">by.col =</span> F)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(dispR.mord)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix"    "char.diff"</code></pre>
+</div>
+</div>
+<p>char.diff returns a matrix of subclass char.diff. As such, the output can handily be converted into a ‘dist’ object using the as.dist function for compatibility with other base R and vegan functions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>dispR.mord.dist <span class="ot">&lt;-</span> <span class="fu">as.dist</span>(dispR.mord)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>char.diff allows you to treat all character scores as character tokens by changing the argument ‘translate’ to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e.&nbsp;all that will matter during distance metric calculation is whether scores match or not).</p>
+<p>it also allows you add special tokens to a matrix and specify special behaviors for them. For example, let’s add some inapplicables coded as dashes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>data[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,<span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="st">"-"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the ‘inapplicable’ category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e.&nbsp;both are treated as missing), and polymorphisms and uncertainties return all present states:</p>
+<p>missing = function(x,y) NA inapplicable = function(x,y) NA polymorphism = function(x,y) strsplit(x, split = “\&amp;”)[[1]] uncertainty = function(x,y) strsplit(x, split = “\/”)[[1]]</p>
+<p>To change this, you must submit a function as a named element of a list (example below) which only takes x,y as inputs and only returns a single value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>dispR.mord.def <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>dispR.mord.mod <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F, <span class="at">special.behaviours =</span> <span class="fu">list</span>(<span class="at">inapplicable =</span> <span class="cf">function</span>(x,y) <span class="fu">return</span>(<span class="st">"0"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s take a look at the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.def)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Different values highlight that it is working! char.diff is a very flexible, powerful function that empowers you to make your analyses your own. I encourage you to play around with it and build your pipelines around it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>?char.diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,215 @@
+---
+title: "Generating distance matrices"
+author: "Thomas Smith"
+format: html
+editor: visual
+---
+
+## 1.0 Introduction
+
+This tutorial will introduce you to the various functions you can use to generate distance matrices. We will apply these to a categorical disparity dataset, as this is their primary use in analyses of disparity. However, you can derive distance matrices from traditional morphometric data (any distance metric that will handle continuous values will work), and both landmark and outline data using generalized Procrustes superimposition (most GPS functions will output a Procrustes distance matrix, which you can analyse). However, the application of this step will reduce the amount of information subsequent ordinations will possess (i.e. you won't be able to directly infer phenotypes from the position of points in morphospace) so it is not the preferred approach in analyses of continuous data.
+
+### 1.1 Load packages
+
+We will generate distance matrices using base R, Vegan, dispRity, and Claddis. Let's make sure the latter packages are installed and load them.
+
+```{r}
+if(length(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis") %in% installed.packages()[,"Package"]]) > 0){
+  install.packages(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis") %in% installed.packages()[,"Package"]])
+}
+```
+
+## 2.0 Base R
+
+Let's start simple with base R. First, generate a toy dataset with 10 samples coded for 10 binary characters.
+
+```{r}
+data <- matrix(sample(c(0,1), 100, replace = T), nrow = 10)
+rownames(data) <- paste0("Species_",seq(1,10,1))
+colnames(data) <- paste0("C",seq(1,10,1))
+View(data)
+```
+
+Looks like something you might collect, right?
+
+Base R can convert this data matrix into a distance matrix using the function dist.
+
+```{r}
+dist.Euc <- dist(data, method = "euclidean")
+```
+
+By default, this produces a 'dist' object, which is compatible with a variety of functions, most importantly the Vegan ordination methods. It is also a more efficient form of data storage than the alternative (a standard matrix object). However, it is not as intuitive. We can convert dist objects to matrix objects using as.matrix.
+
+```{r}
+dist.Euc <- as.matrix(dist.Euc)
+class(dist.Euc)
+View(dist.Euc)
+```
+
+These matrices can be converted back to dist objects using as.dist.
+
+```{r}
+dist.Euc <- as.dist(dist.Euc)
+class(dist.Euc)
+```
+
+Unfortunately, the dist function is limited in the distance metrics it can calculate. See the list below.
+
+```{r}
+?dist
+```
+
+Of those it can, only the raw Euclidean distance is used in disparity analyses, and even then somewhat irregularly. This is because the function cannot accommodate missing data (commonplace in disparity analyses). If there are any missing data entries in your data matrix, it will simply ignore that character during distance calculation, which is not ideal! As such, we need access to other distance metrics. For that, we need other packages (unless you want to calculate them yourself).
+
+## 3.0 Vegan
+Vegan gives us access to the Gower and Chi-Squared distances. Gower we use regularly in disparity analysis. Chi-squared not really, as it is only applicable to frequency data. However, we will touch on some methods of ordination that employ this later on so it's worth taking a peek. 
+
+Let's use our data object from before.
+
+```{r}
+library(vegan)
+vegdist.Gower <- vegdist(data, method = "gower")
+vegdist.altGower <- vegdist(data, method = "altGower")
+vegdist.chisq <- vegdist(data, method = "chisq")
+```
+
+All are dist objects, as with the base R function dist. This is because vegdist is designed to be a one-for-one replacement. Try converting these distance matrices back to regular matrices and seeing how they compare to the Euclidean distance matrix we generated using the base R dist function.
+
+Notice how there are two versions of the Gower distance, "gower" and "altGower" and that they are subtly different? This is because the standard Gower distance takes into account double-zeros when the summed differences are divided by the number of comparable characters, whereas the alternative form of the Gower distance does not. This means that for pairs of taxa with double-zeros, there alternate Gower distance will be higher than their regular Gower distance. For more information, see the documentation.
+
+```{r}
+?vegdist
+```
+
+## 4.0 Claddis
+Claddis is a little slow and idiosyncratic. However, up until recently, it was the only R package that included the generalised Euclidean distance and maximum observable rescaled distance as options. Fortunately, dispRity now allows us to do this. It was also the first package built specifically for categorical disparity analysis. While I tend to shy away from it these days, its good to get a feel for it. 
+
+```{r}
+library(Claddis)
+```
+
+Let's load an example dataset (Claddis requires a specific data structure).
+
+```{r}
+data(day_2016)
+class(day_2016)
+print(day_2016)
+```
+
+Objects of class cladisticMatrix have two components by default: a 'topper' and a 'matrix' object which specifies a great deal of meta-data about the matrices (weightings, orderings, data types, maximum and minimum values and so forth). You can can convert a regular data matrix into a cladisticMatrix with build_cladistic_matrix. However, bear in mind that the matrix must only contain character data for this to work.
+
+```{r}
+# convert numeric matrix to character matrix
+char.data <- apply(data, c(1,2), as.character)
+# now convert to cladisticMatrix - setting all characters to unordered.
+clad.data <- build_cladistic_matrix(char.data, ordering = rep("unord",10))
+```
+
+You can specify most of the meta-data that will be added to your Claddis object. Take a look through the documentation to learn more.
+
+```{r}
+?build_cladistic_matrix
+```
+
+Back to the example provided by Claddis! In this case, this dataset contains two matrices - one categorical, and one continuous. Our adherence to the golden rules of measurement theory means we cannot analyse these data together, so let's drop the three continuous characters.
+
+```{r}
+day_2016[[2]] <- NULL
+```
+
+Now let's derive some distance matrices. Claddis gives us access to four distance metrics. 
+
+```{r}
+clad.RED <- calculate_morphological_distances(day_2016, distance_metric = "red", distance_transformation = "none")
+clad.GED <- calculate_morphological_distances(day_2016, distance_metric = "ged", distance_transformation = "none")
+clad.Gower <- calculate_morphological_distances(day_2016, distance_metric = "gc", distance_transformation = "none")
+clad.MORD <- calculate_morphological_distances(day_2016, distance_metric = "mord", distance_transformation = "none")
+```
+
+The result is a list with three elements: the first a string specifying the distance metric used, the second the distance matrix itself, and the third a matrix specifying how many characters could be compared (i.e. both contained data) for each pair of taxa.
+
+```{r}
+View(clad.Gower$distance_matrix)
+View(clad.Gower$comparable_character_matrix)
+```
+
+Note that you can transform your distances using calculate_morphological_distances. This isn't necessary when a distance matrix is based on a complete dataset (i.e. no missing data) or you simply intend to quantify disparity using pairwise distances. However, if your intention is to ordinate your data using principal coordinate analysis, the resulting ordination will be made approximately Euclidean if a square root transformation is applied. This can be done by changing the distance_transformation argument from "none" to "sqrt". We will do this later when we start ordinating our data. 
+
+calculate_morphological_distances also offers ways in which to handle polymorphisms, inapplicables, uncertainities, and character dependencies. 
+
+The presence of polymorphisms, coded (01), and uncertainties, coded {01}, probably means you need to revise your character list. You shouldn't really be using ambiguous characters that can necessitate such unusual coding strategies in disparity analysis.
+
+Inapplicables (i.e. when a character is absent because it is contingent on another character which is also missing - usually coded as dashes or NAs) are usually dealt with in one of three ways. Either all character scores are increased by 1 and the dashes converted into 0, all the inapplicables are simply treated as absences (dashes are converted to 1), or they are treated as missing (coded as gaps or '?'s). The most logical solution is to treat them as any other absence (this can be done before the distance matrix is derived by recoding). 
+
+Claddis does offer a fourth option based on the work of Melanie Hopkins and Katherine St. John, which actually takes into account the character dependencies that lead to inapplicable character scores through character weighting. However, this has not seen much usage. 
+If you're interested you can read the article: http://doi.org/10.1098/rspb.2018.1784
+
+And the Claddis calculate_morphological_distance documentation:
+
+```{r}
+?calculate_morphological_distances
+```
+
+## 5.0 dispRity
+As I mentioned before, Claddis was the only R package built for the sole purpose of categorical disparity analysis until dispRity came along. Let's try it.
+
+```{r}
+library(dispRity)
+```
+
+Let's use our toy dataset. One thing to bear in mind - dispRity calculates the distances between columns, not rows, by default. However, this is not a problem for us - we'll just set argument 'by.col' to FALSE.
+
+char.diff supports a variety of different distance metrics but the key ones are the Hamming distance ("hamming"), which is equivalent to the Gower distance when dealing with categorical data, the raw Euclidean distance ("euclidean"), and the maximum observable rescaled distance ("mord").
+
+```{r}
+dispR.mord <- char.diff(data, method = "mord", by.col = F)
+dispR.euc <- char.diff(data, method = "euclidean", by.col = F)
+dispR.hamming <- char.diff(data, method = "hamming", by.col = F)
+class(dispR.mord)
+```
+
+char.diff returns a matrix of subclass char.diff. As such, the output can handily be converted into a 'dist' object using the as.dist function for compatibility with other base R and vegan functions.
+
+```{r}
+dispR.mord.dist <- as.dist(dispR.mord)
+```
+
+char.diff allows you to treat all character scores as character tokens by changing the argument 'translate' to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e. all that will matter during distance metric calculation is whether scores match or not). 
+
+it also allows you add special tokens to a matrix and specify special behaviors for them. For example, let's add some inapplicables coded as dashes.
+
+```{r}
+data[sample(1:100,10)] <- "-"
+```
+
+Now let's compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the 'inapplicable' category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e. both are treated as missing), and polymorphisms and uncertainties return all present states:
+
+missing = function(x,y) NA
+inapplicable = function(x,y) NA
+polymorphism = function(x,y) strsplit(x, split = "\\&")[[1]]
+uncertainty = function(x,y) strsplit(x, split = "\\/")[[1]]
+
+To change this, you must submit a function as a named element of a list (example below) which only takes x,y as inputs and only returns a single value.
+
+```{r}
+dispR.mord.def <- char.diff(data, method = "mord", by.col = F)
+dispR.mord.mod <- char.diff(data, method = "mord", by.col = F, special.behaviours = list(inapplicable = function(x,y) return("0")))
+```
+
+Let's take a look at the results.
+
+```{r}
+View(dispR.mord.def)
+View(dispR.mord.mod)
+```
+
+Different values highlight that it is working! char.diff is a very flexible, powerful function that empowers you to make your analyses your own. I encourage you to play around with it and build your pipelines around it.
+
+```{r}
+?char.diff
+```
+
+
+
+
+
