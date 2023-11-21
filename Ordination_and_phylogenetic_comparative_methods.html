@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Smith. Phytools sections by Liam Revell, adapted by Thomas Smith">
+
+<title>Ordination and phylogenetic comparative methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/quarto.js"></script>
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/popper.min.js"></script>
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Ordination_and_phylogenetic_comparative_methods_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Ordination_and_phylogenetic_comparative_methods_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Ordination_and_phylogenetic_comparative_methods_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Ordination_and_phylogenetic_comparative_methods_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Ordination and phylogenetic comparative methods</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Thomas Smith. Phytools sections by Liam Revell, adapted by Thomas Smith </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1.0 Introduction</h2>
+<p>This tutorial will introduce you to the various functions you can use to ordinate your data outside of the Vegan package. It will also take you show you how to perform stochastic character mapping (a form of ancestral state estimation) using Phytools and how to test for phylogenetic signal in categorical and continuous data using the Geiger package.</p>
+<section id="load-packages" class="level3">
+<h3 class="anchored" data-anchor-id="load-packages">1.1 Load packages</h3>
+<p>We will generate distance matrices using base R, Vegan, dispRity, and Claddis. Let’s make sure the latter packages are installed and load them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"phytools"</span>, <span class="st">"geiger"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>, <span class="st">"caper"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"phytools"</span>, <span class="st">"geiger"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>, <span class="st">"caper"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"phytools"</span>, <span class="st">"geiger"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>, <span class="st">"caper"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"phytools"</span>, <span class="st">"geiger"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>, <span class="st">"caper"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="principal-components-analysis-by-hand" class="level3">
+<h3 class="anchored" data-anchor-id="principal-components-analysis-by-hand">1.2 Principal components analysis by hand</h3>
+<p>This may seem exhaustive but I think it’s useful to break these analyses down. Let’s generate a data matrix first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dv">100</span>, <span class="at">replace =</span> T), <span class="at">nrow =</span> <span class="dv">10</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Species_"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"C"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s get the column means so we can can see how we center our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>col.means <span class="ot">&lt;-</span> <span class="fu">apply</span>(data, <span class="dv">2</span>, mean)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># get centred matrix</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>centred.matrix <span class="ot">&lt;-</span> data</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>centred.matrix[,<span class="dv">1</span>] <span class="ot">&lt;-</span> centred.matrix[,<span class="dv">1</span>]<span class="sc">-</span>col.means[<span class="dv">1</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>centred.matrix[,<span class="dv">2</span>] <span class="ot">&lt;-</span> centred.matrix[,<span class="dv">2</span>]<span class="sc">-</span>col.means[<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Fortunately, the cov function does this step for us before computing a covariance matrix. Let’s do that now.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>covariance <span class="ot">&lt;-</span> <span class="fu">cov</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, let’s derive our eigenvectors and eigenvalues.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>eigenvalues <span class="ot">&lt;-</span> <span class="fu">eigen</span>(covariance)<span class="sc">$</span>values</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>eigenvectors <span class="ot">&lt;-</span> <span class="fu">eigen</span>(covariance)<span class="sc">$</span>vectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Almost there! We have our axes! To get the scores for our ‘species’, we need multiple our centred matrix by our eigenvector matrix (aren’t you glad we have functions to do this for us?)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get principal component scores</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we do this by getting the dot product</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>PCs <span class="ot">&lt;-</span> centred.matrix<span class="sc">%*%</span>eigenvectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s plot our ordination.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="base-r" class="level2">
+<h2 class="anchored" data-anchor-id="base-r">2.0 Base R</h2>
+<section id="principal-components-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="principal-components-analysis">2.1 Principal components analysis</h3>
+<p>Let’s start simple with base R. Ordination in base R is wonderfully simple. For principal component analysis, we can use the prcomp function. First, let’s generate a continuous dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>c.data <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">100</span>,<span class="dv">0</span>,<span class="dv">10</span>), <span class="at">nrow =</span> <span class="dv">5</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(c.data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Species_"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">1</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(c.data) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"C"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">20</span>,<span class="dv">1</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(c.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s ordinate it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(c.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This doesn’t provide the eigenvalues by default, so we’ll need to use the eigen function to acquire them (there is a unique solution to eigen-based methods, so these will match the eigenvectors of our PCA object).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>c.eigen <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">cov</span>(c.data), <span class="at">only.values =</span> T)<span class="sc">$</span>values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s convert these into relative eigenvalues so we can so how the total variance is apportioned across the different axes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(c.eigen) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"PC"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">20</span>,<span class="dv">1</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>c.eigen <span class="ot">&lt;-</span> c.eigen<span class="sc">/</span><span class="fu">sum</span>(c.eigen)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(c.eigen, <span class="at">ylab =</span> <span class="st">"Proportion of eigenvalues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Looks like the first four axes are by far the most informative, with the first two capturing over 50% of the variance together. Let’s plot these for now.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA<span class="sc">$</span>x, <span class="at">xlab =</span> <span class="fu">paste0</span>(<span class="st">"PC1 ("</span>,c.eigen[<span class="dv">1</span>]<span class="sc">*</span><span class="dv">100</span>,<span class="st">"% variance)"</span>), <span class="at">ylab =</span> <span class="fu">paste0</span>(<span class="st">"PC2 ("</span>,c.eigen[<span class="dv">2</span>]<span class="sc">*</span><span class="dv">100</span>,<span class="st">"% variance)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="principal-coordinates-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="principal-coordinates-analysis">2.2 Principal coordinates analysis</h3>
+<p>Lets generate a Euclidean distance matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s ordinate it using cmdscale (the base R function for principal coordinates analysis). Now it is worth noting that by default that cmdscale fits the data to just two axes. We don’t want this. The maximum is n-1, where n is the number of points/species. In this case, we have 10, so let’s set k to 9.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>PCoA <span class="ot">&lt;-</span> <span class="fu">cmdscale</span>(dist, <span class="at">k =</span> <span class="dv">9</span>, <span class="at">eig =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in cmdscale(dist, k = 9, eig = T): only 8 of the first 9 eigenvalues
+are &gt; 0</code></pre>
+</div>
+</div>
+<p>Let’s check the eigenvalues. Cmdscale returns them for us if eigen = TRUE.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>d.eigen <span class="ot">&lt;-</span> PCoA<span class="sc">$</span>eig</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(d.eigen) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"PC"</span>,<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>d.eigen <span class="ot">&lt;-</span> d.eigen<span class="sc">/</span><span class="fu">sum</span>(d.eigen)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(d.eigen, <span class="at">ylab =</span> <span class="st">"Proportion of eigenvalues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The variation hasn’t been summarised particularly well here, so any visualisations we derive will be limited in utility. We need to take a more quantitative approach to analysing this data (more on this soon!)</p>
+</section>
+</section>
+<section id="ape" class="level2">
+<h2 class="anchored" data-anchor-id="ape">3.0 Ape</h2>
+<p>Ape provides an alternative to cmdscale that allows you to apply the Cailliez or Lingoes correction during the ordination process. This is done through the correction argument. It also returns all of the eigenvalues and eigenvectors by default, EXCEPT for those with negative eigenvalues. As such, you have to transform your data and/or correct it each time you use this function to be sure you are not working with a misrepresentation of your data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># square root transformation</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ape.PCoA.sq <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(<span class="fu">sqrt</span>(dist), <span class="at">correction =</span> <span class="st">"none"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># square root transformation + Cailliez correction</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>ape.PCoA.C <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(<span class="fu">sqrt</span>(dist), <span class="at">correction =</span> <span class="st">"cailliez"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># square root transformation + Lingoes correction</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>ape.PCoA.L <span class="ot">&lt;-</span> <span class="fu">pcoa</span>(<span class="fu">sqrt</span>(dist), <span class="at">correction =</span> <span class="st">"lingoes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Why not try plotting them and seeing how they differ? What about from an ordination of untransformed, uncorrected data?</p>
+</section>
+<section id="claddis" class="level2">
+<h2 class="anchored" data-anchor-id="claddis">4.0 Claddis</h2>
+<p>Let’s try ordinating data in Claddis! First let’s load the library and load the dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Claddis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: phytools</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: maps</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: strap</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: geoscale</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(day_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s drop the three continuous characters as before.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>day_2016[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Claddis only supports principal coordinates analysis. However it does this all in one.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>clad.PCoA <span class="ot">&lt;-</span> <span class="fu">ordinate_cladistic_matrix</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"mord"</span>, <span class="at">distance_transformation =</span> <span class="st">"sqrt"</span>, <span class="at">correction =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following taxa had to be removed to produce a complete distance matrix: Lycaenodon_longiceps</code></pre>
+</div>
+</div>
+<p>You’ll notice we received a warning that Claddis was unable to produce a complete distance matrix (essential for ordination). We can do this ahead of time by submitting a distance matrix to the trim_matrix function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>clad.dist <span class="ot">&lt;-</span> <span class="fu">calculate_morphological_distances</span>(day_2016, <span class="at">distance_metric =</span> <span class="st">"mord"</span>, <span class="at">distance_transformation =</span> <span class="st">"sqrt"</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>trimmed.clad.dist <span class="ot">&lt;-</span> <span class="fu">trim_matrix</span>(clad.dist<span class="sc">$</span>distance_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can see the taxa that have been trimmed by accessing the “removed_taxa” element of the object produced by trim_matrix. You can isolate the new distance matrix and add it to the distance matrix object as well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>trimmed.clad.dist<span class="sc">$</span>removed_taxa</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Lycaenodon_longiceps"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>clad.dist<span class="sc">$</span>distance_matrix <span class="ot">&lt;-</span> trimmed.clad.dist<span class="sc">$</span>distance_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Anyway, back to the ordination object. Claddis calls the ape pcoa function to handle its ordination. As such, it can apply the Cailliez and Lingoes correction through the correction argument, as well as apply a square root transformation. Unfortunately, the ape pcoa function does not return the eigenvectors and eigenvalues of any negative eigenvalues that might result, so we can’t check if we need to transform our data in the first place. However, no information is lost during the square root transformation so it doesn’t hurt to apply it in all cases.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(clad.PCoA<span class="sc">$</span>values<span class="sc">$</span>Relative_eig, <span class="at">ylab =</span> <span class="st">"Proportion of eigenvalues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Claddis has a wide variety of plotting functions that allow you to generate two and three dimensional plots. The standard, plot_morphospace, allows you to plot regular plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_morphospace</span>(clad.PCoA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It allows you to add convex hulls.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define groups</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>taxon_groups <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">nonBurnetiamorpha =</span> <span class="fu">c</span>(<span class="st">"Biarmosuchus_tener"</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="st">"Hipposaurus_boonstrai"</span>, <span class="st">"Bullacephalus_jacksoni"</span>, <span class="st">"Pachydectes_elsi"</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="st">"Ictidorhinus_martinsi"</span>, <span class="st">"RC_20"</span>, <span class="st">"Herpetoskylax_hopsoni"</span>),</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="at">Burnetiamorpha =</span> <span class="fu">c</span>(<span class="st">"Lemurosaurus_pricei"</span>, <span class="st">"Lobalopex_mordax"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="st">"Lophorhinus_willodenensis"</span>, <span class="st">"Proburnetia_viatkensis"</span>, <span class="st">"Lende_chiweta"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="st">"Paraburnetia_sneeubergensis"</span>, <span class="st">"Burnetia_mirabilis"</span>, <span class="st">"BP_1_7098"</span>))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_morphospace</span>(<span class="at">pcoa_input =</span> clad.PCoA, <span class="at">plot_taxon_names =</span> F, <span class="at">taxon_groups =</span> taxon_groups, <span class="at">plot_convex_hulls =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It allows you to add trees.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define tree - you can load in a nexus file or .tre file instead of writing it manually.</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>time_tree <span class="ot">&lt;-</span> <span class="fu">read.tree</span>(<span class="at">text =</span> <span class="fu">paste0</span>(<span class="st">"(Biarmosuchus_tener:0.5,"</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="st">"(((Hipposaurus_boonstrai:3.5,(Bullacephalus_jacksoni:0.75,"</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="st">"Pachydectes_elsi:0.75):0.75):0.75,(Lemurosaurus_pricei:7.166666667,"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="st">"(Lobalopex_mordax:4.333333333,((Lophorhinus_willodenensis:3.666666667,"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="st">"(Proburnetia_viatkensis:0.8333333333,(Lende_chiweta:2,"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="st">"(Paraburnetia_sneeubergensis:1,Burnetia_mirabilis:2):1):1.833333333)"</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="st">":0.8333333333):0.8333333333,(BP_1_7098:2.25,Niuksenitia_sukhonensis:"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="st">"1.25):1.25):0.8333333333):0.8333333333):3.083333333):1.95,"</span>,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="st">"(Ictidorhinus_martinsi:15.9,(RC_20:11.6,(Herpetoskylax_hopsoni:11.3,"</span>,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="st">"Lycaenodon_longiceps:0.3):0.3):0.3):0.3):0.3);"</span>))</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># add a root.time element, specifying just that</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>time_tree<span class="sc">$</span>root.time <span class="ot">&lt;-</span> <span class="fl">269.5</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="co"># now run the ordination again, submitting the tree via argument time_tree</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>clad.PCoA <span class="ot">&lt;-</span> <span class="fu">ordinate_cladistic_matrix</span>(day_2016, <span class="at">distance_transformation =</span> <span class="st">"sqrt"</span>, <span class="at">correction =</span> <span class="st">"none"</span>, <span class="at">time_tree =</span> time_tree)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').
+
+
+Note:
+   This function is redundant with 'phytools::ancr' in situations in
+   which it should be used (symmetric Q matrices) &amp; invalid for non-
+   symmetric Q matrices (e.g., model='ARD').</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following taxa or nodes had to be removed to produce a complete distance matrix: BP_1_7098%%Niuksenitia_sukhonensis, Niuksenitia_sukhonensis</code></pre>
+</div>
+</div>
+<p>You can see a couple of taxa have been dropped for the sake of a complete distance matrix automatically. The warnings that pop up are a reflection that Claddis is slightly out of date. As such, you’ll probably want to use other methods for generating your ancestral state data and then just derive a distance matrix from a data matrix including tip and node values, ordinate it without submitting a tree, and then insert it into an object that was generating using a tree to replace the dubious PCoA scores (this is why Claddis is difficult). Anyway, let’s plot the result:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_morphospace</span>(clad.PCoA, <span class="at">plot_taxon_names =</span> F, <span class="at">taxon_groups =</span> taxon_groups, <span class="at">plot_convex_hulls =</span> <span class="cn">TRUE</span>, <span class="at">plot_internal_nodes =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>See the below help documentation to explore what the other functions can do for you:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>?plot_chronophylomorphospace</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>?plot_morphospace_stack</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>?plot_multi_morphospace</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="disprity" class="level2">
+<h2 class="anchored" data-anchor-id="disprity">5.0 dispRity</h2>
+<p>dispRity has functionality for importing data from Claddis and geomorph and ordinating it, using principal coordinates analysis and principal components analysis respectively. Let’s take a look.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dispRity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>       --- dispRity package ---
+This is the CRAN release version (1.7.0) of the package.
+For news, vignettes and future releases,
+visit https://github.com/TGuillerme/dispRity</code></pre>
+</div>
+</div>
+<section id="claddis-ordination" class="level3">
+<h3 class="anchored" data-anchor-id="claddis-ordination">5.1 Claddis ordination</h3>
+<p>Now let’s load in some Claddis data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"michaux_1989"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we ordinate!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>dispR.clad.ord <span class="ot">&lt;-</span> <span class="fu">Claddis.ordination</span>(michaux_1989, <span class="at">distance =</span> <span class="st">"mord"</span>, <span class="at">distance_transformation =</span> <span class="st">"sqrt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>dispRity doesn’t have its own plotting function. However, that just means you can use base R to plot it. There are other packages we will take a look at later on during the course.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dispR.clad.ord)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>You might have noticed the output of this function is pretty bare. This is because it passes the ordination off to cmdscale (base R function for PCoA). You should be able to pass on a request to this function to return the eigenvalues using the arg.cmdscale argument of the Claddis.ordination function, but this doesn’t seem to work consistently (might be bugged).</p>
+</section>
+<section id="geomorph-ordination" class="level3">
+<h3 class="anchored" data-anchor-id="geomorph-ordination">5.2 Geomorph ordination</h3>
+<p>Let’s load in some data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geomorph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: RRPP</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'RRPP'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dispRity':
+
+    add.tree</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: rgl</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'geomorph'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dispRity':
+
+    combine.subsets</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"plethodon"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s ordinate it (after we perform GPS).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>procrustes <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethodon<span class="sc">$</span>land)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Performing GPA
+
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |==================                                                    |  25%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |======================================================================| 100%
+
+Making projections... Finished!</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>dispR.geo.ord <span class="ot">&lt;-</span> <span class="fu">geomorph.ordination</span>(procrustes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can also ordinate a geomorph data frame (handy for compatability).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>geomorph_df <span class="ot">&lt;-</span> <span class="fu">geomorph.data.frame</span>(procrustes, <span class="at">species =</span> plethodon<span class="sc">$</span>species)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geomorph.ordination</span>(geomorph_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> ---- dispRity object ---- 
+2 customised subsets for 40 elements in one matrix:
+    species.Jord, species.Teyah.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="testing-for-phylogenetic-signal-in-discrete-and-continuous-non-landmark-data-using-geiger-and-phytools" class="level2">
+<h2 class="anchored" data-anchor-id="testing-for-phylogenetic-signal-in-discrete-and-continuous-non-landmark-data-using-geiger-and-phytools">6.0 Testing for phylogenetic signal in discrete and continuous (non-landmark) data using Geiger and Phytools</h2>
+<p>Pagel’s lambda is a robust measure of the amount of non-random variance in a dataset is explained by the associated tree. The R package phytools let’s us derive an estimate of lambda by fitting a model of phylogenetic signal to our data. This works for continuous data. Geiger let’s us derive it for discrete data. The former is particularly important, as this means you can test for phylogenetic in any ordinated data set (PC scores are continuous).</p>
+<p>Load the library. We’ll load phytools too as it will give us some data to work with.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geiger)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(phytools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="continuous-data" class="level3">
+<h3 class="anchored" data-anchor-id="continuous-data">6.1 Continuous data</h3>
+<p>Load the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"anoletree"</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"anole.data"</span>)</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="fu">name.check</span>(anoletree, anole.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "OK"</code></pre>
+</div>
+</div>
+<p>Using phytools, you can calculate Bloomberg’s K, which compares the variance of PICs to what we would espect under a Brownian motion model. K = 1 means that relatives resemble one another as much as we should expect under BM; K &lt; 1 means that there is less “phylogenetic signal” than expected under BM, while K &gt; 1 means that there is more. A significant p-value returned from phylosignal tells you that there is significant phylogenetic signal - that is, close relatives are more similar than random pairs of species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>anoleSize <span class="ot">&lt;-</span> anole.data[, <span class="dv">1</span>]</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(anoleSize) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(anole.data)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">phylosig</span>(anoletree, anoleSize, <span class="at">test =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Phylogenetic signal K : 1.69526 
+P-value (based on 1000 randomizations) : 0.001 </code></pre>
+</div>
+</div>
+<p>Now let’s calculate Pagel’s lambda. Lambda is a tree transformation that stretches tip branches relative to internal branches, making the tree more and more like a complete polytomy. If our estimated lambda = 0, then the traits are inferred to have no phylogenetic signal. Lambda = 1 corresponds to a Brownian motion model; 0 &lt; lambda &lt; 1 is in between.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">phylosig</span>(anoletree, anoleSize, <span class="at">method =</span> <span class="st">"lambda"</span>, <span class="at">test =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Phylogenetic signal lambda : 0.999927 
+logL(lambda) : 5.25315 
+LR(lambda=0) : 97.8975 
+P-value (based on LR test) : 4.40613e-23 </code></pre>
+</div>
+</div>
+<p>That is some strong phylogenetic signal! You could also achieve this by using fitContinuous in Geiger. Let’s compare this to a simple Brownian motion model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>lambdaModel <span class="ot">&lt;-</span> <span class="fu">fitContinuous</span>(anoletree, anoleSize, <span class="at">model =</span> <span class="st">"lambda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in fitContinuous(anoletree, anoleSize, model = "lambda"): 
+Parameter estimates appear at bounds:
+    lambda</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>brownianModel <span class="ot">&lt;-</span> <span class="fu">fitContinuous</span>(anoletree, anoleSize)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>lambdaModel<span class="sc">$</span>opt<span class="sc">$</span>aicc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -4.204549</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>brownianModel<span class="sc">$</span>opt<span class="sc">$</span>aicc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -6.360343</code></pre>
+</div>
+</div>
+<p>The lower the better when it comes to AIC scores, so our lambda model is a better fit for the data. You can fit all sorts of models with fitContinuous. Check out the documentation and have a think about whether you might want fit any others.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>?fitContinuous</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="discrete-data." class="level3">
+<h3 class="anchored" data-anchor-id="discrete-data.">6.2 Discrete data.</h3>
+<p>With discrete data, we need to use a different statistic, Fritz &amp; Purvis’s D. It is the sum of changes in estimated nodal values of a binary trait along edges in a phylogeny (D) provides a measure of the phylogenetic signal in that trait (Fritz and Purvis, 2010). If a trait is highly conserved, with only a basal division between two clades expressing either trait value, then the only change will be along the two daughters at the root. This will give a summed value of 1: the two differences between the root nodal value of 0.5 and the ancestors of the 1 and 0 clades. In contrast, if the trait is labile, more differences will be observed and the sum will be higher.</p>
+<p>We will calculate this using the phylo.D function from the caper package. First we will load the data and convert it to the necessay format.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caper)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: MASS</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: mvtnorm</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BritishBirds)</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>BritishBirds <span class="ot">&lt;-</span> <span class="fu">comparative.data</span>(BritishBirds.tree, BritishBirds.data, binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculate Fritz &amp; Purvis’ D</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>redPhyloD <span class="ot">&lt;-</span> <span class="fu">phylo.d</span>(BritishBirds, <span class="at">binvar=</span>Red_list)</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(redPhyloD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Calculation of D statistic for the phylogenetic structure of a binary variable
+
+  Data :  BritishBirds.data
+  Binary variable :  Red_list
+  Counts of states:  0 = 149
+                     1 = 32
+  Phylogeny :  BritishBirds.tree
+  Number of permutations :  1000
+
+Estimated D :  0.5683178
+Probability of E(D) resulting from no (random) phylogenetic structure :  0.003
+Probability of E(D) resulting from Brownian phylogenetic structure    :  0.016</code></pre>
+</div>
+</div>
+<p>The estimated D is below 1 and the probablility of this pattern emerging from Brownian phylogenetic structure is higher than it being random. This indicates that phylogenetic signal is at least partially responsible or the variance in the data.</p>
+</section>
+</section>
+<section id="ancestral-state-estimation-using-phytools" class="level2">
+<h2 class="anchored" data-anchor-id="ancestral-state-estimation-using-phytools">7.0 Ancestral state estimation using Phytools</h2>
+<p>Phytools supports a wide variety of ancestral state estimation. There are plenty to choose from and I’d do some reading around to determine which models will work best for you. I’ve stored a couple of tutorials in the session folder for the estimation of continuous ancestral states under Brownian motion and discrete ancestral states under the Mk model as HTML documents. It might be worth looking through these in your spare time. In the meantime, we’ll go through ancr, a function which lets you estimate ancestral states under almost any model, and Bayesian stochastic character mapping.</p>
+<p>As stated previously, you can should estimate your ancestral states prior to ordination and distance matrix derivation (if applicable), add these values to your main data matrix, and then just analyse the supplemented matrix as a normal matrix. Note that geomorph let’s you do this with GPA-aligned coordinates. This is absolutely fine.</p>
+<section id="ancr" class="level3">
+<h3 class="anchored" data-anchor-id="ancr">7.1 ancr</h3>
+<p>The idea of this (generic) method is that it takes a fitted discrete character evolution (e.g., from fitMk or fitHRM) and then computes the marginal reconstructions under that model. Marginal ancestral states are also referred to as scaled likelihoods, and it’s valid to interpret them as the probabilities that each node is in each of the different states, conditioning on the fitted model. (This is why they are also called “empirical Bayes” posterior probabilities – because they are posterior probabilities but in which we condition, normally, on the ML value of our transition model, Q.)</p>
+<p>To illustrate this method, we’re going to apply it to a trait evolution scenario for the so-called “hidden-rates-model” of Beaulieu et al.&nbsp;(2013). For this, we’ll use a dataset of parity mode in liolaemid lizards from Esquerré et al.&nbsp;(2018). Previous analyses found that the best-supported model for these data was a class of hidden-rates-model that I refer to as the ‘umbral’ model in which we have hidden states of the character (say 0* and 1* for an observed character with two levels 0 &amp; 1), but in which evolution always had to proceed 0* ⇆ 0 ⇆ 1 ⇆ 1*. The idea is to capture “cold” and “hot” conditions for the state, in which when in the cold condition the character can’t evolve at all without first transitioning back to the hot condition.</p>
+<p>Load the tree.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>liolaemid.tree<span class="ot">&lt;-</span><span class="fu">read.nexus</span>(</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">file=</span><span class="st">"http://www.phytools.org/Rbook/7/Liolaemidae.MCC.nex"</span>)</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>liolaemid.tree<span class="ot">&lt;-</span><span class="fu">untangle</span>(<span class="fu">ladderize</span>(liolaemid.tree),<span class="st">"read.tree"</span>)</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>liolaemid.tree</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Phylogenetic tree with 258 tips and 257 internal nodes.
+
+Tip labels:
+  Liolaemus_albiceps, Liolaemus_irregularis, Liolaemus_ornatus, Liolaemus_calchaqui, Liolaemus_crepuscularis, Liolaemus_lavillai, ...
+
+Rooted; includes branch lengths.</code></pre>
+</div>
+</div>
+<p>Load the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>liolaemid.data<span class="ot">&lt;-</span><span class="fu">read.csv</span>(</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">file=</span><span class="st">"http://www.phytools.org/Rbook/7/Liolaemidae.data.csv"</span>,</span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names=</span><span class="dv">1</span>,<span class="at">stringsAsFactors=</span><span class="cn">TRUE</span>)</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>parity_mode<span class="ot">&lt;-</span><span class="fu">setNames</span>(liolaemid.data<span class="sc">$</span>parity_mode,</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames</span>(liolaemid.data))</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(parity_mode)<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"oviparous"</span>,<span class="st">"viviparous"</span>)</span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(parity_mode)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Ctenoblepharys_adspersa       Liolaemus_abaucan      Liolaemus_albiceps 
+              oviparous               oviparous              viviparous 
+      Liolaemus_andinus     Liolaemus_annectens      Liolaemus_anomalus 
+             viviparous              viviparous               oviparous 
+Levels: oviparous viviparous</code></pre>
+</div>
+</div>
+<p>So far so good. Now, we’ll fit our model using phytools::fitHRM. Be forewarned: this takes a while!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>hrm.umbral<span class="ot">&lt;-</span><span class="fu">fitHRM</span>(liolaemid.tree,parity_mode,<span class="at">umbral=</span><span class="cn">TRUE</span>,</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">pi=</span><span class="st">"fitzjohn"</span>,<span class="at">opt.method=</span><span class="st">"optimParallel"</span>,<span class="at">rand_start=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+This is the design matrix of the fitted model.
+Does it make sense?
+
+            oviparous oviparous* viviparous viviparous*
+oviparous           0          1          2           0
+oviparous*          3          0          0           0
+viviparous          4          0          0           5
+viviparous*         0          0          6           0
+
+log-likelihood from current iteration: -65.9156 
+ --- Best log-likelihood so far: -65.9156 ---
+log-likelihood from current iteration: -65.9158 
+ --- Best log-likelihood so far: -65.9156 ---
+log-likelihood from current iteration: -63.4595 
+ --- Best log-likelihood so far: -63.4595 ---
+log-likelihood from current iteration: -65.9157 
+ --- Best log-likelihood so far: -63.4595 ---</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in log(comp[1:M + N]): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log-likelihood from current iteration: -65.9156 
+ --- Best log-likelihood so far: -63.4595 ---
+log-likelihood from current iteration: -64.7332 
+ --- Best log-likelihood so far: -63.4595 ---</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in log(comp[1:M + N]): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log-likelihood from current iteration: -65.9156 
+ --- Best log-likelihood so far: -63.4595 ---</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in log(comp[1:M + N]): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log-likelihood from current iteration: -64.7332 
+ --- Best log-likelihood so far: -63.4595 ---
+log-likelihood from current iteration: -64.7332 
+ --- Best log-likelihood so far: -63.4595 ---</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in log(comp[1:M + N]): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log-likelihood from current iteration: -63.5919 
+ --- Best log-likelihood so far: -63.4595 ---</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>hrm.umbral</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Object of class "fitHRM".
+
+Observed states: [ oviparous, viviparous ]
+Number of rate categories per state: [ 2, 2 ]
+
+Fitted (or set) value of Q:
+            oviparous oviparous* viviparous viviparous*
+oviparous   -0.045998   0.006135   0.039863    0.000000
+oviparous*   0.000007  -0.000007   0.000000    0.000000
+viviparous   0.103914   0.000000  -0.239372    0.135458
+viviparous*  0.000000   0.000000   0.000000    0.000000
+
+Fitted (or set) value of pi:
+  oviparous  oviparous*  viviparous viviparous* 
+   0.758822    0.000048    0.241131    0.000000 
+due to treating the root prior as (a) nuisance.
+
+Log-likelihood: -63.459475 
+
+Optimization method used was "optimParallel"
+
+R thinks it has found the ML solution.</code></pre>
+</div>
+</div>
+<p>If we graph our fitted model, we should see that it corresponds nicely to the process we hypothesized.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hrm.umbral,<span class="at">spacer=</span><span class="fl">0.3</span>,<span class="at">offset=</span><span class="fl">0.03</span>,</span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mar=</span><span class="fu">rep</span>(<span class="fl">0.1</span>,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Having fit this model to our data, we just need to pass the fitted object directly to our new ancr (formerly, briefly anceb) as follows. The only argument I’m going to specify is tips=TRUE which will return the posterior probabilities that each of the leaves of the tree are in each of the two unobserved conditions of the character, given its observed state.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>parity_ancr<span class="ot">&lt;-</span><span class="fu">ancr</span>(hrm.umbral,<span class="at">tips=</span><span class="cn">TRUE</span>)</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>parity_ancr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marginal ancestral state estimates:
+    oviparous oviparous* viviparous viviparous*
+259  0.908284          0   0.091716           0
+260  0.853649          0   0.146351           0
+261  0.804687          0   0.195313           0
+262  0.824728          0   0.175272           0
+263  0.625972          0   0.374028           0
+264  0.710132          0   0.289868           0
+...
+
+Log-likelihood = -63.459475 </code></pre>
+</div>
+</div>
+<p>Lastly, let’s graph these probabilities onto the tree. This is a pretty swish bit of plotting code courtesy of Liam Revell’s blog (a place I’d highly recommend visiting).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set max node height</span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>h<span class="ot">&lt;-</span><span class="fu">max</span>(<span class="fu">nodeHeights</span>(liolaemid.tree))</span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plotTree</span>(liolaemid.tree,<span class="at">ftype=</span><span class="st">"off"</span>,<span class="at">lwd=</span><span class="dv">1</span>,</span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">1.05</span><span class="sc">*</span>h),<span class="at">direction=</span><span class="st">"upwards"</span>)</span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>pp<span class="ot">&lt;-</span><span class="fu">get</span>(<span class="st">"last_plot.phylo"</span>,<span class="at">envir=</span>.PlotPhyloEnv)</span>
+<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a>cols<span class="ot">&lt;-</span><span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">"#f0ead6"</span>,<span class="st">"#fffff2"</span>,<span class="st">"darkred"</span>,<span class="fu">palette</span>()[<span class="dv">2</span>]),</span>
+<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(parity_ancr<span class="sc">$</span>ace))</span>
+<span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a><span class="co"># plot boxes along top of tree</span></span>
+<span id="cb99-10"><a href="#cb99-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">Ntip</span>(liolaemid.tree)){</span>
+<span id="cb99-11"><a href="#cb99-11" aria-hidden="true" tabindex="-1"></a>  tcp<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="fu">cumsum</span>(parity_ancr<span class="sc">$</span>ace[liolaemid.tree<span class="sc">$</span>tip.label[i],]))</span>
+<span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a>  tcp<span class="ot">&lt;-</span>tcp<span class="sc">*</span><span class="fl">0.05</span><span class="sc">*</span>h</span>
+<span id="cb99-13"><a href="#cb99-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(tcp)){</span>
+<span id="cb99-14"><a href="#cb99-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">polygon</span>(<span class="fu">rep</span>(pp<span class="sc">$</span>xx[i],<span class="dv">4</span>)<span class="sc">+</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>,<span class="sc">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="fl">0.5</span>),</span>
+<span id="cb99-15"><a href="#cb99-15" aria-hidden="true" tabindex="-1"></a>      h<span class="sc">+</span><span class="fu">c</span>(tcp[j<span class="dv">-1</span>],tcp[j],tcp[j],tcp[j<span class="dv">-1</span>]),</span>
+<span id="cb99-16"><a href="#cb99-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">border=</span><span class="cn">FALSE</span>,<span class="at">col=</span>cols[j<span class="dv">-1</span>])</span>
+<span id="cb99-17"><a href="#cb99-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb99-18"><a href="#cb99-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb99-19"><a href="#cb99-19" aria-hidden="true" tabindex="-1"></a><span class="co"># set legend</span></span>
+<span id="cb99-20"><a href="#cb99-20" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="at">x=</span><span class="dv">0</span>,<span class="at">y=</span><span class="fl">0.5</span><span class="sc">*</span>h,<span class="fu">colnames</span>(parity_ancr<span class="sc">$</span>ace),<span class="at">pch=</span><span class="dv">15</span>,</span>
+<span id="cb99-21"><a href="#cb99-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">col=</span>cols,<span class="at">pt.cex=</span><span class="fl">1.5</span>,<span class="at">cex=</span><span class="fl">0.8</span>,<span class="at">bty=</span><span class="st">"n"</span>)</span>
+<span id="cb99-22"><a href="#cb99-22" aria-hidden="true" tabindex="-1"></a><span class="co"># set node labels</span></span>
+<span id="cb99-23"><a href="#cb99-23" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">fg=</span><span class="st">"transparent"</span>)</span>
+<span id="cb99-24"><a href="#cb99-24" aria-hidden="true" tabindex="-1"></a><span class="fu">nodelabels</span>(<span class="at">pie=</span>parity_ancr<span class="sc">$</span>ace[<span class="dv">1</span><span class="sc">:</span><span class="fu">Nnode</span>(liolaemid.tree)<span class="sc">+</span></span>
+<span id="cb99-25"><a href="#cb99-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Ntip</span>(liolaemid.tree),],<span class="at">piecol=</span>cols,<span class="at">cex=</span><span class="fl">0.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-50-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="stochastic-character-mapping" class="level3">
+<h3 class="anchored" data-anchor-id="stochastic-character-mapping">7.2 stochastic character mapping</h3>
+<p>Stochastic character mapping is a fully Bayesian approach to ancestral state estimation. Phytools supports this via the make.simmap function. This is my preferred option for the ancestral state estimation of discrete characters.</p>
+<p>Generate tree and Q matrix (defining substitution rates), then add character data to tree.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">pbtree</span>(<span class="at">n =</span> <span class="dv">200</span>, <span class="at">scale =</span> <span class="dv">1</span>)</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>Q <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>),<span class="dv">2</span>,<span class="dv">2</span>)</span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(Q) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(Q) <span class="ot">&lt;-</span> letters[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(Q)]</span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">sim.history</span>(tree,Q,<span class="at">anc=</span><span class="st">"a"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Done simulation(s).</code></pre>
+</div>
+</div>
+<p>Now conduct stochastic character mapping.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>mtrees <span class="ot">&lt;-</span> <span class="fu">make.simmap</span>(tree, tree<span class="sc">$</span>states, <span class="at">model=</span><span class="st">"ER"</span>, <span class="at">nsim =</span> <span class="dv">100</span>, <span class="at">pi=</span><span class="st">"estimated"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using pi estimated from the stationary distribution of Q assuming a flat prior.
+pi =
+  a   b 
+0.5 0.5 
+
+make.simmap is sampling character histories conditioned on
+the transition matrix
+
+Q =
+          a         b
+a -1.089321  1.089321
+b  1.089321 -1.089321
+(estimated using likelihood);
+and (mean) root node prior probabilities
+pi =
+  a   b 
+0.5 0.5 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Done.</code></pre>
+</div>
+</div>
+<p>Now let’s plot the first result using the bespoke function phytools provides. These results are binary because it’s just one tree.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="st">"blue"</span>,<span class="st">"red"</span>), letters[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(Q)])</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotSimmap</span>(mtrees[[<span class="dv">1</span>]], cols , <span class="at">pts=</span>F , <span class="at">ftype=</span><span class="st">"off"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-53-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>One advantage of stochastic character mapping is that we can compute the posterior probabilities of each character state being present at each node. Let’s summarise across all the simmaps we produced. First we’ll define a function that will do this for us.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="co"># function to compute the states</span></span>
+<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a> foo <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb106-3"><a href="#cb106-3" aria-hidden="true" tabindex="-1"></a> y <span class="ot">&lt;-</span> <span class="fu">sapply</span>(x<span class="sc">$</span>maps,<span class="cf">function</span>(x) <span class="fu">names</span>(x)[<span class="dv">1</span>])</span>
+<span id="cb106-4"><a href="#cb106-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(y) <span class="ot">&lt;-</span> x<span class="sc">$</span>edge[,<span class="dv">1</span>]</span>
+<span id="cb106-5"><a href="#cb106-5" aria-hidden="true" tabindex="-1"></a> y <span class="ot">&lt;-</span> y[<span class="fu">as.character</span>(<span class="fu">length</span>(x<span class="sc">$</span>tip)<span class="sc">+</span><span class="dv">1</span><span class="sc">:</span>x<span class="sc">$</span>Nnode)]</span>
+<span id="cb106-6"><a href="#cb106-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">return</span>(y)</span>
+<span id="cb106-7"><a href="#cb106-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb106-8"><a href="#cb106-8" aria-hidden="true" tabindex="-1"></a><span class="co"># now apply the function</span></span>
+<span id="cb106-9"><a href="#cb106-9" aria-hidden="true" tabindex="-1"></a>AA <span class="ot">&lt;-</span> <span class="fu">sapply</span>(mtrees,foo)</span>
+<span id="cb106-10"><a href="#cb106-10" aria-hidden="true" tabindex="-1"></a><span class="co"># convert to data that be plotted as pie charts.</span></span>
+<span id="cb106-11"><a href="#cb106-11" aria-hidden="true" tabindex="-1"></a>piesA <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(AA,<span class="dv">1</span>,<span class="cf">function</span>(x,levels,Nsim) <span class="fu">summary</span>(<span class="fu">factor</span>(x,levels))<span class="sc">/</span>Nsim,<span class="at">levels=</span>letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">Nsim=</span><span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s plot the summary of our analyses. This is a fun way of see how characters evolve along a tree.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.phylo</span>(tree,<span class="at">no.margin=</span><span class="cn">TRUE</span>,<span class="at">show.tip.label=</span>F)</span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nodelabels</span>(<span class="at">pie=</span>piesA,<span class="at">cex=</span><span class="fl">0.6</span>,<span class="at">piecol=</span>cols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Ordination_and_phylogenetic_comparative_methods_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In your disparity analyses, you will have to decide on a probability threshold for determining character scores at each node. This is entirely arbitrary and can be worth exploring.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

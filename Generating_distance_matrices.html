@@ -153,7 +153,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="vegan" class="level2">
 <h2 class="anchored" data-anchor-id="vegan">3.0 Vegan</h2>
-<p>Vegan gives us access to the Gower and Chi-Squared distances. Gower we use regularly in disparity analysis. Chi-squared not really, as it is only applicable to frequency data. However, we will touch on some methods of ordination that employ this later on so it’s worth taking a peek.</p>
+<p>Vegan gives us access to the Gower distances. Gower we use regularly in disparity analysis.</p>
 <p>Let’s use our data object from before.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -167,8 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>This is vegan 2.6-4</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vegdist.Gower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"gower"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vegdist.altGower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"altGower"</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>vegdist.chisq <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vegdist.altGower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"altGower"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>All are dist objects, as with the base R function dist. This is because vegdist is designed to be a one-for-one replacement. Try converting these distance matrices back to regular matrices and seeing how they compare to the Euclidean distance matrix we generated using the base R dist function.</p>
 <p>Notice how there are two versions of the Gower distance, “gower” and “altGower” and that they are subtly different? This is because the standard Gower distance takes into account double-zeros when the summed differences are divided by the number of comparable characters, whereas the alternative form of the Gower distance does not. This means that for pairs of taxa with double-zeros, there alternate Gower distance will be higher than their regular Gower distance. For more information, see the documentation.</p>
@@ -287,7 +286,7 @@ visit https://github.com/TGuillerme/dispRity</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>dispR.mord.dist <span class="ot">&lt;-</span> <span class="fu">as.dist</span>(dispR.mord)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>char.diff allows you to treat all character scores as character tokens by changing the argument ‘translate’ to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e.&nbsp;all that will matter during distance metric calculation is whether scores match or not).</p>
+<p>char.diff allows you to treat all character scores as character tokens by changing the argument ‘translate’ to TRUE. This removes the numeric component from the scores, ensuring all will be treated as unordered (i.e.&nbsp;all that will matter during distance metric calculation is whether scores match or not). You can also apply transformations to the result distance matrix by submitting functions to the “correction” argument.</p>
 <p>it also allows you add special tokens to a matrix and specify special behaviors for them. For example, let’s add some inapplicables coded as dashes.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>data[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,<span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="st">"-"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

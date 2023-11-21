@@ -62,7 +62,8 @@ Unfortunately, the dist function is limited in the distance metrics it can calcu
 Of those it can, only the raw Euclidean distance is used in disparity analyses, and even then somewhat irregularly. This is because the function cannot accommodate missing data (commonplace in disparity analyses). If there are any missing data entries in your data matrix, it will simply ignore that character during distance calculation, which is not ideal! As such, we need access to other distance metrics. For that, we need other packages (unless you want to calculate them yourself).
 
 ## 3.0 Vegan
-Vegan gives us access to the Gower and Chi-Squared distances. Gower we use regularly in disparity analysis. Chi-squared not really, as it is only applicable to frequency data. However, we will touch on some methods of ordination that employ this later on so it's worth taking a peek. 
+
+Vegan gives us access to the Gower distances. Gower we use regularly in disparity analysis.
 
 Let's use our data object from before.
 
@@ -70,7 +71,6 @@ Let's use our data object from before.
 library(vegan)
 vegdist.Gower <- vegdist(data, method = "gower")
 vegdist.altGower <- vegdist(data, method = "altGower")
-vegdist.chisq <- vegdist(data, method = "chisq")
 ```
 
 All are dist objects, as with the base R function dist. This is because vegdist is designed to be a one-for-one replacement. Try converting these distance matrices back to regular matrices and seeing how they compare to the Euclidean distance matrix we generated using the base R dist function.
@@ -82,7 +82,8 @@ Notice how there are two versions of the Gower distance, "gower" and "altGower" 
 ```
 
 ## 4.0 Claddis
-Claddis is a little slow and idiosyncratic. However, up until recently, it was the only R package that included the generalised Euclidean distance and maximum observable rescaled distance as options. Fortunately, dispRity now allows us to do this. It was also the first package built specifically for categorical disparity analysis. While I tend to shy away from it these days, its good to get a feel for it. 
+
+Claddis is a little slow and idiosyncratic. However, up until recently, it was the only R package that included the generalised Euclidean distance and maximum observable rescaled distance as options. Fortunately, dispRity now allows us to do this. It was also the first package built specifically for categorical disparity analysis. While I tend to shy away from it these days, its good to get a feel for it.
 
 ```{r}
 library(Claddis)
@@ -117,7 +118,7 @@ Back to the example provided by Claddis! In this case, this dataset contains two
 day_2016[[2]] <- NULL
 ```
 
-Now let's derive some distance matrices. Claddis gives us access to four distance metrics. 
+Now let's derive some distance matrices. Claddis gives us access to four distance metrics.
 
 ```{r}
 clad.RED <- calculate_morphological_distances(day_2016, distance_metric = "red", distance_transformation = "none")
@@ -133,16 +134,15 @@ View(clad.Gower$distance_matrix)
 View(clad.Gower$comparable_character_matrix)
 ```
 
-Note that you can transform your distances using calculate_morphological_distances. This isn't necessary when a distance matrix is based on a complete dataset (i.e. no missing data) or you simply intend to quantify disparity using pairwise distances. However, if your intention is to ordinate your data using principal coordinate analysis, the resulting ordination will be made approximately Euclidean if a square root transformation is applied. This can be done by changing the distance_transformation argument from "none" to "sqrt". We will do this later when we start ordinating our data. 
+Note that you can transform your distances using calculate_morphological_distances. This isn't necessary when a distance matrix is based on a complete dataset (i.e. no missing data) or you simply intend to quantify disparity using pairwise distances. However, if your intention is to ordinate your data using principal coordinate analysis, the resulting ordination will be made approximately Euclidean if a square root transformation is applied. This can be done by changing the distance_transformation argument from "none" to "sqrt". We will do this later when we start ordinating our data.
 
-calculate_morphological_distances also offers ways in which to handle polymorphisms, inapplicables, uncertainities, and character dependencies. 
+calculate_morphological_distances also offers ways in which to handle polymorphisms, inapplicables, uncertainities, and character dependencies.
 
 The presence of polymorphisms, coded (01), and uncertainties, coded {01}, probably means you need to revise your character list. You shouldn't really be using ambiguous characters that can necessitate such unusual coding strategies in disparity analysis.
 
-Inapplicables (i.e. when a character is absent because it is contingent on another character which is also missing - usually coded as dashes or NAs) are usually dealt with in one of three ways. Either all character scores are increased by 1 and the dashes converted into 0, all the inapplicables are simply treated as absences (dashes are converted to 1), or they are treated as missing (coded as gaps or '?'s). The most logical solution is to treat them as any other absence (this can be done before the distance matrix is derived by recoding). 
+Inapplicables (i.e. when a character is absent because it is contingent on another character which is also missing - usually coded as dashes or NAs) are usually dealt with in one of three ways. Either all character scores are increased by 1 and the dashes converted into 0, all the inapplicables are simply treated as absences (dashes are converted to 1), or they are treated as missing (coded as gaps or '?'s). The most logical solution is to treat them as any other absence (this can be done before the distance matrix is derived by recoding).
 
-Claddis does offer a fourth option based on the work of Melanie Hopkins and Katherine St. John, which actually takes into account the character dependencies that lead to inapplicable character scores through character weighting. However, this has not seen much usage. 
-If you're interested you can read the article: http://doi.org/10.1098/rspb.2018.1784
+Claddis does offer a fourth option based on the work of Melanie Hopkins and Katherine St. John, which actually takes into account the character dependencies that lead to inapplicable character scores through character weighting. However, this has not seen much usage. If you're interested you can read the article: http://doi.org/10.1098/rspb.2018.1784
 
 And the Claddis calculate_morphological_distance documentation:
 
@@ -151,6 +151,7 @@ And the Claddis calculate_morphological_distance documentation:
 ```
 
 ## 5.0 dispRity
+
 As I mentioned before, Claddis was the only R package built for the sole purpose of categorical disparity analysis until dispRity came along. Let's try it.
 
 ```{r}
@@ -184,10 +185,7 @@ data[sample(1:100,10)] <- "-"
 
 Now let's compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the 'inapplicable' category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e. both are treated as missing), and polymorphisms and uncertainties return all present states:
 
-missing = function(x,y) NA
-inapplicable = function(x,y) NA
-polymorphism = function(x,y) strsplit(x, split = "\\&")[[1]]
-uncertainty = function(x,y) strsplit(x, split = "\\/")[[1]]
+missing = function(x,y) NA inapplicable = function(x,y) NA polymorphism = function(x,y) strsplit(x, split = "\\&")\[\[1\]\] uncertainty = function(x,y) strsplit(x, split = "\\/")\[\[1\]\]
 
 To change this, you must submit a function as a named element of a list (example below) which only takes x,y as inputs and only returns a single value.
 
@@ -208,8 +206,3 @@ Different values highlight that it is working! char.diff is a very flexible, pow
 ```{r}
 ?char.diff
 ```
-
-
-
-
-

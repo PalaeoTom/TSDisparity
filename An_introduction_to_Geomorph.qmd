@@ -6,9 +6,11 @@ editor: visual
 ---
 
 ## 1.0 Preparing your data
+
 In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves().
 
-### 1.1 Digitizing fixed landmarksy
+### 1.1 Digitizing fixed landmarks
+
 We will be using the scallop example ply file included in geomorph.
 
 First, check you have geomorph installed.
@@ -27,7 +29,7 @@ data("scallopPLY")
 my.ply <- scallopPLY$ply
 ```
 
-Let´s also make sure that our working directory is set to an adequate location. This is particularly relevant for 3D digitizing, as throughout the process, files with the digitized landmark coordinates, as well as the template we will create for replicating 3D surface semilandmarks across specimens, will be stored and automatically read in by functions. For this example, we will work in the subdirectory ~/example3D/, so go ahead and make sure your working directory is set to a folder with that name. I'd recommend creating a new folder on your desktop.
+Let´s also make sure that our working directory is set to an adequate location. This is particularly relevant for 3D digitizing, as throughout the process, files with the digitized landmark coordinates, as well as the template we will create for replicating 3D surface semilandmarks across specimens, will be stored and automatically read in by functions. For this example, we will work in the subdirectory \~/example3D/, so go ahead and make sure your working directory is set to a folder with that name. I'd recommend creating a new folder on your desktop.
 
 Once a ply file is imported (usually using read.ply), one will first digitize the fixed landmarks using digit.fixed(). Note that this is an interactive function, so you will need to replicate these steps in your R console to be able to see the full version of this example. We will digitize 5 fixed landmarks (you set a landmark by right-clicking, then clicking 'y').
 
@@ -36,7 +38,7 @@ Once a ply file is imported (usually using read.ply), one will first digitize th
 fixed.lms1 <- digit.fixed(spec = my.ply, fixed = 5)
 ```
 
-Note that landmark selection on the 3dmesh is done by choosing the point of the scan closest to where you click with your mouse. This means that occasionally points may appear to “go through to the other side of the structure”, especially if your initial point cloud is not very dense. To solve this issue, try rotating the structure to find a better view for digitizing, or zooming in such that you can click close to one of the scan points (these are visible as tiny grey points when you zoom in). Place your landmarks in the points specified in the support document.
+Note that landmark selection on the 3dmesh is done by choosing the point of the scan closest to where you click with your mouse. This means that occasionally points may appear to "go through to the other side of the structure", especially if your initial point cloud is not very dense. To solve this issue, try rotating the structure to find a better view for digitizing, or zooming in such that you can click close to one of the scan points (these are visible as tiny grey points when you zoom in). Place your landmarks in the points specified in the support document.
 
 Now have a look at your working directory. A new file has been created, called my.ply.nts. This contains the coordinates of the digitized 3D fixed landmarks for your specimen.
 
@@ -50,7 +52,9 @@ fixed.lms2 <- digit.fixed(my.ply.2, 5)
 If one wishes to continue and sample also surface semilandmarks, this step can be performed together with the acquisition of surface sliders (see below).
 
 ### 1.2 Sampling surface semilandmarks
+
 #### 1.2.1 Building the template
+
 Now that the fixed landmarks have been digitized, we can continue and sample surface sliding semilandmarks. We will use the first specimen as the reference from which to build a template, which will then be used to sample these semilandmarks across all specimens in our sample. This is done using the function buildtemplate. We will sample 100 surface semilandmarks.
 
 ```{r}
@@ -66,6 +70,7 @@ Note that a txt file containing the coordinates of the sampled surface semilandm
 One may choose to perform steps 1. and 2. above at once for the reference specimen. In that case, the argument fixed of buildtemplate would indicate the number of fixed landmarks to be digitized (i.e. 5 in our example).
 
 #### 1.2.2 Sampling surface semilandmarks in subsequent specimens
+
 Now that the template has been created, we will use it to sample homologous surface semilandmarks in the second specimen in our sample. This is done using the function digitsurface.
 
 ```{r}
@@ -77,6 +82,7 @@ Once the surface semilandmarks have been sampled, you will see a graph with thei
 Same as for building the template, one may choose to simultaneously digitize fixed landmarks and sample surface semilandmarks using the template.
 
 ### 1.3 Plotting 3D specimens
+
 At any moment, you can plot a specimen together with fixed landmarks and surface sliding semilandmarks using plotspec.
 
 ```{r}
@@ -84,7 +90,8 @@ plotspec(spec = my.ply, digitspec = surf.pts1, fixed = 5, centered = T)
 ```
 
 ## 2.0 Principal components analysis and visualisation tools for exploring shape space
-Version 3.1.0 of geomorph introduced the function gm.prcomp, and related utility functions (summary() and plot()), for performing principal components analyses on Procrustes shape variables for a set of aligned specimens. This function now includes several different types of analytical options and, combined with other visualization tools available in geomorph, provides tools for exploring variation in shape space. 
+
+Version 3.1.0 of geomorph introduced the function gm.prcomp, and related utility functions (summary() and plot()), for performing principal components analyses on Procrustes shape variables for a set of aligned specimens. This function now includes several different types of analytical options and, combined with other visualization tools available in geomorph, provides tools for exploring variation in shape space.
 
 Throughout, we will be using shape data of several Plethodon species as an example, so let´s first load and superimpose those.
 
@@ -95,7 +102,8 @@ Y.gpa <- gpagen(plethspecies$land, print.progress = F)
 ```
 
 ### 2.1 Traditional PCA and visualising shape patterns
-One first option is to perform a “traditional” PCA, i.e. based on OLS-centering and projection of the data. This is very much like what is performed in the basic R function prcomp. 
+
+One first option is to perform a "traditional" PCA, i.e. based on OLS-centering and projection of the data. This is very much like what is performed in the basic R function prcomp.
 
 ```{r}
 PCA <- gm.prcomp(Y.gpa$coords)
@@ -111,7 +119,7 @@ plot(PCA, main = "PCA", pch = 22, bg = "green", cex = 1.5, cex.lab = 1.5, font.l
 
 One then has several solutions for exploring shape variation across PC space and visualizing shape patterns. First, the user may choose to manually produce deformation grids to compare the shapes corresponding to the extremes of a chosen PC axis using plotRefToTarget. For example, one can:
 
-1. Compare the minimum and maximum values to the global consensus:
+1.  Compare the minimum and maximum values to the global consensus:
 
 ```{r}
 msh <- mshape(Y.gpa$coords)
@@ -122,8 +130,9 @@ plotRefToTarget(msh, PCA$shapes$shapes.comp1$max)
 # Maximum
 par(mfrow = c(1,1))
 ```
- 
-2. Comparing the minimum and maximum values:
+
+2.  Comparing the minimum and maximum values:
+
 ```{r}
 plotRefToTarget(PCA$shapes$shapes.comp1$min, PCA$shapes$shapes.comp1$max, method = "vector", mag = 2)
 ```
@@ -135,7 +144,8 @@ Of course here one can use all the plotting options available in plotRefToTarget
 ```
 
 ### 2.2 Phylomorphospace
-One may also want to project a phylogeny (if dealing with species-level observations), and estimated ancestral states into the ordination plot produced before, to obtain what is commonly referred to as a “phylomorphospace” plot. This can be easily done by providing a phylogenetic tree during the analysis (which is however NOT used in the analytical step in this case, other than for estimating ancestral states), and then indicating that the phylogeny should also be plotted during the plotting step. For the Plethodon example data, we may project the phylogeny into the previous ordination plot as such:
+
+One may also want to project a phylogeny (if dealing with species-level observations), and estimated ancestral states into the ordination plot produced before, to obtain what is commonly referred to as a "phylomorphospace" plot. This can be easily done by providing a phylogenetic tree during the analysis (which is however NOT used in the analytical step in this case, other than for estimating ancestral states), and then indicating that the phylogeny should also be plotted during the plotting step. For the Plethodon example data, we may project the phylogeny into the previous ordination plot as such:
 
 ```{r}
 PCA.w.phylo <- gm.prcomp(Y.gpa$coords, phy = plethspecies$phy)
@@ -152,6 +162,7 @@ Again, all plotting arguments can be directly manipulated by the user. Please se
 ```
 
 ### 2.3 phyloPCA
+
 Here, the phylogeny IS considered during the analytical step of the ordination, as the principal components analysis is in this case calculated based on GLS-centering and projection of the data. This is to account for the nonindependence among observations of species. For details on the analytical part of this method, see Revell 2009, Evolution 63: 3258 - 3268; Polly et al 2013, Hystrix 24: 33 - 41; Collyer & Adams, submitted.
 
 For the Plethodon example data, this analysis would be implemented and plotted as follows (first with untransformed residual projection, second with transformed residual projection):
@@ -173,6 +184,7 @@ plot(phylo.tPCA, phylo = TRUE, main = "phylo PCA with transformed projection")
 What looks different?
 
 ### 2.4 PaCA: phylogenetically-aligned PCA
+
 This recently introduced method (Collyer & Adams, submitted) provides an ordination that aligns phenotypic data with phylogenetic signal, by maximizing variation in directions that describe phylogenetic signal, while simultaneously preserving the Euclidean distances among observations in the data space. PaCA provides a projection that shows the most phylogenetic signal in the first few components, irrespective of other signals in the data. By comparing PCA, phyloPCA and PaCA results, one may glean the relative importance of phylogenetic and other (ecological) signals in the data.
 
 For the Plethodon example data, this analysis would be implemented and plotted as follows:
@@ -184,6 +196,7 @@ plot(PaCA, phylo = TRUE, main = "PaCA")
 ```
 
 ### 2.5 Three-dimensional PCA plot with a phylogeny and time on the z-axis
+
 Finally, plot.gm.prcomp provides the possibility of producing a 3D plot of any two PCA axes, with the phylogenetic tree connecting the observations and time on the z-axis. Again, different plotting parameters can be controlled to manipulate plot aesthetics. Note, that in this case an rgl plotting device will open for the 3D plot, but the corresponding biplot with the phylogeny projected (option 2, above) will also be produced.
 
 ```{r}
@@ -193,7 +206,9 @@ plot(PCA.w.phylo, time.plot = TRUE, pch = 22, bg = c(rep("red", 5), rep("green",
 ```
 
 ## 3.0 Model fitting in geomorph
+
 ### 3.1 Defining models
+
 For the final section of the tutorial, let's clear up our workspace and load in the final example dataset.
 
 ```{r}
@@ -209,7 +224,7 @@ Y.gpa <- gpagen(larvalMorph$tailcoords, curves = larvalMorph$tail.sliders,
 plot(Y.gpa)
 ```
 
-Next, let’s define some putative models of shape variation that would be biologically relevant.
+Next, let's define some putative models of shape variation that would be biologically relevant.
 
 ```{r}
 gdf <- geomorph.data.frame(Y.gpa, treatment = larvalMorph$treatment, 
@@ -223,6 +238,7 @@ fit.treatment<- procD.lm(coords ~ log(Csize) * treatment/family, data = gdf, pri
 ```
 
 Now let's take a look at the models.
+
 ```{r}
 fit.size
 ```
@@ -267,15 +283,16 @@ One might ascertain that models that include parameters for family and treatment
 ```
 
 ## 4.0 Allometry analyses
+
 ### 4.1 Simple allometry models
 
-First, let’s just consider the simple allometry model:
+First, let's just consider the simple allometry model:
 
 ```{r}
 summary(fit.size)
 ```
 
-It is clear that there is a significant association between shape and size. To visualize this relationship, there are many options. First, we can use the plot generic for procD.lm and vary some of the arguments. Let’s do that, using two different ways to visualize shape change: prediction lines (PredLine) and regression scores (RegScore). The former are first principal component scores for fitted values from the procD.lm fit (Adams and Nistri 2010); the latter are standardized projected shape scores, along the axis defined by the regression of shape on size (Drake and Klingenberg 2008). 
+It is clear that there is a significant association between shape and size. To visualize this relationship, there are many options. First, we can use the plot generic for procD.lm and vary some of the arguments. Let's do that, using two different ways to visualize shape change: prediction lines (PredLine) and regression scores (RegScore). The former are first principal component scores for fitted values from the procD.lm fit (Adams and Nistri 2010); the latter are standardized projected shape scores, along the axis defined by the regression of shape on size (Drake and Klingenberg 2008).
 
 ```{r}
 plot(fit.size, type = "regression", reg.type = "PredLine", predictor = log(gdf$Csize))
@@ -321,7 +338,7 @@ plotAllometry(fit.size, size = gdf$Csize, logsz = TRUE, method = "size.shape")
 
 ### 4.2 Complex allometry models
 
-We already learned that family and treatment were “significant” model effects. Now let’s focus on whether we should believe that families or treatments have unique allometries or a common allometry.
+We already learned that family and treatment were "significant" model effects. Now let's focus on whether we should believe that families or treatments have unique allometries or a common allometry.
 
 ```{r}
 fit.unique <- procD.lm(coords ~ log(Csize) * treatment/family, 
@@ -345,7 +362,8 @@ plotAllometry(fit.common, size = gdf$Csize, logsz = TRUE, method = "RegScore",
 The next section focuses on ANOVA for model effects and pairwise comparisons.
 
 ## 5.0 Updating ANOVA and performing pairwise comparisons
-In our example, we have both fixed and random effects. Treatment is a fixed effect and family is a random effect, nested within our fixed effect (as egg clutches were “randomly”” sampled from the wild). Generally, when evaluating model effects, ANOVA involves assessing the probability of observed F-values which are ratios of mean squared (MS) values for effects to MS values for the appropriate random effect, usually the residuals. (For procD.lm models, the distribution of F-values is generated over many random permutations.) For example:
+
+In our example, we have both fixed and random effects. Treatment is a fixed effect and family is a random effect, nested within our fixed effect (as egg clutches were "randomly"" sampled from the wild). Generally, when evaluating model effects, ANOVA involves assessing the probability of observed F-values which are ratios of mean squared (MS) values for effects to MS values for the appropriate random effect, usually the residuals. (For procD.lm models, the distribution of F-values is generated over many random permutations.) For example:
 
 ```{r}
 anova(fit.common)
@@ -365,7 +383,7 @@ The pairwise function has this general format:
 
 pairwise(fit, groups, covariate),
 
-where fit is an already fitted object, using procD.lm, groups is a factor to designate groups to be compared, and covariate is a vector if slopes are to be compared. This format assumes the inherent null model of “fit” is appropriate. If an alternative null model is desired, the function can be updated as:
+where fit is an already fitted object, using procD.lm, groups is a factor to designate groups to be compared, and covariate is a vector if slopes are to be compared. This format assumes the inherent null model of "fit" is appropriate. If an alternative null model is desired, the function can be updated as:
 
 pairwise(fit, fit.null, groups, covariate),
 
@@ -375,7 +393,7 @@ where fit.null is a second procD.lm fit. If one is not sure about the inherent n
 reveal.model.designs(fit.common)
 ```
 
-The results tell us that if we run pairwise on fit.common, the null model would be ~ log(Csize) + treatment and the full model would be ~ log(Csize) + treatment + treatment:family. This is the case because we used type I (sequential) sums of squares and cross-products (the default). However, it is maybe not ideal. We might prefer to have as a null model, ~ log(Csize) + family. Thus, let’s first establish that model and then run the pairwise function
+The results tell us that if we run pairwise on fit.common, the null model would be \~ log(Csize) + treatment and the full model would be \~ log(Csize) + treatment + treatment:family. This is the case because we used type I (sequential) sums of squares and cross-products (the default). However, it is maybe not ideal. We might prefer to have as a null model, \~ log(Csize) + family. Thus, let's first establish that model and then run the pairwise function
 
 ```{r}
 fit.null <- procD.lm(coords ~ log(Csize) + family, data = gdf, print.progress = FALSE)
@@ -389,7 +407,7 @@ There are now many options for summarizing results; i.e., we can perform multipl
 summary(PW, test.type = "dist", confidence = 0.95)
 ```
 
-The test statistics used, “dist”, is the distance between LS means. By specifying a confidence level, we are given upper confidence limits (UCL) from the distributions of pairwise distances. We can see that if the observed distance is larger than the UCL, the P-value is less than 1 - confidence; i.e., it is “significant”. The default is this “stats table”, but we could also produce pairwise tables. In fact, we can reproduce the old format for advanced.procD.lm like so:
+The test statistics used, "dist", is the distance between LS means. By specifying a confidence level, we are given upper confidence limits (UCL) from the distributions of pairwise distances. We can see that if the observed distance is larger than the UCL, the P-value is less than 1 - confidence; i.e., it is "significant". The default is this "stats table", but we could also produce pairwise tables. In fact, we can reproduce the old format for advanced.procD.lm like so:
 
 ```{r}
 anova(fit.null, fit.common, print.progress = FALSE)
@@ -399,7 +417,7 @@ anova(fit.null, fit.common, print.progress = FALSE)
 summary(PW, test.type = "dist", confidence = 0.95, stat.table = FALSE)
 ```
 
-Because we have already performed the pairwise procedure, we could also summarize a different test. For example, let’s say we wish to compare morphological disparities (variances) among treatments. We simply change the summary:
+Because we have already performed the pairwise procedure, we could also summarize a different test. For example, let's say we wish to compare morphological disparities (variances) among treatments. We simply change the summary:
 
 ```{r}
 summary(PW, test.type = "var", confidence = 0.95)
@@ -424,7 +442,8 @@ Greater detail for how to summarize different tests is found in the summary.pair
 ```
 
 ## 6.0 Performing trajectory analysis
-The trajectory,analysis function has the same basic arguments as the pairwise function, but also has an argument for trajectory points (which can be a single value, if data are already trajectories or a factor to indicate trajectory point levels). Following the example above, trajectory analysis can be considered a pairwise function where treatments are trajectories and families are trajectory points. The following highlights the steps involved for one type of example (but the plotting options are quite numerous):
+
+The trajectory.analysis function has the same basic arguments as the pairwise function, but also has an argument for trajectory points (which can be a single value, if data are already trajectories or a factor to indicate trajectory point levels). Following the example above, trajectory analysis can be considered a pairwise function where treatments are trajectories and families are trajectory points. The following highlights the steps involved for one type of example (but the plotting options are quite numerous):
 
 ```{r}
 TA <- trajectory.analysis(fit.common, 
@@ -433,13 +452,13 @@ TA <- trajectory.analysis(fit.common,
 summary(TA, attribute = "MD")
 ```
 
-The argument, attribute = “MD”, indicates that the differences between trajectory magnitudes - the path length of trajectories - is considered. The trajectory analysis could also be summarized for trajectory correlations (TC), which are angles between trajectory directions (major axes of variation), or shape differences (SD). More examples are given in the trajectory.analysis help file. 
+The argument, attribute = "MD", indicates that the differences between trajectory magnitudes - the path length of trajectories - is considered. The trajectory analysis could also be summarized for trajectory correlations (TC), which are angles between trajectory directions (major axes of variation), or shape differences (SD). More examples are given in the trajectory.analysis help file.
 
 ```{r}
 ?trajectory.analysis
 ```
 
-The function, plot.trajectory.analysis plots the data points projected on the PCs for fitted values and the function, add.trajectories, superimposes the trajectories on these points. 
+The function, plot.trajectory.analysis plots the data points projected on the PCs for fitted values and the function, add.trajectories, superimposes the trajectories on these points.
 
 ```{r}
 TP <- plot(TA, pch = 19, cex = 0.7, col = as.numeric(gdf$treatment))
@@ -447,4 +466,55 @@ add.trajectories(TP, traj.bg = 1:nlevels(gdf$treatment),
                  start.bg = 1:nlevels(gdf$treatment),
                  end.bg = 1:nlevels(gdf$treatment))
 ```
+
+## 7.0 Testing for phylogenetic signal in GPA shape variables
+
+Finally, geomorph gives us the ability to test for phylogenetic signal in our Procrustes shape variables. Let's load a new dataset.
+
+```{r}
+rm(list=ls())
+data(plethspecies)
+```
+
+Perform GPA and get shape variables.
+
+```{r}
+Y.gpa <- gpagen(plethspecies$land)        
+```
+ 
+Now to test for phylogenetic signal in shape. We will use physignal.z. 
+
+```{r}
+PS.shape <- physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front", iter = 1000)
+summary(PS.shape)
+plot(PS.shape)
+plot(PS.shape$PACA, phylo = T)
+```
+There seems to be a roblem with an ill-conditioned residual covariance matrix. Let's try shaving off one dimension (i.e. going from 8 dimensions to 7) by setting PAC.no to 7.
+
+```{r}
+PS.shape <- physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front", PAC.no = 7, iter = 1000)
+summary(PS.shape)
+plot(PS.shape)
+plot(PS.shape$PACA, phylo = TRUE)
+```
+
+Now let's test for phylogenetic signal in size.
+
+```{r}
+PS.size <- physignal.z(A = Y.gpa$Csize, phy = plethspecies$phy, lambda = "front", iter = 1000)
+summary(PS.size)
+plot(PS.size)
+```
+
+Pagel's lambda is the go-to measure of phylogenetic signal. Bounded between 0-1, estimated lambda values of 0 mean our traits are inferred to have no phylogenetic signal. 1 is Brownian motion (i.e. the only variation left after you take out the phylogenetic signal is random).
+
+These functions also report Bloomberg's K. Again, a value of 0 means independence, higher values = some sort of phylogenetic signal (it is unbounded).
+
+The P-value reports significance of effect (i.e. low p-values = significant phylogenetic signal).
+
+Finally, the functions also report a standardised effect size (Z).
+
+Lots of information to parse but handily, one function does it all for you!
+
 

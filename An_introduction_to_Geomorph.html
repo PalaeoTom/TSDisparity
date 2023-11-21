@@ -104,8 +104,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="preparing-your-data" class="level2">
 <h2 class="anchored" data-anchor-id="preparing-your-data">1.0 Preparing your data</h2>
 <p>In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves().</p>
-<section id="digitizing-fixed-landmarksy" class="level3">
-<h3 class="anchored" data-anchor-id="digitizing-fixed-landmarksy">1.1 Digitizing fixed landmarksy</h3>
+<section id="digitizing-fixed-landmarks" class="level3">
+<h3 class="anchored" data-anchor-id="digitizing-fixed-landmarks">1.1 Digitizing fixed landmarks</h3>
 <p>We will be using the scallop example ply file included in geomorph.</p>
 <p>First, check you have geomorph installed.</p>
 <div class="cell">
@@ -1415,7 +1415,7 @@ TM 0.789 0.850 0.211 0.410 0.578 1.000</code></pre>
 </section>
 <section id="performing-trajectory-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="performing-trajectory-analysis">6.0 Performing trajectory analysis</h2>
-<p>The trajectory,analysis function has the same basic arguments as the pairwise function, but also has an argument for trajectory points (which can be a single value, if data are already trajectories or a factor to indicate trajectory point levels). Following the example above, trajectory analysis can be considered a pairwise function where treatments are trajectories and families are trajectory points. The following highlights the steps involved for one type of example (but the plotting options are quite numerous):</p>
+<p>The trajectory.analysis function has the same basic arguments as the pairwise function, but also has an argument for trajectory points (which can be a single value, if data are already trajectories or a factor to indicate trajectory point levels). Following the example above, trajectory analysis can be considered a pairwise function where treatments are trajectories and families are trajectory points. The following highlights the steps involved for one type of example (but the plotting options are quite numerous):</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>TA <span class="ot">&lt;-</span> <span class="fu">trajectory.analysis</span>(fit.common, </span>
 <span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">groups =</span> gdf<span class="sc">$</span>treatment, <span class="at">traj.pts =</span> gdf<span class="sc">$</span>family,</span>
@@ -1470,6 +1470,127 @@ TG:TM 0.06378306 0.2455973 -0.0814343  0.537</code></pre>
 <p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="testing-for-phylogenetic-signal-in-gpa-shape-variables" class="level2">
+<h2 class="anchored" data-anchor-id="testing-for-phylogenetic-signal-in-gpa-shape-variables">7.0 Testing for phylogenetic signal in GPA shape variables</h2>
+<p>Finally, geomorph gives us the ability to test for phylogenetic signal in our Procrustes shape variables. Let’s load a new dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(plethspecies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Perform GPA and get shape variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethspecies<span class="sc">$</span>land)        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Performing GPA
+
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |==================                                                    |  25%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |======================================================================| 100%
+
+Making projections... Finished!</code></pre>
+</div>
+</div>
+<p>Now to test for phylogenetic signal in shape. We will use physignal.z.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front",  
+    iter = 1000) 
+
+Evaluation of phylogenetic signal effect size
+Optimization method: front
+Optimization performed in 8 data dimensions.
+
+Observed phylogenetic signal effect size (Z): -0.7579
+
+P-value: 0.7183 based on 1001 random permutations
+
+For a model with a log-likelihood of 277.4506
+a branch-scaling (lambda) of 1e-04
+and a ratio of Bownian Motion fit (K) of 0.8859 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-58-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>There seems to be a roblem with an ill-conditioned residual covariance matrix. Let’s try shaving off one dimension (i.e.&nbsp;going from 8 dimensions to 7) by setting PAC.no to 7.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">PAC.no =</span> <span class="dv">7</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front",  
+    iter = 1000, PAC.no = 7) 
+
+Evaluation of phylogenetic signal effect size
+Optimization method: front
+Optimization performed in 7 data dimensions.
+
+Observed phylogenetic signal effect size (Z): 1.6933
+
+P-value: 0.029 based on 1001 random permutations
+
+For a model with a log-likelihood of 229.8667
+a branch-scaling (lambda) of 1e-04
+and a ratio of Bownian Motion fit (K) of 0.8901 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-59-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now let’s test for phylogenetic signal in size.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>PS.size <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>Csize, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+physignal.z(A = Y.gpa$Csize, phy = plethspecies$phy, lambda = "front",  
+    iter = 1000) 
+
+Evaluation of phylogenetic signal effect size
+Optimization method: front
+Optimization performed in 1 data dimensions.
+
+Observed phylogenetic signal effect size (Z): -0.7885
+
+P-value: 0.7712 based on 1001 random permutations
+
+For a model with a log-likelihood of 66.0972
+a branch-scaling (lambda) of 1e-04
+and a ratio of Bownian Motion fit (K) of 0.6938 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Pagel’s lambda is the go-to measure of phylogenetic signal. Bounded between 0-1, estimated lambda values of 0 mean our traits are inferred to have no phylogenetic signal. 1 is Brownian motion (i.e.&nbsp;the only variation left after you take out the phylogenetic signal is random).</p>
+<p>These functions also report Bloomberg’s K. Again, a value of 0 means independence, higher values = some sort of phylogenetic signal (it is unbounded).</p>
+<p>The P-value reports significance of effect (i.e.&nbsp;low p-values = significant phylogenetic signal).</p>
+<p>Finally, the functions also report a standardised effect size (Z).</p>
+<p>Lots of information to parse but handily, one function does it all for you!</p>
 </section>
 
 </main>
