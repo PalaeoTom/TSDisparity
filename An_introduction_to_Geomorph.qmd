@@ -145,12 +145,12 @@ Of course here one can use all the plotting options available in plotRefToTarget
 
 ### 2.2 Phylomorphospace
 
-One may also want to project a phylogeny (if dealing with species-level observations), and estimated ancestral states into the ordination plot produced before, to obtain what is commonly referred to as a "phylomorphospace" plot. This can be easily done by providing a phylogenetic tree during the analysis (which is however NOT used in the analytical step in this case, other than for estimating ancestral states), and then indicating that the phylogeny should also be plotted during the plotting step. For the Plethodon example data, we may project the phylogeny into the previous ordination plot as such:
+One may also want to project a phylogeny (if dealing with species-level observations), and estimated ancestral states into the ordination plot produced before, to obtain what is commonly referred to as a "phylomorphospace" plot. This can be easily done by providing a phylogenetic tree. This function estimates ancestral states before ordination takes place (i.e. using the raw data). For the Plethodon example data, we may project the phylogeny into the previous ordination plot as such:
 
 ```{r}
-PCA.w.phylo <- gm.prcomp(Y.gpa$coords, phy = plethspecies$phy)
+PCA.w.phylo <- gm.prcomp(Y.gpa$coords, phy = plethspecies$phy, GLS = F)
 summary(PCA.w.phylo)
-plot(PCA.w.phylo, phylo = TRUE, main = "PCA.w.phylo")
+plot(PCA.w.phylo, phylo = T, main = "PCA.w.phylo")
 ```
 
 Note that the summary statistics obtained for this analysis are identical to those from the previous one. This is because here the phylogeny is merely used for plotting, and is NOT considered during the analytical procedures.
@@ -163,7 +163,7 @@ Again, all plotting arguments can be directly manipulated by the user. Please se
 
 ### 2.3 phyloPCA
 
-Here, the phylogeny IS considered during the analytical step of the ordination, as the principal components analysis is in this case calculated based on GLS-centering and projection of the data. This is to account for the nonindependence among observations of species. For details on the analytical part of this method, see Revell 2009, Evolution 63: 3258 - 3268; Polly et al 2013, Hystrix 24: 33 - 41; Collyer & Adams, submitted.
+Here, the phylogeny IS considered during the analytical step of the ordination, as the principal components analysis is in this case calculated based on GLS-centering and projection of the data. This is to account for the nonindependence among observations of species. For details on the analytical part of this method, see Revell 2009, Evolution 63: 3258 - 3268; Polly et al 2013, Hystrix 24: 33 - 41; Collyer & Adams, submitted. This is effectively a PCA with a built in phylogenetic size correction.
 
 For the Plethodon example data, this analysis would be implemented and plotted as follows (first with untransformed residual projection, second with transformed residual projection):
 
@@ -469,7 +469,7 @@ add.trajectories(TP, traj.bg = 1:nlevels(gdf$treatment),
 
 ## 7.0 Testing for phylogenetic signal in GPA shape variables
 
-Finally, geomorph gives us the ability to test for phylogenetic signal in our Procrustes shape variables. Let's load a new dataset.
+Finally, geomorph gives us the ability to test for phylogenetic signal in our Procrustes shape variables without ordinating our data. Let's load a new dataset.
 
 ```{r}
 rm(list=ls())
@@ -481,8 +481,8 @@ Perform GPA and get shape variables.
 ```{r}
 Y.gpa <- gpagen(plethspecies$land)        
 ```
- 
-Now to test for phylogenetic signal in shape. We will use physignal.z. 
+
+Now to test for phylogenetic signal in shape. We will use physignal.z.
 
 ```{r}
 PS.shape <- physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front", iter = 1000)
@@ -490,6 +490,7 @@ summary(PS.shape)
 plot(PS.shape)
 plot(PS.shape$PACA, phylo = T)
 ```
+
 There seems to be a roblem with an ill-conditioned residual covariance matrix. Let's try shaving off one dimension (i.e. going from 8 dimensions to 7) by setting PAC.no to 7.
 
 ```{r}
@@ -516,5 +517,3 @@ The P-value reports significance of effect (i.e. low p-values = significant phyl
 Finally, the functions also report a standardised effect size (Z).
 
 Lots of information to parse but handily, one function does it all for you!
-
-

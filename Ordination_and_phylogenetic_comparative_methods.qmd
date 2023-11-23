@@ -7,7 +7,7 @@ editor: visual
 
 ## 1.0 Introduction
 
-This tutorial will introduce you to the various functions you can use to ordinate your data outside of the Vegan package. It will also take you show you how to perform stochastic character mapping (a form of ancestral state estimation) using Phytools and how to test for phylogenetic signal in categorical and continuous data using the Geiger package. 
+This tutorial will introduce you to the various functions you can use to ordinate your data outside of the Vegan package. It will also take you show you how to perform stochastic character mapping (a form of ancestral state estimation) using Phytools and how to test for phylogenetic signal in categorical and continuous data using the Geiger package.
 
 ### 1.1 Load packages
 
@@ -67,6 +67,7 @@ plot(PCs)
 ```
 
 ## 2.0 Base R
+
 ### 2.1 Principal components analysis
 
 Let's start simple with base R. Ordination in base R is wonderfully simple. For principal component analysis, we can use the prcomp function. First, let's generate a continuous dataset.
@@ -90,7 +91,7 @@ This doesn't provide the eigenvalues by default, so we'll need to use the eigen 
 c.eigen <- eigen(cov(c.data), only.values = T)$values
 ```
 
-Let's convert these into relative eigenvalues so we can so how the total variance is apportioned across the different axes. 
+Let's convert these into relative eigenvalues so we can so how the total variance is apportioned across the different axes.
 
 ```{r}
 names(c.eigen) <- paste0("PC",seq(1,20,1))
@@ -112,10 +113,10 @@ Lets generate a Euclidean distance matrix.
 dist <- dist(data)
 ```
 
-Now let's ordinate it using cmdscale (the base R function for principal coordinates analysis). Now it is worth noting that by default that cmdscale fits the data to just two axes. We don't want this. The maximum is n-1, where n is the number of points/species. In this case, we have 10, so let's set k to 9. 
+Now let's ordinate it using cmdscale (the base R function for principal coordinates analysis). Now it is worth noting that by default that cmdscale fits the data to just two axes. We don't want this. The maximum is n-1, where n is the number of points/species. In this case, we have 10, so let's set k to 9.
 
 ```{r}
-PCoA <- cmdscale(dist, k = 9, eig = T)
+PCoA <- cmdscale(sqrt(dist), k = 9, eig = T)
 ```
 
 Let's check the eigenvalues. Cmdscale returns them for us if eigen = TRUE.
@@ -148,7 +149,7 @@ Why not try plotting them and seeing how they differ? What about from an ordinat
 
 ## 4.0 Claddis
 
-Let's try ordinating data in Claddis! First let's load the library and load the dataset. 
+Let's try ordinating data in Claddis! First let's load the library and load the dataset.
 
 ```{r}
 library(Claddis)
@@ -162,20 +163,20 @@ Let's drop the three continuous characters as before.
 day_2016[[2]] <- NULL
 ```
 
-Claddis only supports principal coordinates analysis. However it does this all in one. 
+Claddis only supports principal coordinates analysis. However it does this all in one.
 
 ```{r}
 clad.PCoA <- ordinate_cladistic_matrix(day_2016, distance_metric = "mord", distance_transformation = "sqrt", correction = "none")
 ```
 
-You'll notice we received a warning that Claddis was unable to produce a complete distance matrix (essential for ordination). We can do this ahead of time by submitting a distance matrix to the trim_matrix function. 
+You'll notice we received a warning that Claddis was unable to produce a complete distance matrix (essential for ordination). We can do this ahead of time by submitting a distance matrix to the trim_matrix function.
 
 ```{r}
 clad.dist <- calculate_morphological_distances(day_2016, distance_metric = "mord", distance_transformation = "sqrt")
 trimmed.clad.dist <- trim_matrix(clad.dist$distance_matrix)
 ```
 
-You can see the taxa that have been trimmed by accessing the "removed_taxa" element of the object produced by trim_matrix. You can isolate the new distance matrix and add it to the distance matrix object as well. 
+You can see the taxa that have been trimmed by accessing the "removed_taxa" element of the object produced by trim_matrix. You can isolate the new distance matrix and add it to the distance matrix object as well.
 
 ```{r}
 trimmed.clad.dist$removed_taxa
@@ -236,8 +237,8 @@ You can see a couple of taxa have been dropped for the sake of a complete distan
 plot_morphospace(clad.PCoA, plot_taxon_names = F, taxon_groups = taxon_groups, plot_convex_hulls = TRUE, plot_internal_nodes = TRUE)
 ```
 
-
 See the below help documentation to explore what the other functions can do for you:
+
 ```{r}
 ?plot_chronophylomorphospace
 ```
@@ -252,7 +253,7 @@ See the below help documentation to explore what the other functions can do for 
 
 ## 5.0 dispRity
 
-dispRity has functionality for importing data from Claddis and geomorph and ordinating it, using principal coordinates analysis and principal components analysis respectively. Let's take a look. 
+dispRity has functionality for importing data from Claddis and geomorph and ordinating it, using principal coordinates analysis and principal components analysis respectively. Let's take a look.
 
 ```{r}
 library(dispRity)
@@ -308,6 +309,7 @@ geomorph.ordination(geomorph_df)
 Pagel's lambda is a robust measure of the amount of non-random variance in a dataset is explained by the associated tree. The R package phytools let's us derive an estimate of lambda by fitting a model of phylogenetic signal to our data. This works for continuous data. Geiger let's us derive it for discrete data. The former is particularly important, as this means you can test for phylogenetic in any ordinated data set (PC scores are continuous).
 
 Load the library. We'll load phytools too as it will give us some data to work with.
+
 ```{r}
 library(geiger)
 library(phytools)
@@ -316,25 +318,27 @@ library(phytools)
 ### 6.1 Continuous data
 
 Load the data.
+
 ```{r}
 data("anoletree")
 data("anole.data")
 name.check(anoletree, anole.data)
 ```
 
-Using phytools, you can calculate Bloomberg's K, which compares the variance of PICs to what we would espect under a Brownian motion model. K = 1 means that relatives resemble one another as much as we should expect under BM; K < 1 means that there is less “phylogenetic signal” than expected under BM, while K > 1 means that there is more. A significant p-value returned from phylosignal tells you that there is significant phylogenetic signal - that is, close relatives are more similar than random pairs of species.
+Using phytools, you can calculate Bloomberg's K, which compares the variance of PICs to what we would espect under a Brownian motion model. K = 1 means that relatives resemble one another as much as we should expect under BM; K \< 1 means that there is less "phylogenetic signal" than expected under BM, while K \> 1 means that there is more. A significant p-value returned from phylosignal tells you that there is significant phylogenetic signal - that is, close relatives are more similar than random pairs of species.
 
 ```{r}
 anoleSize <- anole.data[, 1]
 names(anoleSize) <- rownames(anole.data)
 phylosig(anoletree, anoleSize, test = T)
 ```
-Now let's calculate Pagel's lambda. Lambda is a tree transformation that stretches tip branches relative to internal branches, making the tree more and more like a complete polytomy. If our estimated lambda = 0, then the traits are inferred to have no phylogenetic signal. Lambda = 1 corresponds to a Brownian motion model; 0 < lambda < 1 is in between.
 
+Now let's calculate Pagel's lambda. Lambda is a tree transformation that stretches tip branches relative to internal branches, making the tree more and more like a complete polytomy. If our estimated lambda = 0, then the traits are inferred to have no phylogenetic signal. Lambda = 1 corresponds to a Brownian motion model; 0 \< lambda \< 1 is in between.
 
 ```{r}
 phylosig(anoletree, anoleSize, method = "lambda", test = T)
 ```
+
 That is some strong phylogenetic signal! You could also achieve this by using fitContinuous in Geiger. Let's compare this to a simple Brownian motion model.
 
 ```{r}
@@ -354,7 +358,8 @@ The lower the better when it comes to AIC scores, so our lambda model is a bette
 
 With discrete data, we need to use a different statistic, Fritz & Purvis's D. It is the sum of changes in estimated nodal values of a binary trait along edges in a phylogeny (D) provides a measure of the phylogenetic signal in that trait (Fritz and Purvis, 2010). If a trait is highly conserved, with only a basal division between two clades expressing either trait value, then the only change will be along the two daughters at the root. This will give a summed value of 1: the two differences between the root nodal value of 0.5 and the ancestors of the 1 and 0 clades. In contrast, if the trait is labile, more differences will be observed and the sum will be higher.
 
-We will calculate this using the phylo.D function from the caper package. First we will load the data and convert it to the necessay format. 
+We will calculate this using the phylo.D function from the caper package. First we will load the data and convert it to the necessay format.
+
 ```{r}
 library(caper)
 data(BritishBirds)
@@ -362,23 +367,28 @@ BritishBirds <- comparative.data(BritishBirds.tree, BritishBirds.data, binomial)
 ```
 
 Calculate Fritz & Purvis' D
+
 ```{r}
 redPhyloD <- phylo.d(BritishBirds, binvar=Red_list)
 print(redPhyloD)
 ```
-The estimated D is below 1 and the probablility of this pattern emerging from Brownian phylogenetic structure is higher than it being random. This indicates that phylogenetic signal is at least partially responsible or the variance in the data. 
+
+The estimated D is below 1 and the probablility of this pattern emerging from Brownian phylogenetic structure is higher than it being random. This indicates that phylogenetic signal is at least partially responsible or the variance in the data.
 
 ## 7.0 Ancestral state estimation using Phytools
+
 Phytools supports a wide variety of ancestral state estimation. There are plenty to choose from and I'd do some reading around to determine which models will work best for you. I've stored a couple of tutorials in the session folder for the estimation of continuous ancestral states under Brownian motion and discrete ancestral states under the Mk model as HTML documents. It might be worth looking through these in your spare time. In the meantime, we'll go through ancr, a function which lets you estimate ancestral states under almost any model, and Bayesian stochastic character mapping.
 
-As stated previously, you can should estimate your ancestral states prior to ordination and distance matrix derivation (if applicable), add these values to your main data matrix, and then just analyse the supplemented matrix as a normal matrix. Note that geomorph let's you do this with GPA-aligned coordinates. This is absolutely fine. 
+As stated previously, you can should estimate your ancestral states prior to ordination and distance matrix derivation (if applicable), add these values to your main data matrix, and then just analyse the supplemented matrix as a normal matrix. Note that geomorph let's you do this with GPA-aligned coordinates. This is absolutely fine.
 
 ### 7.1 ancr
-The idea of this (generic) method is that it takes a fitted discrete character evolution (e.g., from fitMk or fitHRM) and then computes the marginal reconstructions under that model. Marginal ancestral states are also referred to as scaled likelihoods, and it’s valid to interpret them as the probabilities that each node is in each of the different states, conditioning on the fitted model. (This is why they are also called “empirical Bayes” posterior probabilities – because they are posterior probabilities but in which we condition, normally, on the ML value of our transition model, Q.)
 
-To illustrate this method, we’re going to apply it to a trait evolution scenario for the so-called “hidden-rates-model” of Beaulieu et al. (2013). For this, we'll use a dataset of parity mode in liolaemid lizards from Esquerré et al. (2018). Previous analyses found that the best-supported model for these data was a class of hidden-rates-model that I refer to as the ‘umbral’ model in which we have hidden states of the character (say 0* and 1* for an observed character with two levels 0 & 1), but in which evolution always had to proceed 0* ⇆ 0 ⇆ 1 ⇆ 1*. The idea is to capture “cold” and “hot” conditions for the state, in which when in the cold condition the character can’t evolve at all without first transitioning back to the hot condition.
+The idea of this (generic) method is that it takes a fitted discrete character evolution (e.g., from fitMk or fitHRM) and then computes the marginal reconstructions under that model. Marginal ancestral states are also referred to as scaled likelihoods, and it's valid to interpret them as the probabilities that each node is in each of the different states, conditioning on the fitted model. (This is why they are also called "empirical Bayes" posterior probabilities -- because they are posterior probabilities but in which we condition, normally, on the ML value of our transition model, Q.)
+
+To illustrate this method, we're going to apply it to a trait evolution scenario for the so-called "hidden-rates-model" of Beaulieu et al. (2013). For this, we'll use a dataset of parity mode in liolaemid lizards from Esquerré et al. (2018). Previous analyses found that the best-supported model for these data was a class of hidden-rates-model that I refer to as the 'umbral' model in which we have hidden states of the character (say 0\* and 1\* for an observed character with two levels 0 & 1), but in which evolution always had to proceed 0\* ⇆ 0 ⇆ 1 ⇆ 1\*. The idea is to capture "cold" and "hot" conditions for the state, in which when in the cold condition the character can't evolve at all without first transitioning back to the hot condition.
 
 Load the tree.
+
 ```{r}
 liolaemid.tree<-read.nexus(
   file="http://www.phytools.org/Rbook/7/Liolaemidae.MCC.nex")
@@ -387,6 +397,7 @@ liolaemid.tree
 ```
 
 Load the data.
+
 ```{r}
 liolaemid.data<-read.csv(
   file="http://www.phytools.org/Rbook/7/Liolaemidae.data.csv",
@@ -397,7 +408,8 @@ levels(parity_mode)<-c("oviparous","viviparous")
 head(parity_mode)
 ```
 
-So far so good. Now, we’ll fit our model using phytools::fitHRM. Be forewarned: this takes a while!
+So far so good. Now, we'll fit our model using phytools::fitHRM. Be forewarned: this takes a while!
+
 ```{r}
 hrm.umbral<-fitHRM(liolaemid.tree,parity_mode,umbral=TRUE,
     pi="fitzjohn",opt.method="optimParallel",rand_start=TRUE)
@@ -405,18 +417,21 @@ hrm.umbral
 ```
 
 If we graph our fitted model, we should see that it corresponds nicely to the process we hypothesized.
+
 ```{r}
 plot(hrm.umbral,spacer=0.3,offset=0.03,
   mar=rep(0.1,4))
 ```
 
-Having fit this model to our data, we just need to pass the fitted object directly to our new ancr (formerly, briefly anceb) as follows. The only argument I’m going to specify is tips=TRUE which will return the posterior probabilities that each of the leaves of the tree are in each of the two unobserved conditions of the character, given its observed state.
+Having fit this model to our data, we just need to pass the fitted object directly to our new ancr (formerly, briefly anceb) as follows. The only argument I'm going to specify is tips=TRUE which will return the posterior probabilities that each of the leaves of the tree are in each of the two unobserved conditions of the character, given its observed state.
+
 ```{r}
 parity_ancr<-ancr(hrm.umbral,tips=TRUE)
 parity_ancr
 ```
 
-Lastly, let’s graph these probabilities onto the tree. This is a pretty swish bit of plotting code courtesy of Liam Revell's blog (a place I'd highly recommend visiting).
+Lastly, let's graph these probabilities onto the tree. This is a pretty swish bit of plotting code courtesy of Liam Revell's blog (a place I'd highly recommend visiting).
+
 ```{r}
 # set max node height
 h<-max(nodeHeights(liolaemid.tree))
@@ -446,9 +461,11 @@ nodelabels(pie=parity_ancr$ace[1:Nnode(liolaemid.tree)+
 ```
 
 ### 7.2 stochastic character mapping
+
 Stochastic character mapping is a fully Bayesian approach to ancestral state estimation. Phytools supports this via the make.simmap function. This is my preferred option for the ancestral state estimation of discrete characters.
 
-Generate tree and Q matrix (defining substitution rates), then add character data to tree. 
+Generate tree and Q matrix (defining substitution rates), then add character data to tree.
+
 ```{r}
 tree <- pbtree(n = 200, scale = 1)
 Q <- matrix(c(-1,1,1,-1),2,2)
@@ -456,18 +473,21 @@ rownames(Q) <- colnames(Q) <- letters[1:nrow(Q)]
 tree <- sim.history(tree,Q,anc="a")
 ```
 
-Now conduct stochastic character mapping. 
+Now conduct stochastic character mapping.
+
 ```{r}
 mtrees <- make.simmap(tree, tree$states, model="ER", nsim = 100, pi="estimated")
 ```
 
 Now let's plot the first result using the bespoke function phytools provides. These results are binary because it's just one tree.
+
 ```{r}
 cols <- setNames(c("blue","red"), letters[1:nrow(Q)])
 plotSimmap(mtrees[[1]], cols , pts=F , ftype="off")
 ```
 
 One advantage of stochastic character mapping is that we can compute the posterior probabilities of each character state being present at each node. Let's summarise across all the simmaps we produced. First we'll define a function that will do this for us.
+
 ```{r}
 # function to compute the states
  foo <- function(x){
@@ -482,13 +502,11 @@ AA <- sapply(mtrees,foo)
 piesA <- t(apply(AA,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=letters[1:3], Nsim=100))
 ```
 
-Now let's plot the summary of our analyses. This is a fun way of see how characters evolve along a tree. 
+Now let's plot the summary of our analyses. This is a fun way of see how characters evolve along a tree.
+
 ```{r}
 plot.phylo(tree,no.margin=TRUE,show.tip.label=F)
 nodelabels(pie=piesA,cex=0.6,piecol=cols)
 ```
 
-In your disparity analyses, you will have to decide on a probability threshold for determining character scores at each node. This is entirely arbitrary and can be worth exploring. 
-
-
-
+In your disparity analyses, you will have to decide on a probability threshold for determining character scores at each node. This is entirely arbitrary and can be worth exploring.
