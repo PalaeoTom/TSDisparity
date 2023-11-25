@@ -372,7 +372,8 @@ The methods discriminate between families. The family Acanthuridae is displayed 
 These is a really great demonstration of how improved resolution can change our perception of disparity.
 
 ### 5.3 Quantification of differentiation
-In addition to visual interpretations with the convex hull in morphospace, we can quantify the degree of differentiation among taxonomic groups by calculating their silhouette value. The silhouette value is based on the difference between the average distance within groups (their cohesion or density) and the average distances between groups (their separation). The silhouette value ranges from -1 to +1, with higher values indicating a high degree of separation. 
+
+In addition to visual interpretations with the convex hull in morphospace, we can quantify the degree of differentiation among taxonomic groups by calculating their silhouette value. The silhouette value is based on the difference between the average distance within groups (their cohesion or density) and the average distances between groups (their separation). The silhouette value ranges from -1 to +1, with higher values indicating a high degree of separation.
 
 Let's start by calculating the silhouette value for the traditional morphometrics data.
 
@@ -406,4 +407,3 @@ summary(sOA)$avg.width
 The silhouette values support what the plots are showing - that all methods are able to differentiate families in morphospace. Any value above 0.4 is considered high. In this case, LA shows the highest separation among families with a silhouette of 0.65.
 
 Why not try these analyses again with a different grouping scheme? Perhaps one based on genus? All you need to do is add another column to the traits object denoting genera.
-
