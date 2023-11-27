@@ -56,7 +56,7 @@ detr_shapes <- detrend_shapes(model, method = "residuals") %>% arrayspecs(p = nr
 sp_shapes <- expected_shapes(shapes = detr_shapes, x = spp)
 ```
 
-## 2.0 Generating morphospaces 
+## 2.0 Generating morphospaces
 
 Once the shape data is ready, we build a morphospace using the mspace function and then use the resulting ordination as a canvas in which to project different elements depicting various aspects of morphometric variation (scatter points, groups centroids, convex hulls, confidence ellipses, a phylogeny, etc). These elements are added both to the plot and the "mspace" object as consecutive 'layers' and list slots, respectively, using the proj\_\* family of functions and the %\>% pipe operator from the magrittr package (Bache & Wickham 2022).
 
@@ -67,6 +67,7 @@ For clarity, this is still an empirical morphospace because the data plotted are
 msp1 <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>% proj_shapes(shapes = detr_shapes)
 title("Morphospace", cex.main = 1)
 ```
+
 Now let's generate our morphospace (i.e. plot the axes), plot the obsevations, and plot convex hulls. All with colour!
 
 ```{r}
@@ -76,7 +77,7 @@ msp2 <- mspace(detr_shapes, links = wf, cex.ldm = 5) %>%
 title("Morphospace\n+ species differentiation", cex.main = 1)
 ```
 
-How about we add a phylogeny? Let's use proj_phylogeny to do so. 
+How about we add a phylogeny? Let's use proj_phylogeny to do so.
 
 ```{r}
 msp3 <- mspace(shapes = detr_shapes, links = wf, cex.ldm = 5) %>% 
@@ -109,7 +110,7 @@ title("Morphospace\n+ PC1 and PC2 of NDF species projected", cex.main = 1)
 
 Finally, landscape surfaces intended to represent functional or performance measurements can be projected as contour maps with proj_landscape. These surfaces are interpolated using the akima package (Akima & Gebhardt 2022) from values provided directly through the argument X and corresponding to the shapes provided through the shapes argument, or computed through the latter using an arbitrary function, provided using the argument FUN.
 
-These landscapes can be computed for either a region of the morphospace from a sample of empirical shapes occupying that region (“empirical landscapes”) or from the set of synthetic shapes mapping morphometric variation in the background (“theoretical landscapes”). For the latter case, leave shapes = NULL; if values are been provided using X these must have been computed beforehand and arranged in the same order as the shape models in the background (that is, from left to right and from bottom to top), which can be extracted using extract_shapes. This last step is not necessary if FUN is provided. A scalebar can be added using plot_mspace and scalebar = TRUE.
+These landscapes can be computed for either a region of the morphospace from a sample of empirical shapes occupying that region ("empirical landscapes") or from the set of synthetic shapes mapping morphometric variation in the background ("theoretical landscapes"). For the latter case, leave shapes = NULL; if values are been provided using X these must have been computed beforehand and arranged in the same order as the shape models in the background (that is, from left to right and from bottom to top), which can be extracted using extract_shapes. This last step is not necessary if FUN is provided. A scalebar can be added using plot_mspace and scalebar = TRUE.
 
 ```{r}
 # compute lift/drag ratio for each tail in the data set
@@ -139,10 +140,8 @@ plot_mspace(mspl, display.landsc = "filled.contour", palette.landsc = terrain.co
 ```
 
 ## 3.0 Ordination methods
-The default settings of mspace rely on the prcomp function from the stats package to build the synthetic morphometric space. However, morphospace also provides functions for other ordination methods, namely:
-1. Phylogenetic PCA (Revell 2009) (implemented through the phy_prcomp function, which wraps phyl.pca from phytools, Revell 2012).
-2. Between-groups PCA, which finds the combinations of traits that maximise the separation of clusters (bg_prcomp function - produces number of axes equal to lowest number of groups minus one, number of original variables, and the number of observations).
-3. Both ordinary and phylgenetic versions of Partial Least Squares (PLS), used to test for covariation (pls_shapes function [an user-friendly wrapper of pls2b, which is used in the following chunk to test for covariation with a synthetic covariate]). 
+
+The default settings of mspace rely on the prcomp function from the stats package to build the synthetic morphometric space. However, morphospace also provides functions for other ordination methods, namely: 1. Phylogenetic PCA (Revell 2009) (implemented through the phy_prcomp function, which wraps phyl.pca from phytools, Revell 2012). 2. Between-groups PCA, which finds the combinations of traits that maximise the separation of clusters (bg_prcomp function - produces number of axes equal to lowest number of groups minus one, number of original variables, and the number of observations). 3. Both ordinary and phylgenetic versions of Partial Least Squares (PLS), used to test for covariation (pls_shapes function \[an user-friendly wrapper of pls2b, which is used in the following chunk to test for covariation with a synthetic covariate\]).
 
 These have been styled/wrapped to share format with prcomp, and both bgPCA and PLS functions allow for leave-one-out cross-validation (LOOCV), which alleviates some spurious patterns that arise when the number of variables exceeds the number of samples (as it is common in geometric morphometric analyses; see Cardini et al. 2019 and Cardini & Polly 2020).
 
@@ -186,7 +185,7 @@ abline(lm(pls2$yscores ~ pls2$xscores), col = "red")
 title("PLS\n with LOOCV", cex.main = 1)
 ```
 
-These methods can be used instead of regular PCA for building morphospaces via the FUN and ... arguments (adding the argument groups for bg_prcomp, tree for phy_prcomp, and X [and potentially also a tree] for pls_shapes, respectively) of the mspace function. The resulting morphospace can be combined with the proj_* functions in the same way as before. Note we can add a legend separately by using plot_mspace.
+These methods can be used instead of regular PCA for building morphospaces via the FUN and ... arguments (adding the argument groups for bg_prcomp, tree for phy_prcomp, and X \[and potentially also a tree\] for pls_shapes, respectively) of the mspace function. The resulting morphospace can be combined with the proj\_\* functions in the same way as before. Note we can add a legend separately by using plot_mspace.
 
 ```{r}
 msp.IV <- mspace(detr_shapes, FUN = bg_prcomp, LOOCV = TRUE, groups = spp, links = wf, invax = c(1,2), cex.ldm = 5, plot = T) %>%
@@ -209,7 +208,8 @@ title("Phylogenetic morphospace + samples", cex.main = 1)
 ```
 
 ## 4.0 Flexible visualisation
-Finally, "mspace" objects created using the mspace %>% proj_* pipeline can be regenerated/modified with the plot_mspace function, which adds further graphical flexibility. By plotting a "mspace" object using this function we can regenerate an existing morphospace as it was created; alternatively, we can select a different set of axes to plot, choose other colors and symbols for points, groups, etc (or not), or add a legend (see chunk above). In addition, this function also allow combining morphometric axes with other non-shape variables to produce ‘hybrid’ morphospaces.
+
+Finally, "mspace" objects created using the mspace %\>% proj\_\* pipeline can be regenerated/modified with the plot_mspace function, which adds further graphical flexibility. By plotting a "mspace" object using this function we can regenerate an existing morphospace as it was created; alternatively, we can select a different set of axes to plot, choose other colors and symbols for points, groups, etc (or not), or add a legend (see chunk above). In addition, this function also allow combining morphometric axes with other non-shape variables to produce 'hybrid' morphospaces.
 
 For example, PC1 can be plotted against size to explore allometric patterns:
 
@@ -234,13 +234,16 @@ plot_mspace(msp, y = phy, axes = 1, nh = 6, nv = 6, cex.ldm = 4,
             col.groups = 1:nlevels(spp), ylab = "Time", legend = TRUE)
 ```
 
-(Note: that legend’ labels are taken from the factor provided in the groups argument from proj_groups, whereas symbols and colors are taken from proj_shapes and proj_groups graphical parameters)
+(Note: that legend' labels are taken from the factor provided in the groups argument from proj_groups, whereas symbols and colors are taken from proj_shapes and proj_groups graphical parameters)
 
 ## 5.0 Other examples
+
 ### 5.1 2D landmark data
+
 Most of the capabilities for 2D landmark data visualization is covered in sections 1-4.. This section will quickly show how to use a curve or set of curves outlining aspects of the phenotype not captured by the chosen landmarks to improve visualizations via thin-plate spline (TPS) interpolation. To do so we use the wings data set, which has been taken from Soto et al. (2012) and includes wing shape data from 263 experimentally bred specimens belonging to two recently diverged cactophilic Drosophila species, D. koepferae and D. buzzattii. These two species show preference to different host cacti (columnar cacti from the genus Trichocereus and prickly pears from the genus Opuntia, respectively) and are considered morphologically cryptic (usually, they can be recognized only from genital morphology). The data set include the centroid size of each wing, as well as information on the host cacti each specimen was bred on, its species, sex, isofemale line, and replica. Also included is a template containing a series of curves describing wing outline and veins (created using build_template2d), which will be warped using TPS interpolation and used to generate fancy shape models for our morphospace.
 
 First, let's load the data.
+
 ```{r}
 # Load wing data 
 setwd("datasets")
@@ -282,7 +285,7 @@ mspace(shapes, template = curvs, col.ldm = "black", cex.ldm = 5, plot = T) %>%
 title("Morphospace using template")
 ```
 
-Let's assume for a second we are interested in exploring whether we can identify morphological differences between species. The pattern we are seeing suggests that variation in wing morphology is very subtle, that wings of these two species are basically indistinguishable, and that cactus has a large effect on wing morphology. However, there is a lot of ‘noise’ (i.e. sexual dimorphism, allometric variation, genetic variation, even host cactus) we can get rid of using detrend_shapes. We do this species-wise, so that patterns of interspecific variation are not blurred.
+Let's assume for a second we are interested in exploring whether we can identify morphological differences between species. The pattern we are seeing suggests that variation in wing morphology is very subtle, that wings of these two species are basically indistinguishable, and that cactus has a large effect on wing morphology. However, there is a lot of 'noise' (i.e. sexual dimorphism, allometric variation, genetic variation, even host cactus) we can get rid of using detrend_shapes. We do this species-wise, so that patterns of interspecific variation are not blurred.
 
 ```{r}
 detr_shapes <- shapes * 0
@@ -308,9 +311,9 @@ for(i in 1:2) {
 }
 ```
 
-(Note: we do this in several step for a good reason: when we use detrend_shapes to detrend shape variation, the grand mean is used by default as the new mean shape of the sample; however by specifying a value or level of x from the model in the xvalue argument, we can use that new value as the mean shape for our ‘detrended’ shape variation. In this case, we are analitically displacing all the wings to the shapes they should have if reared in their primary host cactus, and attained their species’ maximum size).
+(Note: we do this in several step for a good reason: when we use detrend_shapes to detrend shape variation, the grand mean is used by default as the new mean shape of the sample; however by specifying a value or level of x from the model in the xvalue argument, we can use that new value as the mean shape for our 'detrended' shape variation. In this case, we are analitically displacing all the wings to the shapes they should have if reared in their primary host cactus, and attained their species' maximum size).
 
-Once shape variation has been ‘refined’, we can ordinate it again, and magnify variation so the representation can be more easily interpreted using the mag argument.
+Once shape variation has been 'refined', we can ordinate it again, and magnify variation so the representation can be more easily interpreted using the mag argument.
 
 ```{r}
 mspace(detr_shapes, template = curvs, col.ldm = "black",
@@ -324,10 +327,11 @@ mspace(detr_shapes, template = curvs, col.ldm = "black",
   plot_mspace(legend = TRUE, cex.legend = 1.5)
 ```
 
-So, after ‘cleaning’ the raw variation interspecific differences become apparent with each species occupying different regions of wing morphospace (elongated and more triangular in D. koepferae, relatively higher and more rounded in D. buzzattii).
+So, after 'cleaning' the raw variation interspecific differences become apparent with each species occupying different regions of wing morphospace (elongated and more triangular in D. koepferae, relatively higher and more rounded in D. buzzattii).
 
 ### 5.2 Closed outlines
-morphospace can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the purposes of import, normalize and and analize this data we rely on the Momocs package, and use its "OutCoe" format for storing closed outlines as starting point. Below the mspace %>% proj_* workflow is applied to the shells data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus Ptychomya, tracking their shape changes through a 5 million years interval from the Lower Cretaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, geochronologic age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
+
+morphospace can also handle closed outline data in the form of Fourier coefficients resulting from an elliptic Fourier analysis. For the purposes of import, normalize and and analize this data we rely on the Momocs package, and use its "OutCoe" format for storing closed outlines as starting point. Below the mspace %\>% proj\_\* workflow is applied to the shells data set taken from Milla Carmona et al. (2018). This include data from 137 specimens belonging to 4 species of the extinct bivalve genus Ptychomya, tracking their shape changes through a 5 million years interval from the Lower Cretaceous of Argentina. The data set includes the information about the shape (measured using 7 harmonics), centroid size, geochronologic age (both relative and absolute), geographic provenance, and taxonomic classification of each specimen.
 
 ```{r}
 #Load Momocs
@@ -370,7 +374,7 @@ for(i in 1:nlevels(species)) {
 }
 ```
 
-Note that we don’t need arrayspecs when using detrend_shapes here, that’s because Fourier coefficients are already stored in matrix format).
+Note that we don't need arrayspecs when using detrend_shapes here, that's because Fourier coefficients are already stored in matrix format).
 
 Now we can use plot_mspace again to create a more complex hybrid plot combining shape changes associated to PC1 against the time axis. To do so, we first do a bit of variable manipulation to obtain 1) a factor combining species classification and relative age (i.e. biozones), and 2) the mean shapes and 3) mean ages of the resulting levels. Then, we build the morphospace (this time, using detrended shapes and between-groups PCA).
 
@@ -398,7 +402,7 @@ for(i in 1:4) {
 }
 ```
 
-Finally, we use plot_mspace to plot geochronologic age against shape. To add lines connecting the mean shape of each combination of species and biozone, we first bind them as columns, order them, and use a for loop . This particular ‘hybrid’ morphospace is much more useful to depict species’ mean morphological changes through time.
+Finally, we use plot_mspace to plot geochronologic age against shape. To add lines connecting the mean shape of each combination of species and biozone, we first bind them as columns, order them, and use a for loop . This particular 'hybrid' morphospace is much more useful to depict species' mean morphological changes through time.
 
 ```{r}
 # Another visualization (probably better to interpreting temporal patterns): 
@@ -421,11 +425,12 @@ title(' "Stratomorphospace" ')
 From these plots we can say that, regarding the shell outline, 1) P esbelta is rather different from the rest of the species, 2) P coihuicoensis and P. windhauseni are very similar to each other, and 3) most of the species show little or no net change over their stratigraphic span (in other words they seem to be under morphological stasis), with the exception of P. windhauseni which shows a short but noticeable directional trend towards higher shells.
 
 ### 5.3 3D landmark data
-Last but not least, morphospace can also deal with 3D landmark data (my personal preference for importing and normalizing 3D landmark data are the functions from Morpho, but other packages can do this too). To show how to apply the mspace %>% proj_* workflow we use the shells3D data set taken from Milla Carmona et al. (2021), which gathers longitudinal ontogenetic data from 67 specimens belonging to 7 species of the extinct bivalve genus Steinmanella from the Lower Cretaceous of Argentina. The shape of these specimens was registered at different sizes using growth lines, and so the data set includes a total of 278 shapes quantified using 90 surface semilandmarks. Also included are the corresponding centroid sizes, the id of the specimen each shape was taken from, and information about biostratigraphic age, taxonomic classification and geographic provenance of each specimen. The surface mesh corresponding to the specimen closest to the consensus of the sample (found using geomorph::findMeanSpec) is also included.
+
+Last but not least, morphospace can also deal with 3D landmark data (my personal preference for importing and normalizing 3D landmark data are the functions from Morpho, but other packages can do this too). To show how to apply the mspace %\>% proj\_\* workflow we use the shells3D data set taken from Milla Carmona et al. (2021), which gathers longitudinal ontogenetic data from 67 specimens belonging to 7 species of the extinct bivalve genus Steinmanella from the Lower Cretaceous of Argentina. The shape of these specimens was registered at different sizes using growth lines, and so the data set includes a total of 278 shapes quantified using 90 surface semilandmarks. Also included are the corresponding centroid sizes, the id of the specimen each shape was taken from, and information about biostratigraphic age, taxonomic classification and geographic provenance of each specimen. The surface mesh corresponding to the specimen closest to the consensus of the sample (found using geomorph::findMeanSpec) is also included.
 
 The rgl package (Murduch & Adler 2021) is responsible for depiction of 3D models, which imposes some important differences in the way morphospace functions work. Most importantly, each time mspace or plot_mspace is called, a rgl device will pop up and the user will be asked to rotate a reference shape to a desired orientation. Do not close or minimize this window, just expand it and/or rotate and zoom in/out the model and then go to the console and hit Enter there directly.
 
-We start by loading the relevant packages and set a rotation matrix for rgl models (you wouldn’t normally need this step, but because I since cannot rotate the device when knitting this becomes necessary. However it can also be useful to use it in your workflow too, so you don’t need to worry about finding exactly the same orientation over and over again.)
+We start by loading the relevant packages and set a rotation matrix for rgl models (you wouldn't normally need this step, but because I since cannot rotate the device when knitting this becomes necessary. However it can also be useful to use it in your workflow too, so you don't need to worry about finding exactly the same orientation over and over again.)
 
 ```{r}
 library(Morpho)
@@ -439,7 +444,7 @@ par3d(userMatrix =
 )
 ```
 
-Now we load out data and extract the necessary elements. Keep an eye on your RGL window as you do this. 
+Now we load out data and extract the necessary elements. Keep an eye on your RGL window as you do this.
 
 ```{r}
 # Load data from 3D shells, extract shapes and classification into species
@@ -568,4 +573,3 @@ plot_mspace(allomsp2, x = sizes, axes = 1, xlab = "log-size",
 ```
 
 A quick assessment of these plots tells us that there are two main groups of ontogenies: those from S. quintucoensis and S. subquadrata (which go from roughly quadrate shells with expanded posteriors to more rectangular shells) and the rest of the species, whose ontogenetic trajectories seem to be very similar in terms of orientation and magnitude (all of them go from more oval-like shells to more triangular ones, although the position of the trajectory differs). The exception is S. vacaensis, which show a protracted trajectory which reach some very elongated shell shapes. It is also apparent that the common trend is one of anteroposterior elongation, which seems to be more marked for the two species reaching larger sizes (S. pehuenmapuensis and S. vacaensis).
-

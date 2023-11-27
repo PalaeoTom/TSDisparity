@@ -1,0 +1,68 @@
+---
+title: "Simulations tutorial"
+author: Thomas J. Smith
+format: html
+editor: visual
+---
+
+## 1.0 Introduction
+Simulations have two primary uses in analyses of disparity. They can be used to explore the impact of potentially confounding factors so as to ensure the only differences between treatments are in said potentially confounding factor. Additionally, they can be used to visualise and test the fit of patterns in disparity to evolutionary models. 
+
+dispRity offers the most varied functions for simulating morphological data. However, we can also use 'r' variants of the base R distribution functions (e.g. rnorm, runif etc) and rTraitDisc and rTraitCont in ape.
+
+## 2.0 Base R
+The simplest way to generate data in R is to use the 'r' variants of the distribution functions and the 'sample' function. 
+
+### 3.1 Discrete character data
+We can generate binary discrete character data (and convert it to a matrix) using the sample function by sampling a vector over and over again:
+
+```{r}
+d.data <- matrix(sample(c(0,1), size = 1000, replace = T), ncol = 100)
+rownames(data) <- paste0("Species_", seq(1,10,1))
+colnames(data) <- paste0("C", seq(1,100,1))
+View(data)
+```
+
+### 3.2 Continuous data
+We can generate traditional morphometric data using the dist functions. These data can be uniform, normal, or lognormally distributed. 
+
+Normal distribution (we need the abs() function to ensure we don't simulate negative values):
+```{r}
+norm.c.data <- matrix(abs(rnorm(1000, mean = 3, sd = 1)), ncol = 100)
+rownames(norm.c.data) <- paste0("Species_", seq(1,10,1))
+colnames(norm.c.data) <- paste0("C", seq(1,100,1))
+View(norm.c.data)
+```
+
+Uniform distribution:
+```{r}
+unif.c.data <- matrix(runif(1000, min = 0.01, max = 5), ncol = 100)
+rownames(unif.c.data) <- paste0("Species_", seq(1,10,1))
+colnames(unif.c.data) <- paste0("C", seq(1,100,1))
+View(unif.c.data)
+```
+
+Lognormal distribution (again, abs() needed):
+```{r}
+lnorm.c.data <- matrix(rlnorm(1000, meanlog = 1, sdlog = 0.1), ncol = 100)
+rownames(lnorm.c.data) <- paste0("Species_", seq(1,10,1))
+colnames(lnorm.c.data) <- paste0("C", seq(1,100,1))
+View(lnorm.c.data)
+```
+
+Wrap these scripts in lapply and you can very quickly generate a list of matrices.
+
+## 3.0 Ape
+Ape gives us the ability to simulate along trees. This allows us to generate data with phylogenetic signal, which can be useful. There are two functions we can use: rTraitDisc and rTraitCont. First, let's simulate some phylogenetic trees.
+
+Generating a tree. n specifies the number of tips. We can specify how to generate branch lengths using the br function. By default, it samples lengths from a uniform distribution bounded between 0 and 1. We don't want zero-length branch lengths so let's change this so the branch lengths are more akin to a time-calibrated tree (submit arguments min and max to rtree).
+
+```{r}
+library(ape)
+tree <- rtree(n = 10, rooted = TRUE, br = runif, min = 0.1, max = 50)
+```
+
+
+
+
+## 4.0 dispRity
