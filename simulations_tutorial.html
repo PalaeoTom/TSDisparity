@@ -148,15 +148,181 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="ape" class="level2">
 <h2 class="anchored" data-anchor-id="ape">3.0 Ape</h2>
-<p>Ape gives us the ability to simulate along trees. This allows us to generate data with phylogenetic signal, which can be useful. There are two functions we can use: rTraitDisc and rTraitCont. First, let’s simulate some phylogenetic trees.</p>
+<p>Ape gives us the ability to simulate along trees. This allows us to generate data with phylogenetic signal, which can be useful. There are three functions we can use: rTraitDisc, rTraitMulti, and rTraitCont. First, however, let’s take a look at how we can simulate phylogenetic trees.</p>
 <p>Generating a tree. n specifies the number of tips. We can specify how to generate branch lengths using the br function. By default, it samples lengths from a uniform distribution bounded between 0 and 1. We don’t want zero-length branch lengths so let’s change this so the branch lengths are more akin to a time-calibrated tree (submit arguments min and max to rtree).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">rtree</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">rooted =</span> <span class="cn">TRUE</span>, <span class="at">br =</span> runif, <span class="at">min =</span> <span class="fl">0.1</span>, <span class="at">max =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">rtree</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">tip.label =</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"Species_"</span>, <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">1</span>))), <span class="at">rooted =</span> <span class="cn">TRUE</span>, <span class="at">br =</span> runif, <span class="at">min =</span> <span class="fl">0.1</span>, <span class="at">max =</span> <span class="dv">50</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">makeNodeLabel</span>(tree)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">edgelabels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="simulations_tutorial_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+<p>Simple!</p>
+<section id="simulating-continuous-data-along-a-tree" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-continuous-data-along-a-tree">3.1 Simulating continuous data along a tree</h3>
+<p>Now we have a tree, we can simulate data. Let’s simulate a matrix along our tree. rTraitCont let’s us do this under Brownian motion or Ornstein-Uhlenbeck models. Let’s start with Brownian motion. Sigma specifies the standard deviation of the random component for each branch - higher values will mean a greater range of values.</p>
+<p>We can simulate data under a fixed rate for each species. Let’s generate 10 characters start. We will achieve this by wrapping rTraitCont in the sapply function as below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>BM.cont.ape <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="cf">function</span>(all) <span class="fu">rTraitCont</span>(<span class="at">phy =</span> tree, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> <span class="fl">0.1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These functions also allow you to simulate data under variable rates of evolution (i.e.&nbsp;greater or smaller changes will be possible along each branch). This is done by submitting a vector to rTraitCont of length = number of branch lengths. Note that the submitted sigma values will be applied to branches in postorder order. You can visualise this with the following script:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">reorder</span>(tree, <span class="at">order =</span> <span class="st">"po"</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">edgelabels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="simulations_tutorial_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now to simulate data with a rate shift along branch 11. Lets return the nodes as well so we can record it better by setting ancestor to true.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>BM.cont.ape.varR <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="cf">function</span>(all) <span class="fu">rTraitCont</span>(<span class="at">phy =</span> tree, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="fl">0.5</span>,<span class="dv">11</span>),<span class="fu">rep</span>(<span class="fl">0.1</span>,<span class="dv">7</span>)), <span class="at">ancestor =</span> T))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can simulate data under an OU model the same way. We simply need to add two more arguments: theta, the optimum value the trait will be drawn back to, and alpha, the strength of selective constraint that will operate on the trait (i.e.&nbsp;how strongly will it be drawn back to state theta).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>OU.cont.ape <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="cf">function</span>(all) <span class="fu">rTraitCont</span>(<span class="at">phy =</span> tree, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">theta =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">sigma =</span> <span class="fl">0.1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the same way rate can be made to vary between branches in the BM model, rate, optimum value, and strength of selection for optimum value can be made to vary between branches by submitting vectors to arguments sigma, theta, and alpha respectively. Why not try it?</p>
+<p>Note that these functions all produce negative values. You can preserve the distribution of the results by simply adding a coefficient (e.g.&nbsp;10) to all values.</p>
+<p>This is a powerful yet simple function. Read more about it here:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>?rTraitCont</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="simulating-discrete-data" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-discrete-data">3.2 Simulating discrete data</h3>
+<p>rTraitDisc lets use simulate categorical data under a variety of models. By default, it can simulate data under models which specify: 1. that the rate of change between each pair of character states is equal (equal rates model, “ER”), 2. that these rates are all different (all rates different, “ARD”), 3. that each pair of characters has a unique rate but these rate is the same in both directions (symmetrical, “SYM”).</p>
+<p>You can specify these models using the abbreviations in the brackets, in which case you’ll need to specify arguments k (the number of character states) and rate (the rate values to be used), or as square matrices (just like distance matrices) in which the rows and columns are character states and each cell contains the rate of a possible transition (except for the diagonal cells, of course). In my opinion, the latter is the preferred approach, because this way, you’ll have specified the rates of every transition and so you’ll know exactly how your data are being simulated.</p>
+<p>You can customise the character states used, the equilibrium frequencies of each state, and the ancestral state using the arguments states, freq, and root.value respectively.</p>
+<p>If you want to get creative, you can also submit a function which takes two arguments: x, the state of the ancestor the node/tip, and l, the branch length of the branch in question.</p>
+<p>Let’s work through a couple of examples using the in-built bird dataset of ape.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(bird.orders)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># simulating the evolution of a single trait. The following will simulate data under the same equal rates model </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rTraitDisc</span>(bird.orders, <span class="at">model =</span> <span class="st">"ER"</span>, <span class="at">rate =</span> <span class="fl">0.1</span>, <span class="at">k =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Struthioniformes     Tinamiformes      Craciformes      Galliformes 
+               A                A                A                B 
+    Anseriformes    Turniciformes       Piciformes    Galbuliformes 
+               A                A                A                B 
+  Bucerotiformes      Upupiformes    Trogoniformes    Coraciiformes 
+               B                A                B                B 
+     Coliiformes     Cuculiformes   Psittaciformes      Apodiformes 
+               B                B                A                A 
+  Trochiliformes  Musophagiformes     Strigiformes    Columbiformes 
+               A                A                B                A 
+      Gruiformes    Ciconiiformes    Passeriformes 
+               B                A                B 
+Levels: A B</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rTraitDisc</span>(bird.orders, <span class="at">model =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>), <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Struthioniformes     Tinamiformes      Craciformes      Galliformes 
+               A                A                B                B 
+    Anseriformes    Turniciformes       Piciformes    Galbuliformes 
+               B                B                A                B 
+  Bucerotiformes      Upupiformes    Trogoniformes    Coraciiformes 
+               A                A                A                B 
+     Coliiformes     Cuculiformes   Psittaciformes      Apodiformes 
+               B                A                B                A 
+  Trochiliformes  Musophagiformes     Strigiformes    Columbiformes 
+               A                A                B                B 
+      Gruiformes    Ciconiiformes    Passeriformes 
+               B                B                B 
+Levels: A B</code></pre>
+</div>
+</div>
+<p>We can simulate models with irreversibility (i.e.&nbsp;only one direction of change is possible).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rTraitDisc</span>(bird.orders, <span class="at">model =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.1</span>, <span class="dv">0</span>), <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Struthioniformes     Tinamiformes      Craciformes      Galliformes 
+               B                B                B                B 
+    Anseriformes    Turniciformes       Piciformes    Galbuliformes 
+               A                B                B                A 
+  Bucerotiformes      Upupiformes    Trogoniformes    Coraciiformes 
+               A                A                B                A 
+     Coliiformes     Cuculiformes   Psittaciformes      Apodiformes 
+               A                B                A                A 
+  Trochiliformes  Musophagiformes     Strigiformes    Columbiformes 
+               B                B                B                B 
+      Gruiformes    Ciconiiformes    Passeriformes 
+               A                A                A 
+Levels: A B</code></pre>
+</div>
+</div>
+<p>Let’s simulate data under an equal rates model and then plot the tip and node states as labels to visualise the change. We’ll use the tree we generate earlier.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rTraitDisc</span>(tree, <span class="at">model =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>), <span class="dv">2</span>), <span class="at">ancestor =</span> T)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">show.tip.label =</span> F)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">nodelabels</span>(<span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> x[<span class="dv">11</span><span class="sc">:</span><span class="dv">19</span>])</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tiplabels</span>(<span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> x[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="simulations_tutorial_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now for something a little more complicated. Let’s use a model with stasis for 10 time units (could be 10 mya) after a node, then random evolution. To do this, we’ll need to define a function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>foo <span class="ot">&lt;-</span> <span class="cf">function</span>(x, l) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (l <span class="sc">&lt;</span> <span class="dv">10</span>) <span class="fu">return</span>(x)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sample</span>(<span class="dv">2</span>, <span class="at">size =</span> <span class="dv">1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now this is done, let’s simulate the data and make the resulting tree a little more colourful by setting background colours.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rTraitDisc</span>(tree, foo, <span class="at">ancestor =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">show.tip.label =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>co <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"yellow"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>cot <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"white"</span>, <span class="st">"black"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> y[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nodelabels</span>(A, <span class="at">bg =</span> co[A], <span class="at">col =</span> cot[A])</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">tiplabels</span>(Y, <span class="at">bg =</span> co[Y], <span class="at">col =</span> cot[Y])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="simulations_tutorial_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>You can read more about the function here:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>?rTraitDisc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="simulating-a-multivariate-set-of-traits-along-a-tree" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-a-multivariate-set-of-traits-along-a-tree">3.3 Simulating a multivariate set of traits along a tree</h3>
+<p>Ape’s third simulating function, rTraitMult, lets you simulate multiple characters simultaneously. This seems redundant but in fact it lets use simulate correlated character evolution.</p>
+<p>rTraitMult has no built in models. You have to specify them using a function which returns a vector of length p, where p is the number of traits.</p>
+<p>Define the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="cf">function</span>(x, l) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    y1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, x[<span class="dv">1</span>] <span class="sc">+</span> <span class="fl">0.5</span><span class="sc">*</span>x[<span class="dv">2</span>], <span class="fl">0.1</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    y2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="fl">0.5</span><span class="sc">*</span>x[<span class="dv">1</span>] <span class="sc">+</span> x[<span class="dv">2</span>], <span class="fl">0.1</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(y1, y2)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Run the simulation and plot the traits to visualise the correlation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rTraitMult</span>(tree, mod, <span class="dv">2</span>, <span class="at">ancestor =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="at">type =</span> <span class="st">"n"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(x, <span class="at">labels =</span> <span class="fu">rownames</span>(x), <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="simulations_tutorial_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Read more about the function here:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>?rTraitMult</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using ape, it is possible to simulate data that mimics the properties of empirical morphological data under a variety of evolution models. This allows us to explore the impact of confounding factors AND test the fit of our data to different models use base R statistics.</p>
+</section>
 </section>
 <section id="disprity" class="level2">
 <h2 class="anchored" data-anchor-id="disprity">4.0 dispRity</h2>
+<p>dispRity supports a wide range of simulation functions. Tutorials for these can be found here: https://raw.githack.com/TGuillerme/dispRity/master/inst/gitbook/_book/details-of-specific-functions.html#model-fitting</p>
+<p>Sections 4.6 and 4.7 cover the application of simulation approaches in model testing.</p>
+<p>Section 5 covers the simulation of synthetic disparity data for more general purposes. Go to these sections and work through them.</p>
 </section>
 
 </main>
