@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -23,7 +23,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -99,23 +99,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
+
 </header>
+
 
 <section id="preparing-your-data" class="level2">
 <h2 class="anchored" data-anchor-id="preparing-your-data">1.0 Preparing your data</h2>
-<p>In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves().</p>
-<section id="digitizing-fixed-landmarks" class="level3">
-<h3 class="anchored" data-anchor-id="digitizing-fixed-landmarks">1.1 Digitizing fixed landmarks</h3>
-<p>We will be using the scallop example ply file included in geomorph.</p>
-<p>First, check you have geomorph installed.</p>
+<p>In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves(). These functions require the package rgl, which in turn requires Java. As this requirement can cause problems for people (myself included) and is not the recommended approach for landmarking, I have not included it in this vignette.</p>
+<p>First, let us check if you have geomorph installed, install it if necessary, then load the package.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"geomorph"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"geomorph"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"geomorph"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"geomorph"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Next, let’s load it and the example data in.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geomorph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geomorph)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: RRPP</code></pre>
 </div>
@@ -125,391 +121,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: Matrix</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"scallopPLY"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>my.ply <span class="ot">&lt;-</span> scallopPLY<span class="sc">$</span>ply</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let´s also make sure that our working directory is set to an adequate location. This is particularly relevant for 3D digitizing, as throughout the process, files with the digitized landmark coordinates, as well as the template we will create for replicating 3D surface semilandmarks across specimens, will be stored and automatically read in by functions. For this example, we will work in the subdirectory ~/example3D/, so go ahead and make sure your working directory is set to a folder with that name. I’d recommend creating a new folder on your desktop.</p>
-<p>Once a ply file is imported (usually using read.ply), one will first digitize the fixed landmarks using digit.fixed(). Note that this is an interactive function, so you will need to replicate these steps in your R console to be able to see the full version of this example. We will digitize 5 fixed landmarks (you set a landmark by right-clicking, then clicking ‘y’).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># digitize landmarks</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fixed.lms1 <span class="ot">&lt;-</span> <span class="fu">digit.fixed</span>(<span class="at">spec =</span> my.ply, <span class="at">fixed =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Keep Landmark  1 (y/n)? 
-Keep Landmark  2 (y/n)? 
-Keep Landmark  3 (y/n)? 
-Keep Landmark  4 (y/n)? 
-Keep Landmark  5 (y/n)? </code></pre>
-</div>
-</div>
-<p>Note that landmark selection on the 3dmesh is done by choosing the point of the scan closest to where you click with your mouse. This means that occasionally points may appear to “go through to the other side of the structure”, especially if your initial point cloud is not very dense. To solve this issue, try rotating the structure to find a better view for digitizing, or zooming in such that you can click close to one of the scan points (these are visible as tiny grey points when you zoom in). Place your landmarks in the points specified in the support document.</p>
-<p>Now have a look at your working directory. A new file has been created, called my.ply.nts. This contains the coordinates of the digitized 3D fixed landmarks for your specimen.</p>
-<p>Now let´s add a second specimen. For the example, we will just replicate the ply file of the first one, but with a different name. Go ahead and digitize the same five landmarks on this second specimen. A second nts file, called my.ply.2.nts is now created in your working directory.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>my.ply<span class="fl">.2</span> <span class="ot">&lt;-</span> scallopPLY<span class="sc">$</span>ply</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fixed.lms2 <span class="ot">&lt;-</span> <span class="fu">digit.fixed</span>(my.ply<span class="fl">.2</span>, <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Keep Landmark  1 (y/n)? 
-Keep Landmark  2 (y/n)? 
-Keep Landmark  3 (y/n)? 
-Keep Landmark  4 (y/n)? 
-Keep Landmark  5 (y/n)? </code></pre>
-</div>
-</div>
-<p>If one wishes to continue and sample also surface semilandmarks, this step can be performed together with the acquisition of surface sliders (see below).</p>
-</section>
-<section id="sampling-surface-semilandmarks" class="level3">
-<h3 class="anchored" data-anchor-id="sampling-surface-semilandmarks">1.2 Sampling surface semilandmarks</h3>
-<section id="building-the-template" class="level4">
-<h4 class="anchored" data-anchor-id="building-the-template">1.2.1 Building the template</h4>
-<p>Now that the fixed landmarks have been digitized, we can continue and sample surface sliding semilandmarks. We will use the first specimen as the reference from which to build a template, which will then be used to sample these semilandmarks across all specimens in our sample. This is done using the function buildtemplate. We will sample 100 surface semilandmarks.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>surf.pts1 <span class="ot">&lt;-</span> <span class="fu">buildtemplate</span>(<span class="at">spec =</span> my.ply, <span class="at">fixed =</span> fixed.lms1, <span class="at">surface.sliders =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>One may want to import fixed landmarks already digitized and saved as an nts file. This can be easily done using readland.nts, but remember that the input to the argument fixed above is a matrix, so you will need to combine that to two.d.array to obtain a 2d-matrix with the coordinates of the fixed landmarks.</p>
-<p>When running buildtemplate you will see the sampled surface semilandmarks in an rgl device. Have a look at it - is it covered in blue dots?</p>
-<p>Note that a txt file containing the coordinates of the sampled surface semilandmarks has been created in your working directory, with the name template.txt. Also, note that the file my.ply.nts has been modified, and it now contains the coordinates of the fixed landmarks AND surface semilandmarks. Finally, a csv file containing the index of sliding semilandmarks has been created, and can be read for use with the argument surfaces of gpagen.</p>
-<p>One may choose to perform steps 1. and 2. above at once for the reference specimen. In that case, the argument fixed of buildtemplate would indicate the number of fixed landmarks to be digitized (i.e.&nbsp;5 in our example).</p>
-</section>
-<section id="sampling-surface-semilandmarks-in-subsequent-specimens" class="level4">
-<h4 class="anchored" data-anchor-id="sampling-surface-semilandmarks-in-subsequent-specimens">1.2.2 Sampling surface semilandmarks in subsequent specimens</h4>
-<p>Now that the template has been created, we will use it to sample homologous surface semilandmarks in the second specimen in our sample. This is done using the function digitsurface.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>surf.pts2 <span class="ot">&lt;-</span> <span class="fu">digitsurface</span>(<span class="at">spec =</span> my.ply<span class="fl">.2</span>, <span class="at">fixed =</span> fixed.lms2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Warping template
-
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |                                                                      |   1%
-  |                                                                            
-  |=                                                                     |   1%
-  |                                                                            
-  |=                                                                     |   2%
-  |                                                                            
-  |==                                                                    |   2%
-  |                                                                            
-  |==                                                                    |   3%
-  |                                                                            
-  |===                                                                   |   4%
-  |                                                                            
-  |===                                                                   |   5%
-  |                                                                            
-  |====                                                                  |   5%
-  |                                                                            
-  |====                                                                  |   6%
-  |                                                                            
-  |=====                                                                 |   7%
-  |                                                                            
-  |=====                                                                 |   8%
-  |                                                                            
-  |======                                                                |   8%
-  |                                                                            
-  |======                                                                |   9%
-  |                                                                            
-  |=======                                                               |   9%
-  |                                                                            
-  |=======                                                               |  10%
-  |                                                                            
-  |=======                                                               |  11%
-  |                                                                            
-  |========                                                              |  11%
-  |                                                                            
-  |========                                                              |  12%
-  |                                                                            
-  |=========                                                             |  12%
-  |                                                                            
-  |=========                                                             |  13%
-  |                                                                            
-  |==========                                                            |  14%
-  |                                                                            
-  |==========                                                            |  15%
-  |                                                                            
-  |===========                                                           |  15%
-  |                                                                            
-  |===========                                                           |  16%
-  |                                                                            
-  |============                                                          |  17%
-  |                                                                            
-  |============                                                          |  18%
-  |                                                                            
-  |=============                                                         |  18%
-  |                                                                            
-  |=============                                                         |  19%
-  |                                                                            
-  |==============                                                        |  19%
-  |                                                                            
-  |==============                                                        |  20%
-  |                                                                            
-  |==============                                                        |  21%
-  |                                                                            
-  |===============                                                       |  21%
-  |                                                                            
-  |===============                                                       |  22%
-  |                                                                            
-  |================                                                      |  22%
-  |                                                                            
-  |================                                                      |  23%
-  |                                                                            
-  |=================                                                     |  24%
-  |                                                                            
-  |=================                                                     |  25%
-  |                                                                            
-  |==================                                                    |  25%
-  |                                                                            
-  |==================                                                    |  26%
-  |                                                                            
-  |===================                                                   |  27%
-  |                                                                            
-  |===================                                                   |  28%
-  |                                                                            
-  |====================                                                  |  28%
-  |                                                                            
-  |====================                                                  |  29%
-  |                                                                            
-  |=====================                                                 |  29%
-  |                                                                            
-  |=====================                                                 |  30%
-  |                                                                            
-  |=====================                                                 |  31%
-  |                                                                            
-  |======================                                                |  31%
-  |                                                                            
-  |======================                                                |  32%
-  |                                                                            
-  |=======================                                               |  32%
-  |                                                                            
-  |=======================                                               |  33%
-  |                                                                            
-  |========================                                              |  34%
-  |                                                                            
-  |========================                                              |  35%
-  |                                                                            
-  |=========================                                             |  35%
-  |                                                                            
-  |=========================                                             |  36%
-  |                                                                            
-  |==========================                                            |  37%
-  |                                                                            
-  |==========================                                            |  38%
-  |                                                                            
-  |===========================                                           |  38%
-  |                                                                            
-  |===========================                                           |  39%
-  |                                                                            
-  |============================                                          |  39%
-  |                                                                            
-  |============================                                          |  40%
-  |                                                                            
-  |============================                                          |  41%
-  |                                                                            
-  |=============================                                         |  41%
-  |                                                                            
-  |=============================                                         |  42%
-  |                                                                            
-  |==============================                                        |  42%
-  |                                                                            
-  |==============================                                        |  43%
-  |                                                                            
-  |===============================                                       |  44%
-  |                                                                            
-  |===============================                                       |  45%
-  |                                                                            
-  |================================                                      |  45%
-  |                                                                            
-  |================================                                      |  46%
-  |                                                                            
-  |=================================                                     |  47%
-  |                                                                            
-  |=================================                                     |  48%
-  |                                                                            
-  |==================================                                    |  48%
-  |                                                                            
-  |==================================                                    |  49%
-  |                                                                            
-  |===================================                                   |  49%
-  |                                                                            
-  |===================================                                   |  50%
-  |                                                                            
-  |===================================                                   |  51%
-  |                                                                            
-  |====================================                                  |  51%
-  |                                                                            
-  |====================================                                  |  52%
-  |                                                                            
-  |=====================================                                 |  52%
-  |                                                                            
-  |=====================================                                 |  53%
-  |                                                                            
-  |======================================                                |  54%
-  |                                                                            
-  |======================================                                |  55%
-  |                                                                            
-  |=======================================                               |  55%
-  |                                                                            
-  |=======================================                               |  56%
-  |                                                                            
-  |========================================                              |  57%
-  |                                                                            
-  |========================================                              |  58%
-  |                                                                            
-  |=========================================                             |  58%
-  |                                                                            
-  |=========================================                             |  59%
-  |                                                                            
-  |==========================================                            |  59%
-  |                                                                            
-  |==========================================                            |  60%
-  |                                                                            
-  |==========================================                            |  61%
-  |                                                                            
-  |===========================================                           |  61%
-  |                                                                            
-  |===========================================                           |  62%
-  |                                                                            
-  |============================================                          |  62%
-  |                                                                            
-  |============================================                          |  63%
-  |                                                                            
-  |=============================================                         |  64%
-  |                                                                            
-  |=============================================                         |  65%
-  |                                                                            
-  |==============================================                        |  65%
-  |                                                                            
-  |==============================================                        |  66%
-  |                                                                            
-  |===============================================                       |  67%
-  |                                                                            
-  |===============================================                       |  68%
-  |                                                                            
-  |================================================                      |  68%
-  |                                                                            
-  |================================================                      |  69%
-  |                                                                            
-  |=================================================                     |  69%
-  |                                                                            
-  |=================================================                     |  70%
-  |                                                                            
-  |=================================================                     |  71%
-  |                                                                            
-  |==================================================                    |  71%
-  |                                                                            
-  |==================================================                    |  72%
-  |                                                                            
-  |===================================================                   |  72%
-  |                                                                            
-  |===================================================                   |  73%
-  |                                                                            
-  |====================================================                  |  74%
-  |                                                                            
-  |====================================================                  |  75%
-  |                                                                            
-  |=====================================================                 |  75%
-  |                                                                            
-  |=====================================================                 |  76%
-  |                                                                            
-  |======================================================                |  77%
-  |                                                                            
-  |======================================================                |  78%
-  |                                                                            
-  |=======================================================               |  78%
-  |                                                                            
-  |=======================================================               |  79%
-  |                                                                            
-  |========================================================              |  79%
-  |                                                                            
-  |========================================================              |  80%
-  |                                                                            
-  |========================================================              |  81%
-  |                                                                            
-  |=========================================================             |  81%
-  |                                                                            
-  |=========================================================             |  82%
-  |                                                                            
-  |==========================================================            |  82%
-  |                                                                            
-  |==========================================================            |  83%
-  |                                                                            
-  |===========================================================           |  84%
-  |                                                                            
-  |===========================================================           |  85%
-  |                                                                            
-  |============================================================          |  85%
-  |                                                                            
-  |============================================================          |  86%
-  |                                                                            
-  |=============================================================         |  87%
-  |                                                                            
-  |=============================================================         |  88%
-  |                                                                            
-  |==============================================================        |  88%
-  |                                                                            
-  |==============================================================        |  89%
-  |                                                                            
-  |===============================================================       |  89%
-  |                                                                            
-  |===============================================================       |  90%
-  |                                                                            
-  |===============================================================       |  91%
-  |                                                                            
-  |================================================================      |  91%
-  |                                                                            
-  |================================================================      |  92%
-  |                                                                            
-  |=================================================================     |  92%
-  |                                                                            
-  |=================================================================     |  93%
-  |                                                                            
-  |==================================================================    |  94%
-  |                                                                            
-  |==================================================================    |  95%
-  |                                                                            
-  |===================================================================   |  95%
-  |                                                                            
-  |===================================================================   |  96%
-  |                                                                            
-  |====================================================================  |  97%
-  |                                                                            
-  |====================================================================  |  98%
-  |                                                                            
-  |===================================================================== |  98%
-  |                                                                            
-  |===================================================================== |  99%
-  |                                                                            
-  |======================================================================|  99%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-</div>
-</div>
-<p>Once the surface semilandmarks have been sampled, you will see a graph with their position in specimen 2. As before, the file my.ply.2.nts has been modified, and it now contains the coordinates of the fixed landmarks (red) AND surface semilandmarks for specimen 2 (green).</p>
-<p>Same as for building the template, one may choose to simultaneously digitize fixed landmarks and sample surface semilandmarks using the template.</p>
-</section>
-</section>
-<section id="plotting-3d-specimens" class="level3">
-<h3 class="anchored" data-anchor-id="plotting-3d-specimens">1.3 Plotting 3D specimens</h3>
-<p>At any moment, you can plot a specimen together with fixed landmarks and surface sliding semilandmarks using plotspec.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotspec</span>(<span class="at">spec =</span> my.ply, <span class="at">digitspec =</span> surf.pts1, <span class="at">fixed =</span> <span class="dv">5</span>, <span class="at">centered =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
 </section>
 <section id="principal-components-analysis-and-visualisation-tools-for-exploring-shape-space" class="level2">
 <h2 class="anchored" data-anchor-id="principal-components-analysis-and-visualisation-tools-for-exploring-shape-space">2.0 Principal components analysis and visualisation tools for exploring shape space</h2>
 <p>Version 3.1.0 of geomorph introduced the function gm.prcomp, and related utility functions (summary() and plot()), for performing principal components analyses on Procrustes shape variables for a set of aligned specimens. This function now includes several different types of analytical options and, combined with other visualization tools available in geomorph, provides tools for exploring variation in shape space.</p>
 <p>Throughout, we will be using shape data of several Plethodon species as an example, so let´s first load and superimpose those.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"plethspecies"</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethspecies<span class="sc">$</span>land, <span class="at">print.progress =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"plethspecies"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethspecies<span class="sc">$</span>land, <span class="at">print.progress =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="traditional-pca-and-visualising-shape-patterns" class="level3">
 <h3 class="anchored" data-anchor-id="traditional-pca-and-visualising-shape-patterns">2.1 Traditional PCA and visualising shape patterns</h3>
 <p>One first option is to perform a “traditional” PCA, i.e.&nbsp;based on OLS-centering and projection of the data. This is very much like what is performed in the basic R function prcomp.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ordination type: Principal Component Analysis 
@@ -528,16 +156,24 @@ Eigenvalues            0.0000264508 1.260516e-05 5.959622e-06 1.584785e-06
 Proportion of Variance 0.0443754550 2.114717e-02 9.998220e-03 2.658730e-03
 Cumulative Proportion  0.9661958790 9.873431e-01 9.973413e-01 1.000000e+00</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">main =</span> <span class="st">"PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">main =</span> <span class="st">"PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Let’s customise this plot:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">main =</span> <span class="st">"PCA"</span>, <span class="at">pch =</span> <span class="dv">22</span>, <span class="at">bg =</span> <span class="st">"green"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">cex.lab =</span> <span class="fl">1.5</span>, <span class="at">font.lab =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">main =</span> <span class="st">"PCA"</span>, <span class="at">pch =</span> <span class="dv">22</span>, <span class="at">bg =</span> <span class="st">"green"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">cex.lab =</span> <span class="fl">1.5</span>, <span class="at">font.lab =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>One then has several solutions for exploring shape variation across PC space and visualizing shape patterns. First, the user may choose to manually produce deformation grids to compare the shapes corresponding to the extremes of a chosen PC axis using plotRefToTarget. For example, one can:</p>
@@ -545,37 +181,45 @@ Cumulative Proportion  0.9661958790 9.873431e-01 9.973413e-01 1.000000e+00</code
 <li>Compare the minimum and maximum values to the global consensus:</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>msh <span class="ot">&lt;-</span> <span class="fu">mshape</span>(Y.gpa<span class="sc">$</span>coords)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimum</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>min, msh)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(msh, PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>max)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>msh <span class="ot">&lt;-</span> <span class="fu">mshape</span>(Y.gpa<span class="sc">$</span>coords)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimum</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>min, msh)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(msh, PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>max)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximum</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximum</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="2" type="1">
 <li>Comparing the minimum and maximum values:</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>min, PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>max, <span class="at">method =</span> <span class="st">"vector"</span>, <span class="at">mag =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRefToTarget</span>(PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>min, PCA<span class="sc">$</span>shapes<span class="sc">$</span>shapes.comp1<span class="sc">$</span>max, <span class="at">method =</span> <span class="st">"vector"</span>, <span class="at">mag =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Of course here one can use all the plotting options available in plotRefToTarget. Please see the help file of that function for details.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>?plotRefToTarget</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>?plotRefToTarget</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="phylomorphospace" class="level3">
 <h3 class="anchored" data-anchor-id="phylomorphospace">2.2 Phylomorphospace</h3>
 <p>One may also want to project a phylogeny (if dealing with species-level observations), and estimated ancestral states into the ordination plot produced before, to obtain what is commonly referred to as a “phylomorphospace” plot. This can be easily done by providing a phylogenetic tree. This function estimates ancestral states before ordination takes place (i.e.&nbsp;using the raw data). For the Plethodon example data, we may project the phylogeny into the previous ordination plot as such:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>PCA.w.phylo <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> F)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PCA.w.phylo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>PCA.w.phylo <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> F)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PCA.w.phylo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ordination type: Principal Component Analysis 
@@ -600,33 +244,37 @@ Dispersion (variance) of points, after projection:
 Tips Dispersion                 2.720474e-04 1.120524e-04 1.084758e-04
 Proportion Tips Dispersion      4.564029e-01 1.879858e-01 1.819856e-01
 Cumulative Tips Dispersion      4.564029e-01 6.443888e-01 8.263743e-01
-Ancestors Dispersion            3.073342e-05 2.320038e-05 2.039005e-05
-Proportion Ancestors Dispersion 3.854327e-01 2.909597e-01 2.557149e-01
-Cumulative Ancestors Dispersion 3.854327e-01 6.763923e-01 9.321072e-01
+Ancestors Dispersion            5.562296e-05 6.115844e-06 1.946905e-06
+Proportion Ancestors Dispersion 7.523783e-01 8.272534e-02 2.633462e-02
+Cumulative Ancestors Dispersion 7.523783e-01 8.351036e-01 8.614383e-01
                                        Comp4        Comp5        Comp6
 Tips Dispersion                 5.689240e-05 2.645080e-05 1.260516e-05
 Proportion Tips Dispersion      9.544610e-02 4.437545e-02 2.114717e-02
 Cumulative Tips Dispersion      9.218204e-01 9.661959e-01 9.873431e-01
-Ancestors Dispersion            3.171758e-06 1.748508e-06 3.945777e-07
-Proportion Ancestors Dispersion 3.977752e-02 2.192831e-02 4.948462e-03
-Cumulative Ancestors Dispersion 9.718847e-01 9.938130e-01 9.987615e-01
+Ancestors Dispersion            7.984540e-06 1.524978e-06 2.962999e-07
+Proportion Ancestors Dispersion 1.080021e-01 2.062746e-02 4.007870e-03
+Cumulative Ancestors Dispersion 9.694403e-01 9.900678e-01 9.940757e-01
                                        Comp7        Comp8
 Tips Dispersion                 5.959622e-06 1.584785e-06
 Proportion Tips Dispersion      9.998220e-03 2.658730e-03
 Cumulative Tips Dispersion      9.973413e-01 1.000000e+00
-Ancestors Dispersion            8.354868e-08 1.520561e-08
-Proportion Ancestors Dispersion 1.047797e-03 1.906960e-04
-Cumulative Ancestors Dispersion 9.998093e-01 1.000000e+00</code></pre>
+Ancestors Dispersion            1.945159e-07 2.434675e-07
+Proportion Ancestors Dispersion 2.631099e-03 3.293238e-03
+Cumulative Ancestors Dispersion 9.967068e-01 1.000000e+00</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA.w.phylo, <span class="at">phylo =</span> T, <span class="at">main =</span> <span class="st">"PCA.w.phylo"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA.w.phylo, <span class="at">phylo =</span> T, <span class="at">main =</span> <span class="st">"PCA.w.phylo"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Note that the summary statistics obtained for this analysis are identical to those from the previous one. This is because here the phylogeny is merely used for plotting, and is NOT considered during the analytical procedures.</p>
 <p>Again, all plotting arguments can be directly manipulated by the user. Please see the help file of plot.gm.prcomp for details.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>?plot.gm.prcomp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>?plot.gm.prcomp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="phylopca" class="level3">
@@ -634,9 +282,9 @@ Cumulative Ancestors Dispersion 9.998093e-01 1.000000e+00</code></pre>
 <p>Here, the phylogeny IS considered during the analytical step of the ordination, as the principal components analysis is in this case calculated based on GLS-centering and projection of the data. This is to account for the nonindependence among observations of species. For details on the analytical part of this method, see Revell 2009, Evolution 63: 3258 - 3268; Polly et al 2013, Hystrix 24: 33 - 41; Collyer &amp; Adams, submitted. This is effectively a PCA with a built in phylogenetic size correction.</p>
 <p>For the Plethodon example data, this analysis would be implemented and plotted as follows (first with untransformed residual projection, second with transformed residual projection):</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Phylo PCA without projecting untransformed residuals</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>phylo.PCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(phylo.PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Phylo PCA without projecting untransformed residuals</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>phylo.PCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(phylo.PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ordination type: Principal Component Analysis 
@@ -658,36 +306,40 @@ Cumulative Proportion  9.574548e-01 9.786223e-01 9.960221e-01 1.000000e+00
 
 Dispersion (variance) of points, after projection:
                                        Comp1        Comp2        Comp3
-Tips Dispersion                 0.0002498092 8.395185e-05 1.057114e-04
-Proportion Tips Dispersion      0.4190949497 1.408427e-01 1.773479e-01
-Cumulative Tips Dispersion      0.4190949497 5.599376e-01 7.372855e-01
-Ancestors Dispersion            0.0000169982 9.862682e-06 2.194379e-05
-Proportion Ancestors Dispersion 0.2131770701 1.236895e-01 2.752006e-01
-Cumulative Ancestors Dispersion 0.2131770701 3.368665e-01 6.120671e-01
+Tips Dispersion                 2.498092e-04 8.395185e-05 1.057114e-04
+Proportion Tips Dispersion      4.190949e-01 1.408427e-01 1.773479e-01
+Cumulative Tips Dispersion      4.190949e-01 5.599376e-01 7.372855e-01
+Ancestors Dispersion            5.035969e-05 6.581394e-06 6.772535e-06
+Proportion Ancestors Dispersion 6.811852e-01 8.902256e-02 9.160800e-02
+Cumulative Ancestors Dispersion 6.811852e-01 7.702078e-01 8.618158e-01
                                        Comp4        Comp5        Comp6
-Tips Dispersion                 0.0001027383 2.765308e-05 1.675548e-05
-Proportion Tips Dispersion      0.1723598707 4.639247e-02 2.811000e-02
-Cumulative Tips Dispersion      0.9096453329 9.560378e-01 9.841478e-01
-Ancestors Dispersion            0.0000272722 1.114653e-06 1.772175e-06
-Proportion Ancestors Dispersion 0.3420249711 1.397905e-02 2.222513e-02
-Cumulative Ancestors Dispersion 0.9540920945 9.680711e-01 9.902963e-01
+Tips Dispersion                 1.027383e-04 2.765308e-05 1.675548e-05
+Proportion Tips Dispersion      1.723599e-01 4.639247e-02 2.811000e-02
+Cumulative Tips Dispersion      9.096453e-01 9.560378e-01 9.841478e-01
+Ancestors Dispersion            8.668589e-06 7.070514e-07 3.112562e-07
+Proportion Ancestors Dispersion 1.172548e-01 9.563859e-03 4.210175e-03
+Cumulative Ancestors Dispersion 9.790705e-01 9.886344e-01 9.928446e-01
                                        Comp7        Comp8
 Tips Dispersion                 7.598972e-06 1.850019e-06
 Proportion Tips Dispersion      1.274849e-02 3.103703e-03
 Cumulative Tips Dispersion      9.968963e-01 1.000000e+00
-Ancestors Dispersion            7.068511e-07 6.689930e-08
-Proportion Ancestors Dispersion 8.864732e-03 8.389947e-04
-Cumulative Ancestors Dispersion 9.991610e-01 1.000000e+00</code></pre>
+Ancestors Dispersion            2.791855e-07 2.498109e-07
+Proportion Ancestors Dispersion 3.776375e-03 3.379042e-03
+Cumulative Ancestors Dispersion 9.966210e-01 1.000000e+00</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phylo.PCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"phylo PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phylo.PCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"phylo PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the transformed residuals</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>phylo.tPCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> <span class="cn">TRUE</span>, <span class="at">transform =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(phylo.tPCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the transformed residuals</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>phylo.tPCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">GLS =</span> <span class="cn">TRUE</span>, <span class="at">transform =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(phylo.tPCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ordination type: Principal Component Analysis 
@@ -712,27 +364,31 @@ Dispersion (variance) of points, after projection:
 Tips Dispersion                 2.740155e-05 8.385080e-06 7.889441e-06
 Proportion Tips Dispersion      4.933393e-01 1.509655e-01 1.420420e-01
 Cumulative Tips Dispersion      4.933393e-01 6.443048e-01 7.863468e-01
-Ancestors Dispersion            1.604482e-06 8.942699e-07 1.578102e-06
-Proportion Ancestors Dispersion 3.034061e-01 1.691056e-01 2.984176e-01
-Cumulative Ancestors Dispersion 3.034061e-01 4.725117e-01 7.709293e-01
+Ancestors Dispersion            6.320992e-06 4.853117e-07 4.951270e-07
+Proportion Ancestors Dispersion 7.646264e-01 5.870631e-02 5.989363e-02
+Cumulative Ancestors Dispersion 7.646264e-01 8.233327e-01 8.832264e-01
                                        Comp4        Comp5        Comp6
 Tips Dispersion                 6.590826e-06 2.909294e-06 1.175603e-06
 Proportion Tips Dispersion      1.186617e-01 5.237912e-02 2.116563e-02
 Cumulative Tips Dispersion      9.050085e-01 9.573876e-01 9.785532e-01
-Ancestors Dispersion            1.007063e-06 6.196138e-08 1.114791e-07
-Proportion Ancestors Dispersion 1.904346e-01 1.171684e-02 2.108060e-02
-Cumulative Ancestors Dispersion 9.613640e-01 9.730808e-01 9.941614e-01
+Ancestors Dispersion            8.025265e-07 6.382265e-08 1.498384e-08
+Proportion Ancestors Dispersion 9.707858e-02 7.720384e-03 1.812539e-03
+Cumulative Ancestors Dispersion 9.803049e-01 9.880253e-01 9.898379e-01
                                        Comp7        Comp8
 Tips Dispersion                 9.878523e-07 2.033663e-07
 Proportion Tips Dispersion      1.778536e-02 3.661419e-03
 Cumulative Tips Dispersion      9.963386e-01 1.000000e+00
-Ancestors Dispersion            2.711996e-08 3.755919e-09
-Proportion Ancestors Dispersion 5.128360e-03 7.102409e-04
-Cumulative Ancestors Dispersion 9.992898e-01 1.000000e+00</code></pre>
+Ancestors Dispersion            6.135027e-08 2.265777e-08
+Proportion Ancestors Dispersion 7.421309e-03 2.740825e-03
+Cumulative Ancestors Dispersion 9.972592e-01 1.000000e+00</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phylo.tPCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"phylo PCA with transformed projection"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phylo.tPCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"phylo PCA with transformed projection"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>What looks different?</p>
@@ -742,8 +398,8 @@ Cumulative Ancestors Dispersion 9.992898e-01 1.000000e+00</code></pre>
 <p>This recently introduced method (Collyer &amp; Adams, submitted) provides an ordination that aligns phenotypic data with phylogenetic signal, by maximizing variation in directions that describe phylogenetic signal, while simultaneously preserving the Euclidean distances among observations in the data space. PaCA provides a projection that shows the most phylogenetic signal in the first few components, irrespective of other signals in the data. By comparing PCA, phyloPCA and PaCA results, one may glean the relative importance of phylogenetic and other (ecological) signals in the data.</p>
 <p>For the Plethodon example data, this analysis would be implemented and plotted as follows:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>PaCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">align.to.phy =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PaCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>PaCA <span class="ot">&lt;-</span> <span class="fu">gm.prcomp</span>(Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">align.to.phy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PaCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ordination type: Alignment to an alternative matrix 
@@ -774,39 +430,48 @@ Dispersion (variance) of points, after projection:
 Tips Dispersion                 2.301865e-04 1.124810e-04 1.133102e-04
 Proportion Tips Dispersion      3.861747e-01 1.887049e-01 1.900960e-01
 Cumulative Tips Dispersion      3.861747e-01 5.748795e-01 7.649755e-01
-Ancestors Dispersion            4.069158e-05 2.437196e-05 8.067595e-06
-Proportion Ancestors Dispersion 5.103196e-01 3.056526e-01 1.011770e-01
-Cumulative Ancestors Dispersion 5.103196e-01 8.159722e-01 9.171492e-01
+Ancestors Dispersion            3.820665e-05 9.237298e-06 9.698713e-06
+Proportion Ancestors Dispersion 5.167983e-01 1.249474e-01 1.311886e-01
+Cumulative Ancestors Dispersion 5.167983e-01 6.417457e-01 7.729343e-01
                                        Comp4        Comp5        Comp6
 Tips Dispersion                 7.526878e-05 4.046474e-05 1.571235e-05
 Proportion Tips Dispersion      1.262754e-01 6.788606e-02 2.635999e-02
 Cumulative Tips Dispersion      8.912509e-01 9.591370e-01 9.854970e-01
-Ancestors Dispersion            6.244464e-06 3.539330e-07 3.508799e-09
-Proportion Ancestors Dispersion 7.831282e-02 4.438730e-03 4.400441e-05
-Cumulative Ancestors Dispersion 9.954620e-01 9.999008e-01 9.999448e-01
+Ancestors Dispersion            9.827479e-06 5.409542e-06 8.233072e-07
+Proportion Ancestors Dispersion 1.329304e-01 7.317162e-02 1.113638e-02
+Cumulative Ancestors Dispersion 9.058647e-01 9.790363e-01 9.901727e-01
                                        Comp7        Comp8
 Tips Dispersion                 6.396433e-06 2.248360e-06
 Proportion Tips Dispersion      1.073104e-02 3.771984e-03
 Cumulative Tips Dispersion      9.962280e-01 1.000000e+00
-Ancestors Dispersion            2.594059e-09 1.810230e-09
-Proportion Ancestors Dispersion 3.253251e-05 2.270238e-05
-Cumulative Ancestors Dispersion 9.999773e-01 1.000000e+00</code></pre>
+Ancestors Dispersion            4.755226e-07 2.510041e-07
+Proportion Ancestors Dispersion 6.432108e-03 3.395182e-03
+Cumulative Ancestors Dispersion 9.966048e-01 1.000000e+00</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PaCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"PaCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PaCA, <span class="at">phylo =</span> <span class="cn">TRUE</span>, <span class="at">main =</span> <span class="st">"PaCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
 <section id="three-dimensional-pca-plot-with-a-phylogeny-and-time-on-the-z-axis" class="level3">
 <h3 class="anchored" data-anchor-id="three-dimensional-pca-plot-with-a-phylogeny-and-time-on-the-z-axis">2.5 Three-dimensional PCA plot with a phylogeny and time on the z-axis</h3>
-<p>Finally, plot.gm.prcomp provides the possibility of producing a 3D plot of any two PCA axes, with the phylogenetic tree connecting the observations and time on the z-axis. Again, different plotting parameters can be controlled to manipulate plot aesthetics. Note, that in this case an rgl plotting device will open for the 3D plot, but the corresponding biplot with the phylogeny projected (option 2, above) will also be produced.</p>
+<p>Finally, plot.gm.prcomp provides the possibility of producing a 3D plot of any two PCA axes, with the phylogenetic tree connecting the observations and time on the z-axis. Again, different plotting parameters can be controlled to manipulate plot aesthetics. Note, that in this case an rgl plotting device will open for the 3D plot, but the corresponding biplot with the phylogeny projected (option 2, above) will also be produced. This function will output the 3D plot in a separate RGL window.</p>
+<p>If this doesn’t work - don’t worry! You likely just need to install Java!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA.w.phylo, <span class="at">time.plot =</span> <span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">22</span>, <span class="at">bg =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"red"</span>, <span class="dv">5</span>), <span class="fu">rep</span>(<span class="st">"green"</span>, <span class="dv">4</span>)), <span class="at">cex =</span> <span class="dv">2</span>, </span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">phylo.par =</span> <span class="fu">list</span>(<span class="at">edge.color =</span> <span class="st">"grey60"</span>, <span class="at">edge.width =</span> <span class="fl">1.5</span>, <span class="at">tip.txt.cex =</span> <span class="fl">0.75</span>,</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">node.labels =</span> F, <span class="at">anc.states =</span> F))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA.w.phylo, <span class="at">time.plot =</span> <span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">22</span>, <span class="at">bg =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"red"</span>, <span class="dv">5</span>), <span class="fu">rep</span>(<span class="st">"green"</span>, <span class="dv">4</span>)), <span class="at">cex =</span> <span class="dv">2</span>, </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">phylo.par =</span> <span class="fu">list</span>(<span class="at">edge.color =</span> <span class="st">"grey60"</span>, <span class="at">edge.width =</span> <span class="fl">1.5</span>, <span class="at">tip.txt.cex =</span> <span class="fl">0.75</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">node.labels =</span> F, <span class="at">anc.states =</span> F))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -817,32 +482,36 @@ Cumulative Ancestors Dispersion 9.999773e-01 1.000000e+00</code></pre>
 <h3 class="anchored" data-anchor-id="defining-models">3.1 Defining models</h3>
 <p>For the final section of the tutorial, let’s clear up our workspace and load in the final example dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"larvalMorph"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"larvalMorph"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s perform GPA.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(larvalMorph<span class="sc">$</span>tailcoords, <span class="at">curves =</span> larvalMorph<span class="sc">$</span>tail.sliders,</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">ProcD =</span> <span class="cn">FALSE</span>, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Y.gpa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(larvalMorph<span class="sc">$</span>tailcoords, <span class="at">curves =</span> larvalMorph<span class="sc">$</span>tail.sliders,</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">ProcD =</span> <span class="cn">FALSE</span>, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Y.gpa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Next, let’s define some putative models of shape variation that would be biologically relevant.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="ot">&lt;-</span> <span class="fu">geomorph.data.frame</span>(Y.gpa, <span class="at">treatment =</span> larvalMorph<span class="sc">$</span>treatment, </span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">family =</span> larvalMorph<span class="sc">$</span>family)</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co"># simple allometry model</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>fit.size <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize), <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># unique family allometries</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>fit.family<span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> family, <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co"># unique treatment: family allometries</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>fit.treatment<span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> treatment<span class="sc">/</span>family, <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="ot">&lt;-</span> <span class="fu">geomorph.data.frame</span>(Y.gpa, <span class="at">treatment =</span> larvalMorph<span class="sc">$</span>treatment, </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">family =</span> larvalMorph<span class="sc">$</span>family)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># simple allometry model</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>fit.size <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize), <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># unique family allometries</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>fit.family<span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> family, <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># unique treatment: family allometries</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>fit.treatment<span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> treatment<span class="sc">/</span>family, <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s take a look at the models.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fit.size</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fit.size</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Linear Model fit with lm.rrpp
@@ -856,7 +525,7 @@ Call: procD.lm(f1 = coords ~ log(Csize), data = gdf, print.progress = FALSE)</co
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fit.family</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>fit.family</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Linear Model fit with lm.rrpp
@@ -870,7 +539,7 @@ Call: procD.lm(f1 = coords ~ log(Csize) * family, data = gdf, print.progress = F
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fit.treatment</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>fit.treatment</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Linear Model fit with lm.rrpp
@@ -890,7 +559,7 @@ Call: procD.lm(f1 = coords ~ log(Csize) * treatment/family, data = gdf,
 <h3 class="anchored" data-anchor-id="performing-anova-and-model-comparisons">3.2 Performing ANOVA and model comparisons</h3>
 <p>The following are the typical ANOVA tables for each model:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -900,10 +569,10 @@ Estimation method: Ordinary Least Squares
 Sums of Squares and Cross-products: Type I 
 Effect sizes (Z) based on F distributions
 
-            Df      SS      MS     Rsq      F      Z Pr(&gt;F)   
-log(Csize)   1 0.50263 0.50263 0.16206 21.661 3.1141  0.001 **
-Residuals  112 2.59885 0.02320 0.83794                        
-Total      113 3.10147                                        
+            Df      SS      MS     Rsq      F      Z Pr(&gt;F)    
+log(Csize)   1 0.50263 0.50263 0.16206 21.661 3.1141  0.001 ***
+Residuals  112 2.59885 0.02320 0.83794                         
+Total      113 3.10147                                         
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -911,7 +580,7 @@ Call: procD.lm(f1 = coords ~ log(Csize), data = gdf, print.progress = FALSE)</co
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.family)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.family)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -921,12 +590,12 @@ Estimation method: Ordinary Least Squares
 Sums of Squares and Cross-products: Type I 
 Effect sizes (Z) based on F distributions
 
-                   Df      SS      MS     Rsq       F       Z Pr(&gt;F)   
-log(Csize)          1 0.50263 0.50263 0.16206 22.5073  3.1333  0.001 **
-family              3 0.21009 0.07003 0.06774  3.1360  2.2172  0.011 * 
-log(Csize):family   3 0.02160 0.00720 0.00696  0.3224 -1.5886  0.952   
-Residuals         106 2.36715 0.02233 0.76324                          
-Total             113 3.10147                                          
+                   Df      SS      MS     Rsq       F       Z Pr(&gt;F)    
+log(Csize)          1 0.50263 0.50263 0.16206 22.5073  3.1333  0.001 ***
+family              3 0.21009 0.07003 0.06774  3.1360  2.2172  0.011 *  
+log(Csize):family   3 0.02160 0.00720 0.00696  0.3224 -1.5886  0.952    
+Residuals         106 2.36715 0.02233 0.76324                           
+Total             113 3.10147                                           
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -934,7 +603,7 @@ Call: procD.lm(f1 = coords ~ log(Csize) * family, data = gdf, print.progress = F
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.treatment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.treatment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -951,13 +620,13 @@ log(Csize):treatment          5 0.08025 0.01605 0.02587  0.8515 -0.1177  0.553
 log(Csize):treatment:family  18 0.47729 0.02652 0.15389  1.4068  1.3236  0.098
 Residuals                    84 1.58323 0.01885 0.51048                       
 Total                       113 3.10147                                       
-                              
-log(Csize)                  **
-treatment                   **
-log(Csize):treatment          
-log(Csize):treatment:family . 
-Residuals                     
-Total                         
+                               
+log(Csize)                  ***
+treatment                   ***
+log(Csize):treatment           
+log(Csize):treatment:family .  
+Residuals                      
+Total                          
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -967,7 +636,7 @@ Call: procD.lm(f1 = coords ~ log(Csize) * treatment/family, data = gdf,
 </div>
 <p>We can compare any number of models at once.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.size, fit.family, fit.treatment, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.size, fit.family, fit.treatment, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -990,17 +659,18 @@ Total                                                            </code></pre>
 </div>
 <p>One might ascertain that models that include parameters for family and treatment are significant improvements over a model that only contains size. Note that the model fits can use types I, II, or III, sums of squares and cross-products (SSCP), ordinary or generalized least squares, and the ANOVA can be performed on a number of different test statistics (see anova.lm.rrpp help file for more details).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>?anova.lm.rrpp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>?anova.lm.rrpp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="allometry-analyses" class="level2">
 <h2 class="anchored" data-anchor-id="allometry-analyses">4.0 Allometry analyses</h2>
+<p>It is important to note that I am no expert in the study of allometry, nor its analysis using geomorph. This is a wide-ranging package with a lot of different uses. What follows is a very brief foray into the analysis of allometry using geomorph for those who are interested using one of the models we defined earlier. There are much more detailed vignettes available online. I also highly recommend that those who are interested spend a few days reading through Chris Klingenberg’s work on the topic.</p>
 <section id="simple-allometry-models" class="level3">
 <h3 class="anchored" data-anchor-id="simple-allometry-models">4.1 Simple allometry models</h3>
-<p>First, let’s just consider the simple allometry model:</p>
+<p>First, let’s just consider the simple allometry model we defined earlier:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -1010,10 +680,10 @@ Estimation method: Ordinary Least Squares
 Sums of Squares and Cross-products: Type I 
 Effect sizes (Z) based on F distributions
 
-            Df      SS      MS     Rsq      F      Z Pr(&gt;F)   
-log(Csize)   1 0.50263 0.50263 0.16206 21.661 3.1141  0.001 **
-Residuals  112 2.59885 0.02320 0.83794                        
-Total      113 3.10147                                        
+            Df      SS      MS     Rsq      F      Z Pr(&gt;F)    
+log(Csize)   1 0.50263 0.50263 0.16206 21.661 3.1141  0.001 ***
+Residuals  112 2.59885 0.02320 0.83794                         
+Total      113 3.10147                                         
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1021,69 +691,70 @@ Call: procD.lm(f1 = coords ~ log(Csize), data = gdf, print.progress = FALSE)</co
 </div>
 </div>
 <p>It is clear that there is a significant association between shape and size. To visualize this relationship, there are many options. First, we can use the plot generic for procD.lm and vary some of the arguments. Let’s do that, using two different ways to visualize shape change: prediction lines (PredLine) and regression scores (RegScore). The former are first principal component scores for fitted values from the procD.lm fit (Adams and Nistri 2010); the latter are standardized projected shape scores, along the axis defined by the regression of shape on size (Drake and Klingenberg 2008).</p>
+<p>When interpreting these plots, keep in mind that the predictor is size and the other axis represents some axis of shape.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit.size, <span class="at">type =</span> <span class="st">"regression"</span>, <span class="at">reg.type =</span> <span class="st">"PredLine"</span>, <span class="at">predictor =</span> <span class="fu">log</span>(gdf<span class="sc">$</span>Csize))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit.size, <span class="at">type =</span> <span class="st">"regression"</span>, <span class="at">reg.type =</span> <span class="st">"PredLine"</span>, <span class="at">predictor =</span> <span class="fu">log</span>(gdf<span class="sc">$</span>Csize))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit.size, <span class="at">type =</span> <span class="st">"regression"</span>, <span class="at">reg.type =</span> <span class="st">"RegScore"</span>, <span class="at">predictor =</span> <span class="fu">log</span>(gdf<span class="sc">$</span>Csize))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>The plot.procD.lm function is for any procD.lm fit. If one wishes to work specifically with allometry models, the plotAllometry function performs the same analysis as a convenient wrapper for plot.procD.lm. For example,</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"PredLine"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"RegScore"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit.size, <span class="at">type =</span> <span class="st">"regression"</span>, <span class="at">reg.type =</span> <span class="st">"RegScore"</span>, <span class="at">predictor =</span> <span class="fu">log</span>(gdf<span class="sc">$</span>Csize))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot.procD.lm function is for any procD.lm fit. If one wishes to work specifically with allometry models, the plotAllometry function performs the same analysis as a convenient wrapper for plot.procD.lm. You just specify the method using ‘method’ instead of ‘reg.type’. For example,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"PredLine"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"RegScore"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>An important detail with these plots is that PredLine and RegScore are model-based projections of shape data. As we will see below, changing the model changes the outcome of the plot.</p>
-<p>We could also perform a two-block partial least squares (PLS) analysis to find the correlation between shape and size, which is not based on a particular model.</p>
+<p>For simple allometry models, RegScore is the same as the common allometric component (CAC, Mitteroecker et al.&nbsp;2004); i.e.,</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>PLS <span class="ot">&lt;-</span> <span class="fu">two.b.pls</span>(<span class="fu">log</span>(gdf<span class="sc">$</span>Csize), gdf<span class="sc">$</span>coords, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>PLS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-two.b.pls(A1 = log(gdf$Csize), A2 = gdf$coords, print.progress = FALSE) 
-
-
-
-r-PLS: 0.466
-
-Effect Size (Z): 3.1676
-
-P-value: 0.001
-
-Based on 1000 random permutations</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PLS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"CAC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
-<p>An astute observer might catch that the PLS plot is exactly the same as the RegScore plot. It is, in this case of a simple allometry model. They are also both the same as a plot of the common allometric component (CAC, Mitteroecker et al.&nbsp;2004); i.e.,</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"CAC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="672"></p>
 </div>
-</div>
-<p>The CAC plot will always be the same as the PLS plot, irrespective of the type of shape-allometry model. The RegScore plot is the same in this simple case because only one vector of regression coefficients is produced, which aligns perfectly with the major axis of covariation between shape and size (the CAC or the shape PLS vector; Adams et al.&nbsp;2013)</p>
+<p>The RegScore plot is the same in this simple case because only one vector of regression coefficients is produced, which aligns perfectly with the major axis of covariation between shape and size (the CAC; Adams et al.&nbsp;2013)</p>
 <p>One can also append a size vector to a matrix of shape variables and perform principal components analysis (PCA), called size-shape PCA (Mitteroecker et al.&nbsp;2004).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"size.shape"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.size, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"size.shape"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -1091,11 +762,11 @@ Based on 1000 random permutations</code></pre>
 <h3 class="anchored" data-anchor-id="complex-allometry-models">4.2 Complex allometry models</h3>
 <p>We already learned that family and treatment were “significant” model effects. Now let’s focus on whether we should believe that families or treatments have unique allometries or a common allometry.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>fit.unique <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> treatment<span class="sc">/</span>family, </span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) <span class="co"># unique allometries</span></span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>fit.common <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">+</span> treatment<span class="sc">/</span>family, </span>
-<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) <span class="co"># common allometry</span></span>
-<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.common, fit.unique, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>fit.unique <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">*</span> treatment<span class="sc">/</span>family, </span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) <span class="co"># unique allometries</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>fit.common <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">+</span> treatment<span class="sc">/</span>family, </span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>) <span class="co"># common allometry</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.common, fit.unique, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Analysis of Variance, using Residual Randomization
@@ -1118,369 +789,40 @@ coords ~ log(Csize) * treatment/family
 Total                                               </code></pre>
 </div>
 </div>
-<p>Because this model comparison did not yield a significant result, we can conclude that a common allometry model is appropriate. Thus, we might want to plot the results, color-coding the points by treatment</p>
+<p>Because this model comparison did not yield a significant result, we can conclude that a common allometry model is appropriate. Thus, we might want to plot the results, color-coding the points by treatment.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.common, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"PredLine"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">as.numeric</span>(gdf<span class="sc">$</span>treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.common, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"PredLine"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">as.numeric</span>(gdf<span class="sc">$</span>treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.common, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"RegScore"</span>,</span>
-<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">as.numeric</span>(gdf<span class="sc">$</span>treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotAllometry</span>(fit.common, <span class="at">size =</span> gdf<span class="sc">$</span>Csize, <span class="at">logsz =</span> <span class="cn">TRUE</span>, <span class="at">method =</span> <span class="st">"RegScore"</span>,</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">as.numeric</span>(gdf<span class="sc">$</span>treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
-<p>The next section focuses on ANOVA for model effects and pairwise comparisons.</p>
-</section>
-</section>
-<section id="updating-anova-and-performing-pairwise-comparisons" class="level2">
-<h2 class="anchored" data-anchor-id="updating-anova-and-performing-pairwise-comparisons">5.0 Updating ANOVA and performing pairwise comparisons</h2>
-<p>In our example, we have both fixed and random effects. Treatment is a fixed effect and family is a random effect, nested within our fixed effect (as egg clutches were “randomly”” sampled from the wild). Generally, when evaluating model effects, ANOVA involves assessing the probability of observed F-values which are ratios of mean squared (MS) values for effects to MS values for the appropriate random effect, usually the residuals. (For procD.lm models, the distribution of F-values is generated over many random permutations.) For example:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.common)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Analysis of Variance, using Residual Randomization
-Permutation procedure: Randomization of null model residuals 
-Number of permutations: 1000 
-Estimation method: Ordinary Least Squares 
-Sums of Squares and Cross-products: Type I 
-Effect sizes (Z) based on F distributions
-
-                  Df      SS      MS     Rsq       F      Z Pr(&gt;F)   
-log(Csize)         1 0.50263 0.50263 0.16206 26.9691 3.2807  0.001 **
-treatment          5 0.45807 0.09161 0.14770  4.9157 3.5979  0.001 **
-treatment:family  18 0.48207 0.02678 0.15543  1.4370 1.4376  0.075 . 
-Residuals         89 1.65870 0.01864 0.53481                         
-Total            113 3.10147                                         
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Call: procD.lm(f1 = coords ~ log(Csize) + treatment/family, data = gdf,  
-    print.progress = FALSE)</code></pre>
-</div>
-</div>
-<p>Notice that the F-value for the three effects - log(Csize), Treatment, and Treatment:Family - is calculated as MS effect / MS Residuals. This is the default. However, in our mixed-model ANOVA, we would prefer to calculate the F-value for treatment as MS Treatment / MS Treatment:Family, to determine if the treatment effect is meaningful compared to shape variation among families we sampled randomly and assigned to treatments. We can update our ANOVA by specifying what the denominator (error term) should be, as a sequence of error terms for the ANOVA; e.g.:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.common, <span class="at">error =</span> <span class="fu">c</span>(<span class="st">"Residuals"</span>, <span class="st">"treatment:family"</span>, <span class="st">"Residuals"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Analysis of Variance, using Residual Randomization
-Permutation procedure: Randomization of null model residuals 
-Number of permutations: 1000 
-Estimation method: Ordinary Least Squares 
-Sums of Squares and Cross-products: Type I 
-Effect sizes (Z) based on F distributions
-
-                  Df      SS      MS     Rsq       F      Z Pr(&gt;F)   
-log(Csize)         1 0.50263 0.50263 0.16206 26.9691 3.2807  0.001 **
-treatment          5 0.45807 0.09161 0.14770  3.4208 1.9482  0.025 * 
-treatment:family  18 0.48207 0.02678 0.15543  1.4370 1.4376  0.075 . 
-Residuals         89 1.65870 0.01864 0.53481                         
-Total            113 3.10147                                         
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Call: procD.lm(f1 = coords ~ log(Csize) + treatment/family, data = gdf,  
-    print.progress = FALSE)</code></pre>
-</div>
-</div>
-<p>Notice the F-value and effect size decreased a bit with recalculation of the F-value for treatment, but remained significant. What this function did was recalculate every treatment F-value in every random permutation to generate a new distribution for measuring effect size (Z) and P-value.</p>
-<p>Now that we know that shape covaries with size, but in a common way for each treatment, we might wish to compare treatment least-squares (LS) means to see which treatments differ in shape, accounting for allometry and accounting for family effects. To achieve this, we will use the pairwise function from RRPP. There are several advantages to using the pairwise function. The most prominent are: (1) the ability to quickly change among different test types and summaries without re-analysis, (2) alternative summary options, (3) an option to use grouping variables not included in the original model fit, and (4) much faster computation for straightforward tests.</p>
-<p>The pairwise function has this general format:</p>
-<p>pairwise(fit, groups, covariate),</p>
-<p>where fit is an already fitted object, using procD.lm, groups is a factor to designate groups to be compared, and covariate is a vector if slopes are to be compared. This format assumes the inherent null model of “fit” is appropriate. If an alternative null model is desired, the function can be updated as:</p>
-<p>pairwise(fit, fit.null, groups, covariate),</p>
-<p>where fit.null is a second procD.lm fit. If one is not sure about the inherent null model, they can use the reveal.model.designs function of RRPP to discover the exact null model used; e.g.,</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">reveal.model.designs</span>(fit.common)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                 Reduced 
-log(Csize)                             1 
-treatment                     log(Csize) 
-treatment:family  log(Csize) + treatment 
-                                                      Full
-log(Csize)                                      log(Csize)
-treatment                           log(Csize) + treatment
-treatment:family log(Csize) + treatment + treatment:family
-                                                  
-log(Csize)                                        
-treatment                                         
-treatment:family &lt;- Null/Full inherent in pairwise</code></pre>
-</div>
-</div>
-<p>The results tell us that if we run pairwise on fit.common, the null model would be ~ log(Csize) + treatment and the full model would be ~ log(Csize) + treatment + treatment:family. This is the case because we used type I (sequential) sums of squares and cross-products (the default). However, it is maybe not ideal. We might prefer to have as a null model, ~ log(Csize) + family. Thus, let’s first establish that model and then run the pairwise function</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>fit.null <span class="ot">&lt;-</span> <span class="fu">procD.lm</span>(coords <span class="sc">~</span> <span class="fu">log</span>(Csize) <span class="sc">+</span> family, <span class="at">data =</span> gdf, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>PW <span class="ot">&lt;-</span> <span class="fu">pairwise</span>(fit.common, fit.null, <span class="at">groups =</span> gdf<span class="sc">$</span>treatment, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>PW</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Pairwise comparisons
-
-Groups: AG AM CF CI TG TM 
-
-RRPP: 1000 permutations</code></pre>
-</div>
-</div>
-<p>There are now many options for summarizing results; i.e., we can perform multiple tests! Here is one option:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PW, <span class="at">test.type =</span> <span class="st">"dist"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Pairwise comparisons
-
-Groups: AG AM CF CI TG TM 
-
-RRPP: 1000 permutations
-
-LS means:
-Vectors hidden (use show.vectors = TRUE to view)
-
-Pairwise distances between means, plus statistics
-               d  UCL (95%)          Z Pr &gt; d
-AG:AM 0.03031748 0.08544041 -0.3983502  0.625
-AG:CF 0.06775829 0.08787927  1.1355437  0.144
-AG:CI 0.12685901 0.09140712  2.3133960  0.004
-AG:TG 0.10993275 0.08320799  2.1315610  0.010
-AG:TM 0.06447743 0.08823741  1.0581303  0.162
-AM:CF 0.05742092 0.08919549  0.8048851  0.227
-AM:CI 0.12904332 0.08977658  2.3407942  0.006
-AM:TG 0.11418302 0.08878564  2.1302365  0.010
-AM:TM 0.04829385 0.08787553  0.5319077  0.309
-CF:CI 0.13108751 0.08447949  2.5457646  0.003
-CF:TG 0.13207622 0.08781678  2.4905214  0.003
-CF:TM 0.06377460 0.09022502  0.9788791  0.190
-CI:TG 0.05102561 0.09150320  0.5093922  0.324
-CI:TM 0.17096322 0.09526279  2.7628577  0.001
-TG:TM 0.15667496 0.08594155  2.8008853  0.001</code></pre>
-</div>
-</div>
-<p>The test statistics used, “dist”, is the distance between LS means. By specifying a confidence level, we are given upper confidence limits (UCL) from the distributions of pairwise distances. We can see that if the observed distance is larger than the UCL, the P-value is less than 1 - confidence; i.e., it is “significant”. The default is this “stats table”, but we could also produce pairwise tables. In fact, we can reproduce the old format for advanced.procD.lm like so:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit.null, fit.common, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Analysis of Variance, using Residual Randomization
-Permutation procedure: Randomization of null model residuals 
-Number of permutations: 1000 
-Estimation method: Ordinary Least Squares 
-Effect sizes (Z) based on F distributions
-
-                                       ResDf Df    RSS      SS       MS     Rsq
-coords ~ log(Csize) + family (Null)      109  1 2.3887                  0.00000
-coords ~ log(Csize) + treatment/family    89 20 1.6587 0.73005 0.036503 0.23539
-Total                                    113    3.1015                         
-                                            F     Z     P Pr(&gt;F)
-coords ~ log(Csize) + family (Null)                             
-coords ~ log(Csize) + treatment/family 1.9586 2.463 0.011       
-Total                                                           </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PW, <span class="at">test.type =</span> <span class="st">"dist"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>, <span class="at">stat.table =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Pairwise comparisons
-
-Groups: AG AM CF CI TG TM 
-
-RRPP: 1000 permutations
-
-LS means:
-Vectors hidden (use show.vectors = TRUE to view)
-
-Pairwise distances between means
-           AG         AM         CF         CI         TG         TM
-AG 0.00000000 0.03031748 0.06775829 0.12685901 0.10993275 0.06447743
-AM 0.03031748 0.00000000 0.05742092 0.12904332 0.11418302 0.04829385
-CF 0.06775829 0.05742092 0.00000000 0.13108751 0.13207622 0.06377460
-CI 0.12685901 0.12904332 0.13108751 0.00000000 0.05102561 0.17096322
-TG 0.10993275 0.11418302 0.13207622 0.05102561 0.00000000 0.15667496
-TM 0.06447743 0.04829385 0.06377460 0.17096322 0.15667496 0.00000000
-
-Pairwise 95% Upper confidence limits between means
-           AG         AM         CF         CI         TG         TM
-AG 0.00000000 0.08544041 0.08787927 0.09140712 0.08320799 0.08823741
-AM 0.08544041 0.00000000 0.08919549 0.08977658 0.08878564 0.08787553
-CF 0.08787927 0.08919549 0.00000000 0.08447949 0.08781678 0.09022502
-CI 0.09140712 0.08977658 0.08447949 0.00000000 0.09150320 0.09526279
-TG 0.08320799 0.08878564 0.08781678 0.09150320 0.00000000 0.08594155
-TM 0.08823741 0.08787553 0.09022502 0.09526279 0.08594155 0.00000000
-
-Pairwise effect sizes (Z) between means
-           AG         AM        CF        CI        TG        TM
-AG  0.0000000 -0.3983502 1.1355437 2.3133960 2.1315610 1.0581303
-AM -0.3983502  0.0000000 0.8048851 2.3407942 2.1302365 0.5319077
-CF  1.1355437  0.8048851 0.0000000 2.5457646 2.4905214 0.9788791
-CI  2.3133960  2.3407942 2.5457646 0.0000000 0.5093922 2.7628577
-TG  2.1315610  2.1302365 2.4905214 0.5093922 0.0000000 2.8008853
-TM  1.0581303  0.5319077 0.9788791 2.7628577 2.8008853 0.0000000
-
-Pairwise P-values between means
-      AG    AM    CF    CI    TG    TM
-AG 1.000 0.625 0.144 0.004 0.010 0.162
-AM 0.625 1.000 0.227 0.006 0.010 0.309
-CF 0.144 0.227 1.000 0.003 0.003 0.190
-CI 0.004 0.006 0.003 1.000 0.324 0.001
-TG 0.010 0.010 0.003 0.324 1.000 0.001
-TM 0.162 0.309 0.190 0.001 0.001 1.000</code></pre>
-</div>
-</div>
-<p>Because we have already performed the pairwise procedure, we could also summarize a different test. For example, let’s say we wish to compare morphological disparities (variances) among treatments. We simply change the summary:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PW, <span class="at">test.type =</span> <span class="st">"var"</span>, <span class="at">confidence =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Pairwise comparisons
-
-Groups: AG AM CF CI TG TM 
-
-RRPP: 1000 permutations
-
-
-Observed variances by group
-
-        AG         AM         CF         CI         TG         TM 
-0.01419375 0.01384366 0.01923172 0.01704117 0.01006673 0.01287420 
-
-Pairwise distances between variances, plus statistics
-                 d   UCL (95%)           Z Pr &gt; d
-AG:AM 0.0003500900 0.010087309 -1.69635391  0.949
-AG:CF 0.0050379659 0.009938407  0.52168706  0.305
-AG:CI 0.0028474188 0.010372592 -0.23118837  0.590
-AG:TG 0.0041270191 0.010316444  0.22999925  0.433
-AG:TM 0.0013195570 0.009850599 -0.87460939  0.789
-AM:CF 0.0053880560 0.009613089  0.59377947  0.300
-AM:CI 0.0031975089 0.010284072 -0.06700465  0.548
-AM:TG 0.0037769290 0.009932049  0.19034887  0.443
-AM:TM 0.0009694669 0.009679284 -1.08080047  0.850
-CF:CI 0.0021905471 0.010327023 -0.48165241  0.674
-CF:TG 0.0091649850 0.010154643  1.40254488  0.075
-CF:TM 0.0063575229 0.010012406  0.85125709  0.211
-CI:TG 0.0069744379 0.010679392  0.89506258  0.202
-CI:TM 0.0041669758 0.010341725  0.26148124  0.410
-TG:TM 0.0028074621 0.010485985 -0.20477972  0.578</code></pre>
-</div>
-</div>
-<p>This should be exactly the same as performing a morphological disparity test</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">morphol.disparity</span>(fit.common, <span class="at">groups =</span> gdf<span class="sc">$</span>treatment, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-morphol.disparity(f1 = fit.common, groups = gdf$treatment, print.progress = FALSE) 
-
-
-
-
-Randomized Residual Permutation Procedure Used
-1000 Permutations
-
-Procrustes variances for defined groups
-        AG         AM         CF         CI         TG         TM 
-0.01419375 0.01384366 0.01923172 0.01704117 0.01006673 0.01287420 
-
-
-Pairwise absolute differences between variances
-            AG           AM          CF          CI          TG           TM
-AG 0.000000000 0.0003500900 0.005037966 0.002847419 0.004127019 0.0013195570
-AM 0.000350090 0.0000000000 0.005388056 0.003197509 0.003776929 0.0009694669
-CF 0.005037966 0.0053880560 0.000000000 0.002190547 0.009164985 0.0063575229
-CI 0.002847419 0.0031975089 0.002190547 0.000000000 0.006974438 0.0041669758
-TG 0.004127019 0.0037769290 0.009164985 0.006974438 0.000000000 0.0028074621
-TM 0.001319557 0.0009694669 0.006357523 0.004166976 0.002807462 0.0000000000
-
-
-P-Values
-      AG    AM    CF    CI    TG    TM
-AG 1.000 0.949 0.305 0.590 0.433 0.789
-AM 0.949 1.000 0.300 0.548 0.443 0.850
-CF 0.305 0.300 1.000 0.674 0.075 0.211
-CI 0.590 0.548 0.674 1.000 0.202 0.410
-TG 0.433 0.443 0.075 0.202 1.000 0.578
-TM 0.789 0.850 0.211 0.410 0.578 1.000</code></pre>
-</div>
-</div>
-<p>The pairwise function in RRPP is really versatile. More examples are provided in the help file for the function:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>?pairwise</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Greater detail for how to summarize different tests is found in the summary.pairwise help file.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>?summary.pairwise</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="performing-trajectory-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="performing-trajectory-analysis">6.0 Performing trajectory analysis</h2>
-<p>The trajectory.analysis function has the same basic arguments as the pairwise function, but also has an argument for trajectory points (which can be a single value, if data are already trajectories or a factor to indicate trajectory point levels). Following the example above, trajectory analysis can be considered a pairwise function where treatments are trajectories and families are trajectory points. The following highlights the steps involved for one type of example (but the plotting options are quite numerous):</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>TA <span class="ot">&lt;-</span> <span class="fu">trajectory.analysis</span>(fit.common, </span>
-<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">groups =</span> gdf<span class="sc">$</span>treatment, <span class="at">traj.pts =</span> gdf<span class="sc">$</span>family,</span>
-<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pca =</span> <span class="cn">TRUE</span>, <span class="at">print.progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(TA, <span class="at">attribute =</span> <span class="st">"MD"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Trajectory analysis
-
-1000 permutations.
-
-Points projected onto trajectory PCs
-
-Trajectories:
-Trajectories hidden (use show.trajectories = TRUE to view)
-
-Observed path distances by group
-
-       AG        AM        CF        CI        TG        TM 
-0.2122330 0.1916723 0.6845214 0.2411477 0.2356911 0.1719081 
-
-Pairwise absolute differences in path distances, plus statistics
-               d UCL (95%)          Z Pr &gt; d
-AG:AM 0.02056069 0.2259968 -0.9720506  0.824
-AG:CF 0.47228842 0.2316285  2.9185188  0.001
-AG:CI 0.02891473 0.2373186 -0.7761383  0.779
-AG:TG 0.02345814 0.2337741 -0.9994827  0.828
-AG:TM 0.04032491 0.2185674 -0.5320552  0.702
-AM:CF 0.49284911 0.2342246  2.9869742  0.001
-AM:CI 0.04947542 0.2363919 -0.3521147  0.633
-AM:TG 0.04401883 0.2309155 -0.4909832  0.685
-AM:TM 0.01976423 0.2393851 -1.0673976  0.842
-CF:CI 0.44337369 0.2338206  2.6970630  0.001
-CF:TG 0.44883028 0.2483839  2.7829648  0.001
-CF:TM 0.51261333 0.2365751  3.1039171  0.001
-CI:TG 0.00545659 0.2305836 -1.8689261  0.969
-CI:TM 0.06923965 0.2477913 -0.1034597  0.536
-TG:TM 0.06378306 0.2455973 -0.0814343  0.537</code></pre>
-</div>
-</div>
-<p>The argument, attribute = “MD”, indicates that the differences between trajectory magnitudes - the path length of trajectories - is considered. The trajectory analysis could also be summarized for trajectory correlations (TC), which are angles between trajectory directions (major axes of variation), or shape differences (SD). More examples are given in the trajectory.analysis help file.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>?trajectory.analysis</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>The function, plot.trajectory.analysis plots the data points projected on the PCs for fitted values and the function, add.trajectories, superimposes the trajectories on these points.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>TP <span class="ot">&lt;-</span> <span class="fu">plot</span>(TA, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.7</span>, <span class="at">col =</span> <span class="fu">as.numeric</span>(gdf<span class="sc">$</span>treatment))</span>
-<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="fu">add.trajectories</span>(TP, <span class="at">traj.bg =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nlevels</span>(gdf<span class="sc">$</span>treatment), </span>
-<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">start.bg =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nlevels</span>(gdf<span class="sc">$</span>treatment),</span>
-<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">end.bg =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nlevels</span>(gdf<span class="sc">$</span>treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
 </section>
 <section id="testing-for-phylogenetic-signal-in-gpa-shape-variables" class="level2">
-<h2 class="anchored" data-anchor-id="testing-for-phylogenetic-signal-in-gpa-shape-variables">7.0 Testing for phylogenetic signal in GPA shape variables</h2>
+<h2 class="anchored" data-anchor-id="testing-for-phylogenetic-signal-in-gpa-shape-variables">5.0 Testing for phylogenetic signal in GPA shape variables</h2>
 <p>Finally, geomorph gives us the ability to test for phylogenetic signal in our Procrustes shape variables without ordinating our data. Let’s load a new dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(plethspecies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(plethspecies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Perform GPA and get shape variables.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethspecies<span class="sc">$</span>land)        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>Y.gpa <span class="ot">&lt;-</span> <span class="fu">gpagen</span>(plethspecies<span class="sc">$</span>land)        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Performing GPA
@@ -1499,8 +841,8 @@ Making projections... Finished!</code></pre>
 </div>
 <p>Now to test for phylogenetic signal in shape. We will use physignal.z.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
-<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -1511,27 +853,35 @@ Evaluation of phylogenetic signal effect size
 Optimization method: front
 Optimization performed in 8 data dimensions.
 
-Observed phylogenetic signal effect size (Z): -0.7579
+Observed phylogenetic signal effect size (Z): -1.1739
 
-P-value: 0.7183 based on 1001 random permutations
+P-value: 0.8127 based on 1001 random permutations
 
 For a model with a log-likelihood of 277.4506
 a branch-scaling (lambda) of 1e-04
 and a ratio of Bownian Motion fit (K) of 0.8859 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-58-2.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-37-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>There seems to be a roblem with an ill-conditioned residual covariance matrix. Let’s try shaving off one dimension (i.e.&nbsp;going from 8 dimensions to 7) by setting PAC.no to 7.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">PAC.no =</span> <span class="dv">7</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
-<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>PS.shape <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>coords, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">PAC.no =</span> <span class="dv">7</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -1550,19 +900,27 @@ For a model with a log-likelihood of 229.8667
 a branch-scaling (lambda) of 1e-04
 and a ratio of Bownian Motion fit (K) of 0.8901 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.shape<span class="sc">$</span>PACA, <span class="at">phylo =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-59-2.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-38-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Now let’s test for phylogenetic signal in size.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>PS.size <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>Csize, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
-<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>PS.size <span class="ot">&lt;-</span> <span class="fu">physignal.z</span>(<span class="at">A =</span> Y.gpa<span class="sc">$</span>Csize, <span class="at">phy =</span> plethspecies<span class="sc">$</span>phy, <span class="at">lambda =</span> <span class="st">"front"</span>, <span class="at">iter =</span> <span class="dv">1000</span>)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -1581,9 +939,13 @@ For a model with a log-likelihood of 66.0972
 a branch-scaling (lambda) of 1e-04
 and a ratio of Bownian Motion fit (K) of 0.6938 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PS.size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="An_introduction_to_Geomorph_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Pagel’s lambda is the go-to measure of phylogenetic signal. Bounded between 0-1, estimated lambda values of 0 mean our traits are inferred to have no phylogenetic signal. 1 is Brownian motion (i.e.&nbsp;the only variation left after you take out the phylogenetic signal is random).</p>
@@ -1674,10 +1036,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1687,8 +1066,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1700,7 +1088,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1744,6 +1255,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1769,6 +1281,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1829,6 +1367,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
