@@ -103,7 +103,7 @@ Objects of class cladisticMatrix have two components by default: a 'topper' and 
 # convert numeric matrix to character matrix
 char.data <- apply(data, c(1,2), as.character)
 # now convert to cladisticMatrix - setting all characters to unordered.
-clad.data <- build_cladistic_matrix(char.data, ordering = rep("unord",10))
+clad.data <- build_cladistic_matrix(char.data, ordering = rep("unordered",10))
 ```
 
 You can specify most of the meta-data that will be added to your Claddis object. Take a look through the documentation to learn more.
