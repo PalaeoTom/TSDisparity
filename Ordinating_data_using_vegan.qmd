@@ -53,7 +53,7 @@ PCA <- rda(varespec, scale = FALSE)
 First things first, let's see how effectively we've summarised the variance in the dataset. Plot a bar chart of the proportion of the total eigenvalues accounted for by each principal component. For meaningful visualisation, you want to see the vast majority in the first 2-3 axes (so our visualisations of the data will be meaningful).
 
 ```{r}
-barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig))
+barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig), names.arg = paste0("PC", seq(1,length(PCA$CA$eig), 1)), ylab = "Proportion of eigenvalues")
 round(as.vector(PCA$CA$eig)/sum(PCA$CA$eig), digits = 2)
 ```
 
@@ -278,13 +278,9 @@ par(mfrow = c(1,1))
 
 They don't look too dissimilar to the PCOA plots. However, remember these are non-metric spaces. The distances between the points no longer carry consistent meaning and so the information content of these plots is limited.
 
-## 3.0 Constrained ordination methods
+### 2.4 Correspondence analysis (CA)
 
-Vegan includes functions for a couple of other ordination techniques that are popular in community ecology. Most of these don't see regular use in contemporary disparity analyses but they are worth exploring, just in case a use strikes you!
-
-### 3.1 Correspondence analysis (CA)
-
-PCA preserves Euclidean distances among samples (and so if affected by double zeros). Correspondence analysis preserves chi-square distances (and so is unaffected by double zeros). PCA assumes a linear relation between variables and ordination axes, CA a uni-modal relationship. These are the core differences between PCA and CA which will dictate which method you should use. In almost all cases, because the variation you will sample using traditional morphometrics, geometric morphometrics, and outline methods will be relatively constrained, PCA will be the most appropriate. Nevertheless let's run through a short example using a different dataset.
+PCA preserves Euclidean distances among samples (and so if affected by double zeros). Correspondence analysis preserves chi-square distances (and so is unaffected by double zeros). PCA assumes a linear relation between variables and ordination axes, CA a uni-modal relationship. These are the core differences between PCA and CA which will dictate which method you should use. In almost all cases, because the variation you will sample using traditional morphometrics, geometric morphometrics, and outline methods will be relatively constrained (and double zeros represent useful information), PCA will be the most appropriate. Nevertheless let's run through a short example using a different dataset.
 
 ```{r}
 data(dune)
@@ -310,23 +306,11 @@ speciesCA <- CA$CA$v
 
 Why not try analysing the varespec data using CA and comparing it to the results of the PCA?
 
-### 3.2 Detrended correspondence analysis
+## 3.0 Constrained ordination methods
 
-A modified version of CA for analysing sparse ecological gradient data (e.g. time-series of species colonisation). It was developed with the intention of rectifying two alleged faults of standard correspondence analysis: the apparent curvature of straight gradients and packing of sites at the ends of the gradient. It doesn't see much use today and will be of little relevance to most of you.
+Vegan includes functions for a couple of other ordination techniques that are popular in community ecology. Most of these don't see regular use in contemporary disparity analyses but they are worth exploring, just in case a use strikes you!
 
-```{r}
-DCA <- decorana(dune)
-plot(DCA)
-DCA
-```
-
-See the decorana function information for further details about the method if you're interested. However, it will likely be of little use in analyses of disparity.
-
-```{r}
-?decorana
-```
-
-### 3.3 Canonical correspondence analysis (CCA)
+### 3.1 Canonical correspondence analysis (CCA)
 
 One of three methods of constrained ordination supported by Vegan. Constrained ordination methods analyse at least two matrices at once and seek to identify how much of the variance in one is explained by the other. While unconstrained ordination methods summarise and present all the variation in a dataset, constrained methods will only display variation in the response data that can be attributed to the predictor data.
 
@@ -352,7 +336,7 @@ RsquareAdj(RDA)
 
 We can see from the printout that these two variables, A1 + Management, explained 0.3994 of the total variance in the dune dataset. Adjusted R-squared measures the strength of the relationship between Y and X after applying a correction to the regular R-squared value to take into account the number of explanatory variables (we want the simplest model possible). This is the statistic that should be reported when model building in this way.
 
-### 3.4 Testing the significance of different terms
+### 3.2 Testing the significance of different terms
 
 Previously, we picked two variables at random for our RDA. What about if we want to include all variables that are statistically important? We can do this via forward selection.
 
@@ -415,7 +399,7 @@ You can test the significance of each constrained axis:
 anova(RDA, by="axis")
 ```
 
-### 3.5 Conditioned or partial ordination
+### 3.3 Conditioned or partial ordination
 
 All constrained ordination methods can have terms that are partialled out from the analysis before constraints are applied. This lets us reduce noise in the dataset.
 
@@ -426,7 +410,7 @@ RDA.part
 
 This partials out the effect of 'moisture', which affects the significance of the other terms. Why don't you use the vegan ANOVA functions to explore by how much this has changed the results of the RDA?
 
-### 3.6 Fitting environmental variables
+### 3.4 Fitting environmental variables
 
 Vegan provides two functions for fitting environmental variables onto ordination: envfit fits vectors of continuous variables and centroids of levels of class variables (defined as factor in R). The arrow shows the direction of the (increasing) gradient, and the length of the arrow is proportional to the correlation between the variable and the ordination; and ordisurf (which requires package mgcv) fits smooth surfaces for continuous variables onto ordination using thin plate splines with cross-validatory selection of smoothness.
 

@@ -7,9 +7,9 @@ editor: visual
 
 ## 1.0 Preparing your data
 
-In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves(). These functions require the package rgl, which in turn requires Java. As this requirement can cause problems for people (myself included) and is not the recommended approach for landmarking, I have not included it in this vignette. 
+In geomorph, you can digitize fixed landmarks, and semilandmarks on surfaces, using a 3D surface object or a mesh3d object. In its simplest version, this involves the following geomorph functions: digit.fixed, buildtemplate, and digitsurface. If you want to use curve semilandmarks, these may be either digitized as fixed landmarks, and then indexed for sliding using the curves argument of gpagen(); or sampled automatically from a digitized curve using digit.curves(). These functions require the package rgl, which in turn requires Java. As this requirement can cause problems for people (myself included) and is not the recommended approach for landmarking, I have not included it in this vignette.
 
-First, let us check if you have geomorph installed, install it if necessary, then load the package. 
+First, let us check if you have geomorph installed, install it if necessary, then load the package.
 
 ```{r}
 if(length(c("geomorph")[!c("geomorph") %in% installed.packages()[,"Package"]]) > 0){
@@ -17,7 +17,6 @@ if(length(c("geomorph")[!c("geomorph") %in% installed.packages()[,"Package"]]) >
 }
 library(geomorph)
 ```
-
 
 ## 2.0 Principal components analysis and visualisation tools for exploring shape space
 
@@ -127,9 +126,9 @@ plot(PaCA, phylo = TRUE, main = "PaCA")
 
 ### 2.5 Three-dimensional PCA plot with a phylogeny and time on the z-axis
 
-Finally, plot.gm.prcomp provides the possibility of producing a 3D plot of any two PCA axes, with the phylogenetic tree connecting the observations and time on the z-axis. Again, different plotting parameters can be controlled to manipulate plot aesthetics. Note, that in this case an rgl plotting device will open for the 3D plot, but the corresponding biplot with the phylogeny projected (option 2, above) will also be produced. This function will output the 3D plot in a separate RGL window. 
+Finally, plot.gm.prcomp provides the possibility of producing a 3D plot of any two PCA axes, with the phylogenetic tree connecting the observations and time on the z-axis. Again, different plotting parameters can be controlled to manipulate plot aesthetics. Note, that in this case an rgl plotting device will open for the 3D plot, but the corresponding biplot with the phylogeny projected (option 2, above) will also be produced. This function will output the 3D plot in a separate RGL window.
 
-If this doesn't work - don't worry! You likely just need to install Java! 
+If this doesn't work - don't worry! You likely just need to install Java!
 
 ```{r}
 plot(PCA.w.phylo, time.plot = TRUE, pch = 22, bg = c(rep("red", 5), rep("green", 4)), cex = 2, 
@@ -216,7 +215,7 @@ One might ascertain that models that include parameters for family and treatment
 
 ## 4.0 Allometry analyses
 
-It is important to note that I am no expert in the study of allometry, nor its analysis using geomorph. This is a wide-ranging package with a lot of different uses. What follows is a very brief foray into the analysis of allometry using geomorph for those who are interested using one of the models we defined earlier. There are much more detailed vignettes available online. I also highly recommend that those who are interested spend a few days reading through Chris Klingenberg's work on the topic.  
+It is important to note that I am no expert in the study of allometry, nor its analysis using geomorph. This is a wide-ranging package with a lot of different uses. What follows is a very brief foray into the analysis of allometry using geomorph for those who are interested using one of the models we defined earlier. There are much more detailed vignettes available online. I also highly recommend that those who are interested spend a few days reading through Chris Klingenberg's work on the topic.
 
 ### 4.1 Simple allometry models
 
@@ -226,9 +225,9 @@ First, let's just consider the simple allometry model we defined earlier:
 summary(fit.size)
 ```
 
-It is clear that there is a significant association between shape and size. To visualize this relationship, there are many options. First, we can use the plot generic for procD.lm and vary some of the arguments. Let's do that, using two different ways to visualize shape change: prediction lines (PredLine) and regression scores (RegScore). The former are first principal component scores for fitted values from the procD.lm fit (Adams and Nistri 2010); the latter are standardized projected shape scores, along the axis defined by the regression of shape on size (Drake and Klingenberg 2008). 
+It is clear that there is a significant association between shape and size. To visualize this relationship, there are many options. First, we can use the plot generic for procD.lm and vary some of the arguments. Let's do that, using two different ways to visualize shape change: prediction lines (PredLine) and regression scores (RegScore). The former are first principal component scores for fitted values from the procD.lm fit (Adams and Nistri 2010); the latter are standardized projected shape scores, along the axis defined by the regression of shape on size (Drake and Klingenberg 2008).
 
-When interpreting these plots, keep in mind that the predictor is size and the other axis represents some axis of shape. 
+When interpreting these plots, keep in mind that the predictor is size and the other axis represents some axis of shape.
 
 ```{r}
 plot(fit.size, type = "regression", reg.type = "PredLine", predictor = log(gdf$Csize))

@@ -205,8 +205,9 @@ taxon_groups <- list(nonBurnetiamorpha = c("Biarmosuchus_tener",
 Burnetiamorpha = c("Lemurosaurus_pricei", "Lobalopex_mordax",
 "Lophorhinus_willodenensis", "Proburnetia_viatkensis", "Lende_chiweta",
 "Paraburnetia_sneeubergensis", "Burnetia_mirabilis", "BP_1_7098"))
+class(taxon_groups) <- "taxonGroups"
 # plot
-plot_morphospace(pcoa_input = clad.PCoA, plot_taxon_names = F, taxon_groups = taxon_groups, plot_convex_hulls = TRUE)
+plot_morphospace(pcoa_input = clad.PCoA, plot_taxon_names = F, taxon_groups = taxon_groups, plot_convex_hull = T)
 ```
 
 It allows you to add trees.
