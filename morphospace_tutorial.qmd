@@ -33,8 +33,7 @@ When loading data, make sure you set the correct working directory!
 ```{r}
 # Load tail data and extract shapes, centroid sizes, classification of sex 
 # and species, links between landmarks, and phylogenetic tree
-setwd("datasets")
-tails <- readRDS("tails.Rds")
+tails <- readRDS("datasets/tails.Rds")
 
 shapes <- tails$shapes
 sizes <- log(tails$sizes)
@@ -246,8 +245,7 @@ First, let's load the data.
 
 ```{r}
 # Load wing data 
-setwd("datasets")
-wings <- readRDS("wings.Rds")
+wings <- readRDS("datasets/wings.Rds")
 ```
 
 Extract shapes, centroid sizes, classification of sex and species, links between landmarks, template, and phylogeny
@@ -338,8 +336,7 @@ morphospace can also handle closed outline data in the form of Fourier coefficie
 library(Momocs)
 
 # Load data from shells, extract shapes and sizes, and gets classifications of species, absolute age, and relative age (bzone)
-setwd("datasets")
-shells <- readRDS("shells.Rds")
+shells <- readRDS("datasets/shells.Rds")
 
 shapes <- shells$shapes$coe
 sizes <- log(shells$sizes)
@@ -448,9 +445,7 @@ Now we load out data and extract the necessary elements. Keep an eye on your RGL
 
 ```{r}
 # Load data from 3D shells, extract shapes and classification into species
-setwd("datasets")
-shells3D <- readRDS("shells3D.Rds")
-
+shells3D <- readRDS("datasets/shells3D.Rds")
 
 shapes <- shells3D$shapes
 sizes <- log(shells3D$sizes)

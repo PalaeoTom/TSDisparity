@@ -28,7 +28,6 @@ Now load momocs and read in the data.
 ```{r}
 library(Momocs)
 # move to wherever you have saved the datasets folder
-setwd("~/R_packages/R_projects/TSDisparity/")
 traits <- readRDS("datasets/fish_traits.Rds")
 landmarks <- readRDS("datasets/fish_landmarks.Rds")
 outlines <- readRDS("datasets/fish_outlines.Rds")
