@@ -14,8 +14,8 @@ This tutorial will introduce you to the various functions you can use to generat
 We will generate distance matrices using base R, Vegan, dispRity, and Claddis. Let's make sure the latter packages are installed and load them.
 
 ```{r}
-if(length(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis") %in% installed.packages()[,"Package"]]) > 0){
-  install.packages(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis") %in% installed.packages()[,"Package"]])
+if(length(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis", "dispRity") %in% installed.packages()[,"Package"]]) > 0){
+  install.packages(c("vegan", "Claddis", "dispRity")[!c("vegan", "Claddis", "dispRity") %in% installed.packages()[,"Package"]])
 }
 ```
 

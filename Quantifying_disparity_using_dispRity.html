@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Guillerme. Adapted by Thomas J. Smith.">
+
+<title>Quantifying disparity using dispRity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Quantifying_disparity_using_dispRity_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Quantifying_disparity_using_dispRity_files/libs/quarto-html/quarto.js"></script>
+<script src="Quantifying_disparity_using_dispRity_files/libs/quarto-html/popper.min.js"></script>
+<script src="Quantifying_disparity_using_dispRity_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Quantifying_disparity_using_dispRity_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Quantifying_disparity_using_dispRity_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Quantifying_disparity_using_dispRity_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Quantifying_disparity_using_dispRity_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Quantifying_disparity_using_dispRity_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Quantifying_disparity_using_dispRity_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Quantifying disparity using dispRity</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Thomas Guillerme. Adapted by Thomas J. Smith. </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1.0 Introduction</h2>
+<p>For those of you who are comfortable manipulating objects in R, you can calculate pretty much any disparity metric using base R functions. However, doing so will often require you to transform objects in specific ways and extract specific elements of complex outputs, which can be a little daunting and/or confusing. Luckily, Thomas Guillerme of the University of Sheffield has put together a fantastic do-it-all package that let’s you conduct all sorts of disparity analyses. He has also spent considerable time writing a fantastic manual for the package, with plenty of examples (https://raw.githack.com/TGuillerme/dispRity/master/inst/gitbook/_book/index.html).</p>
+<p>I have transcribed one such example below. Run through it, see what you think, then start playing around with the package.</p>
+<section id="load-libraries-and-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="load-libraries-and-datasets">1.1 Load libraries and datasets</h3>
+<p>Install and load dispRity.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"dispRity"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"dispRity"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dispRity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ape</code></pre>
+</div>
+</div>
+<p>First, we’ll set the seed for reproducibility, then load the datasets.</p>
+<p>Today we’ll be working with a mammal dataset, specifically the ordination of a 50-taxon Gower distance matrix derived from discrete character data. We’ll load two versions: the first is solely composed of the loadings of the sampled taxa (BeckLee_mat50), the second (BeckLee_mat99) includes the loadings for each node in the phylogenetic tree that unites them. We’ll also load the phylogenetic tree used to estimate the node states and age data for some of the tips.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BeckLee_mat50)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BeckLee_mat99)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BeckLee_tree)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(BeckLee_ages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can check out the dimensions of the matrices using the dim function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(BeckLee_mat50)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 50 48</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(BeckLee_mat99)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 99 97</code></pre>
+</div>
+</div>
+<p>As expected, 50 rows (i.e., taxa) in BeckLee_mat50, and 99 in BeckLee_mat99.</p>
+<p>We can also take a peak at the phylogeny. We can do this simply…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(BeckLee_tree, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">axisPhylo</span>(<span class="at">root =</span> <span class="dv">140</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Quantifying_disparity_using_dispRity_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>…and we can do it with a fancy geological time scale (using the strap package)!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(strap)) <span class="fu">install.packages</span>(<span class="st">"strap"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: strap</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: geoscale</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>strap<span class="sc">::</span><span class="fu">geoscalePhylo</span>(BeckLee_tree, <span class="at">cex.tip =</span> <span class="fl">0.7</span>, <span class="at">cex.ts =</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Quantifying_disparity_using_dispRity_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If you want to use your own data, you can use any type of morphospace in any dataset form (“matrix”, “data.frame”). Throughout this tutorial, you we assume you are using the (loose) morphospace definition from Thomas Guillerme, Cooper, et al.&nbsp;(2020): any matrix were columns are traits and rows are observations (in a distance matrix, columns are still trait, i.e.&nbsp;“distance to species A”, etc.). We won’t cover it here but you can also use lists of matrices and list of trees.</p>
+<p>To go through this tutorial you will need:</p>
+<ul>
+<li>A matrix with tip data</li>
+<li>A phylogenetic tree</li>
+<li>A matrix with tip and node data</li>
+<li>A table of first and last occurrences data (FADLAD)</li>
+</ul>
+<p>If you are missing any of these components, you can use the following functions to sample any of the missing components:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Functions to get simulate a PCO looking like matrix from a tree</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>i.need.a.matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(tree) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    matrix <span class="ot">&lt;-</span> <span class="fu">space.maker</span>(<span class="at">elements =</span> <span class="fu">Ntip</span>(tree), <span class="at">dimensions =</span> <span class="fu">Ntip</span>(tree), <span class="at">distribution =</span> rnorm,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">scree =</span> <span class="fu">rev</span>(<span class="fu">cumsum</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="fu">Ntip</span>(tree), <span class="fu">Ntip</span>(tree)))))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames</span>(matrix) <span class="ot">&lt;-</span> tree<span class="sc">$</span>tip.label</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(matrix)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to simulate a tree</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>i.need.a.tree <span class="ot">&lt;-</span> <span class="cf">function</span>(matrix) {</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    tree <span class="ot">&lt;-</span> <span class="fu">rtree</span>(<span class="fu">nrow</span>(matrix))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    tree<span class="sc">$</span>root.time <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">tree.age</span>(tree)<span class="sc">$</span>age)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    tree<span class="sc">$</span>tip.label <span class="ot">&lt;-</span> <span class="fu">rownames</span>(matrix)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    tree<span class="sc">$</span>node.label <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"n"</span>, <span class="dv">1</span><span class="sc">:</span>(<span class="fu">nrow</span>(matrix)<span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(tree)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to simulate some "node" data</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>i.need.node.data <span class="ot">&lt;-</span> <span class="cf">function</span>(matrix, tree) {</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    matrix_node <span class="ot">&lt;-</span> <span class="fu">space.maker</span>(<span class="at">elements =</span> <span class="fu">Nnode</span>(tree), <span class="at">dimensions =</span> <span class="fu">ncol</span>(matrix),</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                               <span class="at">distribution =</span> rnorm, <span class="at">scree =</span> <span class="fu">apply</span>(matrix, <span class="dv">2</span>, var))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(tree<span class="sc">$</span>node.label)) {</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(matrix_node) <span class="ot">&lt;-</span> tree<span class="sc">$</span>node.label</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames</span>(matrix_node) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"n"</span>, <span class="dv">1</span><span class="sc">:</span>(<span class="fu">nrow</span>(matrix)<span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">rbind</span>(matrix, matrix_node))</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to simulate some "FADLAD" data</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>i.need.FADLAD <span class="ot">&lt;-</span> <span class="cf">function</span>(tree) {</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    tree_ages <span class="ot">&lt;-</span> <span class="fu">tree.age</span>(tree)[<span class="dv">1</span><span class="sc">:</span><span class="fu">Ntip</span>(tree),]</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">data.frame</span>(<span class="at">FAD =</span> tree_ages[,<span class="dv">1</span>], <span class="at">LAD =</span> tree_ages[,<span class="dv">1</span>], <span class="at">row.names =</span> tree_ages[,<span class="dv">2</span>]))</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Once you’ve done that, simply rename your data objects as the Beck &amp; Lee dataset is renamed below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## A matrix with tip data</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>my_matrix <span class="ot">&lt;-</span> BeckLee_mat50</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## A phylogenetic tree </span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>my_tree <span class="ot">&lt;-</span> BeckLee_tree</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="do">## A matrix with tip and node data</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>my_tip_node_matrix <span class="ot">&lt;-</span> BeckLee_mat99</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="do">## A table of first and last occurrences data (FADLAD)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>my_fadlad <span class="ot">&lt;-</span> BeckLee_ages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="disparity-through-time" class="level2">
+<h2 class="anchored" data-anchor-id="disparity-through-time">2.0 Disparity through time</h2>
+<section id="splitting-the-morphospace-through-time" class="level3">
+<h3 class="anchored" data-anchor-id="splitting-the-morphospace-through-time">2.1 Splitting the morphospace through time</h3>
+<p>One of the crucial steps in disparity-through-time analysis is to split the full morphospace into smaller time subsets that contain the total number of morphologies at certain points in time (time-slicing) or during certain periods in time (time-binning). Basically, the full morphospace represents the total number of morphologies across all time and will be greater than any of the time subsets of the morphospace.</p>
+<p>The dispRity package provides a chrono.subsets function that allows users to split the morphospace into time slices (using method = continuous) or into time bins (using method = discrete). In this example, we are going to split the morphospace into five equal time bins of 20 million years long from 100 million years ago to the present. We will also provide to the function a table containing the first and last occurrences dates for some fossils to take into account that some fossils might occur in several of our different time bins.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Creating the vector of time bins ages</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>time_bins <span class="ot">&lt;-</span> <span class="fu">rev</span>(<span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">100</span>, <span class="at">by =</span> <span class="dv">20</span>))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Splitting the morphospace using the chrono.subsets function</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>binned_morphospace <span class="ot">&lt;-</span> <span class="fu">chrono.subsets</span>(<span class="at">data =</span> my_matrix, <span class="at">tree =</span> my_tree,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"discrete"</span>, <span class="at">time =</span> time_bins, <span class="at">inc.nodes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">FADLAD =</span> my_fadlad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The output object is a dispRity object (In brief, dispRity objects are lists of different elements (i.e.&nbsp;disparity results, morphospace time subsets, morphospace attributes, etc.) that display only a summary of the object when calling the object to avoiding filling the R console with superfluous output. It also allows easy plotting/summarising/analysing for repeatability down the line but we will not go into this right now.</p>
+<p>For more on dispRity objects, see the manual: https://raw.githack.com/TGuillerme/dispRity/master/inst/gitbook/_book/the-guts-of-the-disprity-package.html#disprity-object</p>
+<p>Let’s take a peek under the hood.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Printing the class of the object</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(binned_morphospace)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "dispRity"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Printing the content of the object</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(binned_morphospace)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 4
+ $ matrix :List of 1
+  ..$ : num [1:50, 1:48] -0.561 -0.419 -0.834 -0.771 -0.832 ...
+  .. ..- attr(*, "dimnames")=List of 2
+  .. .. ..$ : chr [1:50] "Cimolestes" "Maelestes" "Batodon" "Bulaklestes" ...
+  .. .. ..$ : NULL
+ $ tree   :Class "multiPhylo"
+List of 1
+  ..$ :List of 6
+  .. ..$ edge       : int [1:98, 1:2] 51 52 52 53 53 51 54 55 56 56 ...
+  .. ..$ edge.length: num [1:98] 24.5 24.6 12.7 11.8 11.8 ...
+  .. ..$ Nnode      : int 49
+  .. ..$ tip.label  : chr [1:50] "Daulestes" "Bulaklestes" "Uchkudukodon" "Kennalestes" ...
+  .. ..$ node.labels: chr [1:49] "n1" "n2" "n3" "n4" ...
+  .. ..$ root.time  : num 139
+  .. ..- attr(*, "class")= chr "phylo"
+  .. ..- attr(*, "order")= chr "cladewise"
+ $ call   :List of 1
+  ..$ subsets: Named chr [1:4] "discrete" "1" "1" "FALSE"
+  .. ..- attr(*, "names")= chr [1:4] "" "trees" "matrices" "bind"
+ $ subsets:List of 5
+  ..$ 100 - 80:List of 1
+  .. ..$ elements: int [1:8, 1] 5 4 6 8 43 10 11 42
+  ..$ 80 - 60 :List of 1
+  .. ..$ elements: int [1:15, 1] 7 8 9 1 2 3 12 13 14 44 ...
+  ..$ 60 - 40 :List of 1
+  .. ..$ elements: int [1:13, 1] 41 49 24 25 26 27 28 21 22 19 ...
+  ..$ 40 - 20 :List of 1
+  .. ..$ elements: int [1:6, 1] 15 39 40 35 23 47
+  ..$ 20 - 0  :List of 1
+  .. ..$ elements: int [1:10, 1] 36 37 38 32 33 34 50 48 29 30
+ - attr(*, "class")= chr "dispRity"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Printing the names of each element of the object</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(binned_morphospace)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "matrix"  "tree"    "call"    "subsets"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Printing the object as a dispRity class</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>binned_morphospace</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> ---- dispRity object ---- 
+5 discrete time subsets for 50 elements in one matrix with 1 phylogenetic tree
+    100 - 80, 80 - 60, 60 - 40, 40 - 20, 20 - 0.</code></pre>
+</div>
+</div>
+<p>These objects will gradually contain more information when completing the following steps in the disparity-through-time analysis.</p>
+</section>
+<section id="bootstrapping-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrapping-the-data">2.2 Bootstrapping the data</h3>
+<p>Once we obtain our different time subsets, we can bootstrap and rarefy them (i.e.&nbsp;pseudo-replicating the data). The bootstrapping allows us to make each subset more robust to outliers and the rarefaction allows us to compare subsets with the same number of taxa to remove sampling biases (i.e.&nbsp;more taxa in one subset than the others). The boot.matrix function bootstraps the dispRity object and the rarefaction option within performs rarefaction.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Getting the minimum number of rows (i.e. taxa) in the time subsets</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>minimum_size <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">size.subsets</span>(binned_morphospace))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Bootstrapping each time subset 100 times and rarefying them </span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>rare_bin_morphospace <span class="ot">&lt;-</span> <span class="fu">boot.matrix</span>(binned_morphospace, <span class="at">bootstraps =</span> <span class="dv">100</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rarefaction =</span> minimum_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calculating-disparity" class="level3">
+<h3 class="anchored" data-anchor-id="calculating-disparity">2.3 Calculating disparity</h3>
+<p>We can now calculate the disparity within each time subsets along with some confidence intervals generated by the pseudoreplication step above (bootstraps/rarefaction). Disparity can be calculated in many ways and this package allows users to come up with their own disparity metrics. For more details, please refer to the dispRity metric section (or directly use moms).</p>
+<p>In this example, we are going to look at how the spread of the data in the morphospace through time. For that we are going to use the sum of the variance from each dimension of the morphospace in the morphospace. We highly recommend using a metric that makes sense for your specific analysis and for your specific dataset and not just because everyone uses it!</p>
+<p>This is not a straightforward question but you can use the test.metric function to check your assumptions. Basically, what test.metric does is modify your morphospace using a null process of interest (e.g.&nbsp;changes in size) and checks whether your metric does indeed pick up that change. For example here, let see if the sum of variances picks up changes in size but not random changes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>my_test <span class="ot">&lt;-</span> <span class="fu">test.metric</span>(my_matrix, <span class="at">metric =</span> <span class="fu">c</span>(sum, dispRity<span class="sc">::</span>variances), <span class="at">shifts =</span> <span class="fu">c</span>(<span class="st">"random"</span>, <span class="st">"size"</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(my_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 10%  20%  30%  40%  50%  60%  70%  80%  90% 100%        slope
+random          2.41 2.51 2.56 2.50 2.54 2.51 2.52 2.53 2.53 2.52 0.0006434981
+size.increase   2.23 2.19 2.25 2.33 2.31 2.35 2.43 2.44 2.48 2.52 0.0036071419
+size.hollowness 2.40 2.56 2.56 2.60 2.63 2.64 2.60 2.58 2.55 2.52 0.0006032204
+                     p_value   R^2(adj)
+random          3.046683e-02 0.12638784
+size.increase   4.009847e-16 0.90601561
+size.hollowness 1.324664e-01 0.04783366</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(my_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Quantifying_disparity_using_dispRity_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We see that changes in the inner size (see Thomas Guillerme, Puttick, et al.&nbsp;(2020) for more details) is actually picked up by the sum of variances but not random changes or outer changes. Which is a good thing!</p>
+<p>As you’ve noted, the sum of variances is defined in test.metric as c(sum, variances). This is a core bit of the dispRity package where you can define your own metric as a function or a set of functions. You can find more info about this in the dispRity metric section but in brief, the dispRity package considers metrics by their “dimensions” level which corresponds to what they output. For example, the function sum is a dimension level 1 function because no matter the input, it outputs a single value (the sum). Variances on the other hand is a dimension level 2 function because it will output the variance of each column in a matrix (an example of a dimensions level 3 would be the function var that outputs a matrix). The dispRity package always automatically sorts the dimensions levels: it will always run dimensions level 3 &gt; dimensions level 2 &gt; and dimensions level 1. In this case both c(sum, variances) and c(variances, sum) will result in actually running sum(variances(matrix)).</p>
+<p>Anyways, let’s calculate the sum of variances on our bootstrapped and rarefied morphospaces:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Calculating disparity for the bootstrapped and rarefied data</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>disparity <span class="ot">&lt;-</span> <span class="fu">dispRity</span>(rare_bin_morphospace , <span class="at">metric =</span> <span class="fu">c</span>(sum, dispRity<span class="sc">::</span>variances))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To display the actual calculated scores, we need to summarise the disparity object using the S3 method summary that is applied to a dispRity object (see ?summary.dispRity for more details). By the way, as for any R package, you can refer to the help files for each individual function for more details.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Summarising the disparity results</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(disparity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   subsets  n   obs bs.median  2.5%   25%   75% 97.5%
+1 100 - 80  8 2.207     1.962 1.615 1.876 2.017 2.172
+2 100 - 80  6    NA     1.923 1.477 1.768 2.065 2.222
+3  80 - 60 15 2.315     2.167 1.979 2.111 2.227 2.308
+4  80 - 60  6    NA     2.167 1.831 2.055 2.300 2.460
+5  60 - 40 13 2.435     2.244 2.006 2.183 2.304 2.384
+6  60 - 40  6    NA     2.284 1.683 2.140 2.383 2.532
+7  40 - 20  6 2.604     2.206 1.628 2.026 2.388 2.604
+8   20 - 0 10 2.491     2.257 1.958 2.170 2.326 2.421
+9   20 - 0  6    NA     2.302 1.766 2.143 2.366 2.528</code></pre>
+</div>
+</div>
+<p>The summary.dispRity function comes with many options on which values to calculate (central tendency and quantiles) and on how many digits to display. Refer to the function’s manual for more details.</p>
+</section>
+<section id="plotting-the-results" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-results">2.4 Plotting the results</h3>
+<p>It is sometimes easier to visualise the results in a plot than in a table. For that we can use the plot S3 function to plot the dispRity objects (see ?plot.dispRity for more details).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Graphical options</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quartz</span>(<span class="at">width =</span> <span class="dv">10</span>, <span class="at">height =</span> <span class="dv">5</span>) ; <span class="fu">par</span>(<span class="at">mfrow =</span> (<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)), <span class="at">bty =</span> <span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(disparity, <span class="at">type =</span> <span class="st">"continuous"</span>, <span class="at">main =</span> <span class="st">"bootstrapped results"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Quantifying_disparity_using_dispRity_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(disparity, <span class="at">type =</span> <span class="st">"continuous"</span>, <span class="at">main =</span> <span class="st">"rarefied results"</span>,</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">rarefaction =</span> minimum_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Quantifying_disparity_using_dispRity_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nice. The curves look pretty similar. Same as for the summary.dispRity function, check out the plot.dispRity manual for the many, many options available.</p>
+</section>
+<section id="testing-differences" class="level3">
+<h3 class="anchored" data-anchor-id="testing-differences">2.5 Testing differences</h3>
+<p>Finally, to draw some valid conclusions from these results, we can apply some statistical tests. We can test, for example, if mammalian disparity changed significantly through time over the last 100 million years. To do so, we can compare the means of each time-bin in a sequential manner to see whether the disparity in bin n is equal to the disparity in bin n+1, and whether this is in turn equal to the disparity in bin n+2, etc. Because our data is temporally autocorrelated (i.e.&nbsp;what happens in bin n+1 depends on what happened in bin n) and pseudoreplicated (i.e.&nbsp;each bootstrap draw creates non-independent time subsets because they are all based on the same time subsets), we apply a non-parametric mean comparison: the wilcox.test. Also, we need to apply a p-value correction (e.g.&nbsp;Bonferroni correction) to correct for multiple testing (see ?p.adjust for more details).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Testing the differences between bins in the bootstrapped dataset.</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">test.dispRity</span>(disparity, <span class="at">test =</span> wilcox.test, <span class="at">comparison =</span> <span class="st">"sequential"</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">correction =</span> <span class="st">"bonferroni"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+                   statistic: W
+100 - 80 : 80 - 60          730
+80 - 60 : 60 - 40          2752
+60 - 40 : 40 - 20          5461
+40 - 20 : 20 - 0           4506
+
+[[2]]
+                        p.value
+100 - 80 : 80 - 60 7.081171e-25
+80 - 60 : 60 - 40  1.593988e-07
+60 - 40 : 40 - 20  1.000000e+00
+40 - 20 : 20 - 0   9.115502e-01</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Testing the differences between bins in the rarefied dataset.</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">test.dispRity</span>(disparity, <span class="at">test =</span> wilcox.test, <span class="at">comparison =</span> <span class="st">"sequential"</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">correction =</span> <span class="st">"bonferroni"</span>, <span class="at">rarefaction  =</span> minimum_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+                   statistic: W
+100 - 80 : 80 - 60         1518
+80 - 60 : 60 - 40          3722
+60 - 40 : 40 - 20          5676
+40 - 20 : 20 - 0           4160
+
+[[2]]
+                        p.value
+100 - 80 : 80 - 60 7.159537e-17
+80 - 60 : 60 - 40  7.199018e-03
+60 - 40 : 40 - 20  3.953488e-01
+40 - 20 : 20 - 0   1.609754e-01</code></pre>
+</div>
+</div>
+<p>Here our results show significant changes in disparity through time between all time bins (all p-values &lt; 0.05). However, when looking at the rarefied results, there is no significant difference between the time bins in the Palaeogene (60-40 to 40-20 Mya), suggesting that the differences detected in the first test might just be due to the differences in number of taxa sampled (13 or 6 taxa) in each time bin.</p>
+<p>Don’t stop there - there are plenty more analyses to play around with using dispRity. Have a browse of the manual: https://raw.githack.com/TGuillerme/dispRity/master/inst/gitbook/_book/index.html</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
