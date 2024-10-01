@@ -183,9 +183,16 @@ it also allows you add special tokens to a matrix and specify special behaviors 
 data[sample(1:100,10)] <- "-"
 ```
 
-Now let's compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the 'inapplicable' category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e. both are treated as missing), and polymorphisms and uncertainties return all present states:
+Now let's compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the 'inapplicable' category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e. both are treated as missing), and polymorphisms and uncertainties return all present states.
 
-missing = function(x,y) NA inapplicable = function(x,y) NA polymorphism = function(x,y) strsplit(x, split = "\\&")\[\[1\]\] uncertainty = function(x,y) strsplit(x, split = "\\/")\[\[1\]\]
+The below defines the functions as they are coded in dispRity. 
+
+```{r}
+missing = function(x,y) NA
+inapplicable = function(x,y) NA 
+polymorphism = function(x,y) strsplit(x, split = "\\&")[[1]]
+uncertainty = function(x,y) strsplit(x, split = "\\/")[[1]]
+```
 
 To change this, you must submit a function as a named element of a list (example below) which only takes x,y as inputs and only returns a single value.
 

@@ -110,8 +110,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="load-packages">1.1 Load packages</h3>
 <p>We will generate distance matrices using base R, Vegan, dispRity, and Claddis. Let’s make sure the latter packages are installed and load them.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]]) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>)[<span class="sc">!</span><span class="fu">c</span>(<span class="st">"vegan"</span>, <span class="st">"Claddis"</span>, <span class="st">"dispRity"</span>) <span class="sc">%in%</span> <span class="fu">installed.packages</span>()[,<span class="st">"Package"</span>]])</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Loading required package: lattice</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>This is vegan 2.6-6.1</code></pre>
+<pre><code>This is vegan 2.6-8</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vegdist.Gower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"gower"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vegdist.altGower <span class="ot">&lt;-</span> <span class="fu">vegdist</span>(data, <span class="at">method =</span> <span class="st">"altGower"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -287,21 +287,27 @@ All non-continuous characters are weighted 1.</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,<span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="st">"-"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now let’s compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the ‘inapplicable’ category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e.&nbsp;both are treated as missing), and polymorphisms and uncertainties return all present states:</p>
-<p>missing = function(x,y) NA inapplicable = function(x,y) NA polymorphism = function(x,y) strsplit(x, split = “\&amp;”)[[1]] uncertainty = function(x,y) strsplit(x, split = “\/”)[[1]]</p>
+<p>Now let’s compare what happens when we leave the default rule in place for dealing with inapplicables and what happens when we change them to absences. We do this by submitting a new function for the ‘inapplicable’ category of special tokens via the special.behaviours argument. By default, missing data returns NA and inapplicable returns NA (i.e.&nbsp;both are treated as missing), and polymorphisms and uncertainties return all present states.</p>
+<p>The below defines the functions as they are coded in dispRity.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>missing <span class="ot">=</span> <span class="cf">function</span>(x,y) <span class="cn">NA</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>inapplicable <span class="ot">=</span> <span class="cf">function</span>(x,y) <span class="cn">NA</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>polymorphism <span class="ot">=</span> <span class="cf">function</span>(x,y) <span class="fu">strsplit</span>(x, <span class="at">split =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">&amp;"</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>uncertainty <span class="ot">=</span> <span class="cf">function</span>(x,y) <span class="fu">strsplit</span>(x, <span class="at">split =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">/"</span>)[[<span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>To change this, you must submit a function as a named element of a list (example below) which only takes x,y as inputs and only returns a single value.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>dispR.mord.def <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>dispR.mord.mod <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F, <span class="at">special.behaviours =</span> <span class="fu">list</span>(<span class="at">inapplicable =</span> <span class="cf">function</span>(x,y) <span class="fu">return</span>(<span class="st">"0"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>dispR.mord.def <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>dispR.mord.mod <span class="ot">&lt;-</span> <span class="fu">char.diff</span>(data, <span class="at">method =</span> <span class="st">"mord"</span>, <span class="at">by.col =</span> F, <span class="at">special.behaviours =</span> <span class="fu">list</span>(<span class="at">inapplicable =</span> <span class="cf">function</span>(x,y) <span class="fu">return</span>(<span class="st">"0"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at the results.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.def)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.def)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(dispR.mord.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Different values highlight that it is working! char.diff is a very flexible, powerful function that empowers you to make your analyses your own. I encourage you to play around with it and build your pipelines around it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>?char.diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>?char.diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 
