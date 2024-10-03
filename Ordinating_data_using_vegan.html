@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -34,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Loading required package: lattice</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>This is vegan 2.6-6.1</code></pre>
+<pre><code>This is vegan 2.6-8</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(varespec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -207,8 +207,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>You can isolate the PCA scores with the following for further analyses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sitePCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>u <span class="co"># Site scores</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>speciesPCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>v <span class="co"># Species scores</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sitePCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>u <span class="co"># Site scores - the rows</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>speciesPCA <span class="ot">&lt;-</span> PCA<span class="sc">$</span>CA<span class="sc">$</span>v <span class="co"># Species scores - the columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You can also plot the results of PCA as a biplot, where the species are plotted as arrows which signify the direction in which the cover increases for those species.</p>
 <div class="cell">
@@ -570,11 +570,16 @@ Warning in metaMDS(x, autotransform = F, k = i + 1, trace = F): stress is
 <div class="cell-output cell-output-stdout">
 <pre><code>Call: rda(formula = dune ~ A1 + Management, data = dune.env)
 
+-- Model Summary --
+
               Inertia Proportion Rank
 Total         84.1237     1.0000     
 Constrained   33.5978     0.3994    4
 Unconstrained 50.5259     0.6006   15
-Inertia is variance 
+
+Inertia is variance
+
+-- Eigenvalues --
 
 Eigenvalues for constrained axes:
   RDA1   RDA2   RDA3   RDA4 
@@ -603,13 +608,23 @@ $adj.r.squared
 <p>First, let’s generate RDA objects that try to explain the variance in the dune dataset with all and none of the environmental variables. These will serve as our endmember models.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># all variables</span></span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>RDA.upper <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> ., <span class="at">data =</span> dune.env)</span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="co"># no variables</span></span>
-<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>RDA.lower <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> dune.env)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>RDA.upper <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> ., <span class="at">data =</span> dune.env)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Some constraints or conditions were aliased because they were redundant. This
+can happen if terms are linearly dependent (collinear): 'Manure^4'</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># no variables</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>RDA.lower <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> dune.env)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we will use the ordiR2step function to perform forward selection on our 5 environmental variables. This will produce an optimised model. Key arguments include: ‘object’, which specifies our start point, and argument ‘scope’, which specifies our end (so we move from no variables included to all). Argument ‘direction’ specifies how the algorithm should proceed (should it move ‘forward’, adding variables, or take them away, moving ‘backward’, or try ‘both’). Argument R2scope ensures the function will not exceed the R2 of the complete model (i.e.&nbsp;including all variables, defaults to TRUE).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>fwd.sel <span class="ot">&lt;-</span> <span class="fu">ordiR2step</span>(RDA.lower, RDA.upper, <span class="at">direction =</span> <span class="st">"both"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>fwd.sel <span class="ot">&lt;-</span> <span class="fu">ordiR2step</span>(RDA.lower, RDA.upper, <span class="at">direction =</span> <span class="st">"both"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Some constraints or conditions were aliased because they were redundant. This
+can happen if terms are linearly dependent (collinear): 'Manure^4'</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Step: R2.adj= 0 
 Call: dune ~ 1 
@@ -630,8 +645,15 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Step: R2.adj= 0.2251241 
 Call: dune ~ Management 
- 
-                R2.adjusted
+ </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Some constraints or conditions were aliased because they were redundant. This
+can happen if terms are linearly dependent (collinear): 'Manure^4'</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                R2.adjusted
 + Moisture        0.3450334
 &lt;All variables&gt;   0.3250882
 + Manure          0.2779515
@@ -642,23 +664,28 @@ Call: dune ~ Management
 </div>
 <p>We can access the new model with the following.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>fwd.sel<span class="sc">$</span>call</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>fwd.sel<span class="sc">$</span>call</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>rda(formula = dune ~ Management, data = dune.env)</code></pre>
 </div>
 </div>
 <p>Let’s conduct another RDA using this optimised model and compare it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>RDA.opt <span class="ot">&lt;-</span> <span class="fu">eval</span>(fwd.sel<span class="sc">$</span>call)</span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>RDA.opt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>RDA.opt <span class="ot">&lt;-</span> <span class="fu">eval</span>(fwd.sel<span class="sc">$</span>call)</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>RDA.opt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call: rda(formula = dune ~ Management, data = dune.env)
+
+-- Model Summary --
 
               Inertia Proportion Rank
 Total         84.1237     1.0000     
 Constrained   29.2307     0.3475    3
 Unconstrained 54.8930     0.6525   16
-Inertia is variance 
+
+Inertia is variance
+
+-- Eigenvalues --
 
 Eigenvalues for constrained axes:
   RDA1   RDA2   RDA3 
@@ -670,7 +697,7 @@ Eigenvalues for unconstrained axes:
   PC12   PC13   PC14   PC15   PC16 
  0.785  0.661  0.467  0.283  0.159 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RsquareAdj</span>(RDA.opt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RsquareAdj</span>(RDA.opt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$r.squared
 [1] 0.3474729
@@ -684,7 +711,7 @@ $adj.r.squared
 <p>There are other ways of testing for the significance of constraints. Vegan supports a series of wrapper anova functions.</p>
 <p>The below will test the significance of the overall model we originally specified (i.e.&nbsp;dune ~ A1 + management).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Permutation test for rda under reduced model
 Permutation: free
@@ -700,7 +727,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 <p>You can test the significance of each term:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"term"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"term"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Permutation test for rda under reduced model
 Terms added sequentially (first to last)
@@ -708,17 +735,17 @@ Permutation: free
 Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
-           Df Variance      F Pr(&gt;F)   
-A1          1    8.115 2.4091  0.014 * 
-Management  3   25.483 2.5218  0.003 **
-Residual   15   50.526                 
+           Df Variance      F Pr(&gt;F)    
+A1          1    8.115 2.4091  0.014 *  
+Management  3   25.483 2.5218  0.001 ***
+Residual   15   50.526                  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 <p>You can test significance of the marginal effects of each term:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"mar"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"mar"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Permutation test for rda under reduced model
 Marginal effects of terms
@@ -726,17 +753,17 @@ Permutation: free
 Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
-           Df Variance      F Pr(&gt;F)    
-A1          1    4.367 1.2965  0.227    
-Management  3   25.483 2.5218  0.001 ***
-Residual   15   50.526                  
+           Df Variance      F Pr(&gt;F)   
+A1          1    4.367 1.2965  0.228   
+Management  3   25.483 2.5218  0.002 **
+Residual   15   50.526                 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 <p>You can test the significance of each constrained axis:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"axis"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(RDA, <span class="at">by=</span><span class="st">"axis"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Permutation test for rda under reduced model
 Forward tests for axes
@@ -745,10 +772,10 @@ Number of permutations: 999
 
 Model: rda(formula = dune ~ A1 + Management, data = dune.env)
          Df Variance      F Pr(&gt;F)   
-RDA1      1   15.144 4.4960  0.007 **
-RDA2      1   11.862 3.5215  0.014 * 
-RDA3      1    4.053 1.2033  0.597   
-RDA4      1    2.538 0.7535  0.681   
+RDA1      1   15.144 4.4960  0.002 **
+RDA2      1   11.862 3.5215  0.024 * 
+RDA3      1    4.053 1.2033  0.577   
+RDA4      1    2.538 0.7535  0.706   
 Residual 15   50.526                 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
@@ -759,18 +786,23 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h3 class="anchored" data-anchor-id="conditioned-or-partial-ordination">3.3 Conditioned or partial ordination</h3>
 <p>All constrained ordination methods can have terms that are partialled out from the analysis before constraints are applied. This lets us reduce noise in the dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>RDA.part <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> A1 <span class="sc">+</span> Management <span class="sc">+</span> <span class="fu">Condition</span>(Moisture), <span class="at">data=</span>dune.env)</span>
-<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>RDA.part</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>RDA.part <span class="ot">&lt;-</span> <span class="fu">rda</span>(dune <span class="sc">~</span> A1 <span class="sc">+</span> Management <span class="sc">+</span> <span class="fu">Condition</span>(Moisture), <span class="at">data=</span>dune.env)</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>RDA.part</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Call: rda(formula = dune ~ A1 + Management + Condition(Moisture), data
-= dune.env)
+<pre><code>Call: rda(formula = dune ~ A1 + Management + Condition(Moisture), data =
+dune.env)
+
+-- Model Summary --
 
               Inertia Proportion Rank
 Total         84.1237     1.0000     
 Conditional   27.4865     0.3267    3
 Constrained   21.3933     0.2543    4
 Unconstrained 35.2439     0.4190   12
-Inertia is variance 
+
+Inertia is variance
+
+-- Eigenvalues --
 
 Eigenvalues for constrained axes:
   RDA1   RDA2   RDA3   RDA4 
@@ -788,14 +820,14 @@ Eigenvalues for unconstrained axes:
 <p>Vegan provides two functions for fitting environmental variables onto ordination: envfit fits vectors of continuous variables and centroids of levels of class variables (defined as factor in R). The arrow shows the direction of the (increasing) gradient, and the length of the arrow is proportional to the correlation between the variable and the ordination; and ordisurf (which requires package mgcv) fits smooth surfaces for continuous variables onto ordination using thin plate splines with cross-validatory selection of smoothness.</p>
 <p>Let’s try both using the base RDA of the dune dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>RDA.fit <span class="ot">&lt;-</span>  <span class="fu">envfit</span>(RDA <span class="sc">~</span> A1 <span class="sc">+</span> Management, <span class="at">data=</span>dune.env)</span>
-<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>RDA.fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>RDA.fit <span class="ot">&lt;-</span>  <span class="fu">envfit</span>(RDA <span class="sc">~</span> A1 <span class="sc">+</span> Management, <span class="at">data=</span>dune.env)</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>RDA.fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 ***VECTORS
 
        RDA1     RDA2    r2 Pr(&gt;r)  
-A1 -0.91473 -0.40407 0.276  0.054 .
+A1 -0.91473 -0.40407 0.276  0.053 .
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Permutation: free
@@ -821,8 +853,8 @@ Number of permutations: 999</code></pre>
 </div>
 <p>We can plot the results directly or add them to an existing ordination. The arrow shows the direction of the increasing gradient, its length proportional to the correlation between the variable and the ordination.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">dis =</span> <span class="st">"site"</span>)</span>
-<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA.fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">dis =</span> <span class="st">"site"</span>)</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA.fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -833,7 +865,7 @@ Number of permutations: 999</code></pre>
 </div>
 <p>Ordisurf directly adds a fitted surface to an ordination. It returns the result of the fitted thinplate spline.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ordisurf</span>(RDA <span class="sc">~</span> A1, <span class="at">data =</span> dune.env)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ordisurf</span>(RDA <span class="sc">~</span> A1, <span class="at">data =</span> dune.env)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -865,7 +897,7 @@ REML score: 42.24929     </code></pre>
 <p>Finally, vegan has a variety of functions that let you customise your ordinations.</p>
 <p>Let’s start with a basic plot of our varespec PCA data from way, way back in this tutorial. Let’s plot the sites as points and species (variables) as crosses.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -876,9 +908,9 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>If you want finer control over your plot, it’s best to start with a blank plot first. This can be achieved by changing argument ‘type’ to “n” (i.e.&nbsp;you’ll just plot the axes). Let’s make the sites and species more distinct this way.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"n"</span>)</span>
-<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(PCA, <span class="at">display =</span> <span class="st">"sites"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">pch=</span><span class="dv">21</span>, <span class="at">col=</span><span class="st">"red"</span>, <span class="at">bg=</span><span class="st">"yellow"</span>)</span>
-<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>, <span class="at">cex=</span><span class="fl">0.7</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"n"</span>)</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(PCA, <span class="at">display =</span> <span class="st">"sites"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">pch=</span><span class="dv">21</span>, <span class="at">col=</span><span class="st">"red"</span>, <span class="at">bg=</span><span class="st">"yellow"</span>)</span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>, <span class="at">cex=</span><span class="fl">0.7</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -892,8 +924,8 @@ REML score: 42.24929     </code></pre>
 <p>It is worth familiarising yourself with the arguments you can use to customise your plot. Use xlim and ylim to set the limits of your axes and the select argument (which accepts a logical vector which is TRUE for displayed items or a vector of indices of displayed items) to specify which points are plotting. You can also use the following functions to customise your plots.</p>
 <p>You can use the ordilabel function to add partially opaque text labels to a plot: some text labels will be covered, but the uppermost will be readable.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordilabel</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordilabel</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -904,8 +936,8 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>You can use the automatic orditorp function that uses text only if this can be done without overwriting previous labels, but points in other cases. This produces a much tidier version of the labelled plot produced by ordilabel. You have to specify whether you want to label the species (columns) or sites (rows).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="fu">orditorp</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="fu">orditorp</span>(PCA, <span class="at">display =</span> <span class="st">"species"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -916,7 +948,7 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>You can use the automatic ordipointlabel function to plot both point and text labels. It tries to optimize the location of the text to avoid overwriting. However, in cluttered plots it often fails.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -924,7 +956,7 @@ REML score: 42.24929     </code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ordipointlabel</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ordipointlabel</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -939,8 +971,8 @@ REML score: 42.24929     </code></pre>
 <p>Probably the most useful thing you can do to your ordination is to add some sort of convex hull to separate groups of points that are distinct from one another in some way. Vegan supports three functions for doing just that.</p>
 <p>When adding a convex hull to a constrained ordination, you can simple specify the environmental variable you wish to group by and ordihull will add convex hulls:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordihull</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordihull</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -951,8 +983,8 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>Ordiellipse will add ellipses enclosing all points in the group (these can be altered to encompass the standard deviation or standard error of the groups using the “kind” argument):</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordiellipse</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>, <span class="at">kind =</span> <span class="st">"ehull"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordiellipse</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>, <span class="at">kind =</span> <span class="st">"ehull"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -963,8 +995,8 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>And ordispider links items to their centroids:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordispider</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(RDA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ordispider</span>(RDA, <span class="at">groups =</span> dune.env<span class="sc">$</span>Management, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -975,10 +1007,10 @@ REML score: 42.24929     </code></pre>
 </div>
 <p>Unfortunately, these functions only work seamlessly with constrained ordinations. For unconstrained ordinations, we have to specify the groups.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,<span class="dv">8</span>),<span class="fu">rep</span>(<span class="dv">2</span>,<span class="dv">6</span>),<span class="fu">rep</span>(<span class="dv">3</span>,<span class="dv">10</span>)))</span>
-<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(groups) <span class="ot">&lt;-</span> <span class="st">"grouping"</span></span>
-<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
-<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ordihull</span>(PCA, <span class="at">groups =</span> groups<span class="sc">$</span>grouping, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,<span class="dv">8</span>),<span class="fu">rep</span>(<span class="dv">2</span>,<span class="dv">6</span>),<span class="fu">rep</span>(<span class="dv">3</span>,<span class="dv">10</span>)))</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(groups) <span class="ot">&lt;-</span> <span class="st">"grouping"</span></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA, <span class="at">type =</span> <span class="st">"points"</span>)</span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ordihull</span>(PCA, <span class="at">groups =</span> groups<span class="sc">$</span>grouping, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">draw =</span> <span class="st">"polygon"</span>, <span class="at">alpha =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1028,18 +1060,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1071,7 +1092,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -1079,7 +1122,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
