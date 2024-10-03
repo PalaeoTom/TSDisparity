@@ -84,8 +84,8 @@ plot(PCA, type = "points")
 You can isolate the PCA scores with the following for further analyses.
 
 ```{r}
-sitePCA <- PCA$CA$u # Site scores
-speciesPCA <- PCA$CA$v # Species scores
+sitePCA <- PCA$CA$u # Site scores - the rows
+speciesPCA <- PCA$CA$v # Species scores - the columns
 ```
 
 You can also plot the results of PCA as a biplot, where the species are plotted as arrows which signify the direction in which the cover increases for those species.

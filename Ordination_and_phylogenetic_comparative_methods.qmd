@@ -24,7 +24,7 @@ if(length(c("phytools", "geiger", "Claddis", "dispRity", "caper")[!c("phytools",
 This may seem exhaustive but I think it's useful to break these analyses down. Let's generate a data matrix first.
 
 ```{r}
-data <- matrix(sample(c(0,1), 100, replace = T), nrow = 10)
+data <- matrix(runif(100,0,10), nrow = 10)
 rownames(data) <- paste0("Species_",seq(1,10,1))
 colnames(data) <- paste0("C",seq(1,10,1))
 ```
@@ -33,10 +33,12 @@ Now let's get the column means so we can can see how we center our data.
 
 ```{r}
 col.means <- apply(data, 2, mean)
-# get centred matrix
+# initialise centred matrix object
 centred.matrix <- data
-centred.matrix[,1] <- centred.matrix[,1]-col.means[1]
-centred.matrix[,2] <- centred.matrix[,2]-col.means[2]
+# subtract column means from trait values to get centre matrix
+for(i in 1:length(col.means)){
+  centred.matrix[,i] <- centred.matrix[,i]-col.means[i]
+}
 ```
 
 Fortunately, the cov function does this step for us before computing a covariance matrix. Let's do that now.
@@ -102,7 +104,7 @@ barplot(c.eigen, ylab = "Proportion of eigenvalues")
 Looks like the first four axes are by far the most informative, with the first two capturing over 50% of the variance together. Let's plot these for now.
 
 ```{r}
-plot(PCA$x, xlab = paste0("PC1 (",c.eigen[1]*100,"% variance)"), ylab = paste0("PC2 (",c.eigen[2]*100,"% variance)"))
+plot(PCA$x, xlab = paste0("PC1 (",round(c.eigen[1]*100, digits = 2),"% variance)"), ylab = paste0("PC2 (",round(c.eigen[2]*100, digits = 2),"% variance)"))
 ```
 
 ### 2.2 Principal coordinates analysis
@@ -302,7 +304,6 @@ You can also ordinate a geomorph data frame (handy for compatability).
 
 ```{r}
 geomorph_df <- geomorph.data.frame(procrustes, species = plethodon$species)
-geomorph.ordination(geomorph_df)
 ```
 
 ## 6.0 Testing for phylogenetic signal in discrete and continuous (non-landmark) data using Geiger and Phytools
