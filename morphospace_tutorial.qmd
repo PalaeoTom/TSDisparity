@@ -15,7 +15,8 @@ First, let's install morphospace from github. Install the devtools package if yo
 
 ```{r}
 # install.packages("devtools")
-devtools::install_github("millacarmona/morphospace")
+library(devtools)
+devtools::install_github("millacarmona/morphospace", force = TRUE)
 ```
 
 Now load the libraries.
@@ -309,7 +310,7 @@ for(i in 1:2) {
 }
 ```
 
-(Note: we do this in several step for a good reason: when we use detrend_shapes to detrend shape variation, the grand mean is used by default as the new mean shape of the sample; however by specifying a value or level of x from the model in the xvalue argument, we can use that new value as the mean shape for our 'detrended' shape variation. In this case, we are analitically displacing all the wings to the shapes they should have if reared in their primary host cactus, and attained their species' maximum size).
+(Note: we do this in several step for a good reason: when we use detrend_shapes to detrend shape variation, the grand mean is used by default as the new mean shape of the sample; however by specifying a value or level of x from the model in the xvalue argument, we can use that new value as the mean shape for our 'detrended' shape variation. In this case, we are analytically displacing all the wings to the shapes they should have if reared in their primary host cactus, and attained their species' maximum size).
 
 Once shape variation has been 'refined', we can ordinate it again, and magnify variation so the representation can be more easily interpreted using the mag argument.
 

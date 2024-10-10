@@ -310,7 +310,7 @@ plot(PS.shape)
 plot(PS.shape$PACA, phylo = T)
 ```
 
-There seems to be a roblem with an ill-conditioned residual covariance matrix. Let's try shaving off one dimension (i.e. going from 8 dimensions to 7) by setting PAC.no to 7.
+There seems to be a problem with an ill-conditioned residual covariance matrix. Let's try shaving off one dimension (i.e. going from 8 dimensions to 7) by setting PAC.no to 7.
 
 ```{r}
 PS.shape <- physignal.z(A = Y.gpa$coords, phy = plethspecies$phy, lambda = "front", PAC.no = 7, iter = 1000)
